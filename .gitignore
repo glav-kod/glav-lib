@@ -1,5 +1,3 @@
-.nuke/parameters.*
-
 # .NET Core CLI
 /.dotnet/
 /.packages/

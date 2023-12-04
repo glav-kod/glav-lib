@@ -9,12 +9,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox", "GlavLib.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.App", "GlavLib.App\GlavLib.App.csproj", "{3601B2EE-8945-4910-A728-77CC5C374FF3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{A96C5BFF-C460-4AA4-8D72-192B1E0EB331}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A96C5BFF-C460-4AA4-8D72-192B1E0EB331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A96C5BFF-C460-4AA4-8D72-192B1E0EB331}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71658062-5295-4FEF-8D13-E74EEBBED8FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71658062-5295-4FEF-8D13-E74EEBBED8FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71658062-5295-4FEF-8D13-E74EEBBED8FF}.Release|Any CPU.ActiveCfg = Release|Any CPU

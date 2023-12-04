@@ -1,14 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.24" />
-    <PackageReference Include="FluentNHibernate" Version="3.3.0" />
-    <PackageReference Include="Humanizer.Core.uk" Version="2.14.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="NHibernate" Version="5.4.6" />
-    <PackageReference Include="Npgsql" Version="8.0.0" />
-  </ItemGroup>
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj" />
+    <PackageReference Include="Dapper" Version="2.1.24"/>
+    <PackageReference Include="FluentNHibernate" Version="3.3.0"/>
+    <PackageReference Include="Humanizer.Core.uk" Version="2.14.1"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+    <PackageReference Include="NHibernate" Version="5.4.6"/>
+    <PackageReference Include="Npgsql" Version="8.0.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj"/>
   </ItemGroup>
 </Project>

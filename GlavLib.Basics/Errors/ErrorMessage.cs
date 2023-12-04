@@ -14,4 +14,9 @@ public struct ErrorMessage
         Message = message;
         Args = args;
     }
+
+    public override string ToString()
+    {
+        return Message;
+    }
 }

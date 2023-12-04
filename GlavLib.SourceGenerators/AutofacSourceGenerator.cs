@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using GlavLib.SourceGenerators.Extensions;
-using GlavLib.SourceGenerators.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;

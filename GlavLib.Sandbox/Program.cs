@@ -1,11 +1,11 @@
 ﻿using GlavLib.Basics.DataTypes;
 using GlavLib.Sandbox;
 
-Console.WriteLine(MyEnum.KeyOne);
+Console.WriteLine(SystemErrors.Err);
 
-var wrongSum = SystemErrors.WrongSum(sum: 123);
-Console.WriteLine(wrongSum.Key);
-Console.WriteLine(wrongSum.Message);
+// var wrongSum = SystemErrors.WrongSum(sum: 123);
+// Console.WriteLine(wrongSum.Key);
+// Console.WriteLine(wrongSum.Message);
 
 
 [EnumObjectItem("KeyOne", "K1", "Ключ 1")]

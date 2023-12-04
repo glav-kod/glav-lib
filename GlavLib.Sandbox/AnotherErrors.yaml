@@ -1,0 +1,5 @@
+﻿Namespace: GlavLib.Sandbox
+ClassName: AnotherErrors
+
+Errors:
+  AnotherError: "Неверный формат"

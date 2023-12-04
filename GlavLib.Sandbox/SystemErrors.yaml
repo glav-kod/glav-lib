@@ -1,0 +1,8 @@
+﻿Namespace: GlavLib.Sandbox
+ClassName: SystemErrors
+
+Errors:
+  WrongFormat: Неверный формат
+  WrongSum: "Неверная сумма. Сумма {sum:decimal}"
+  LimitError: "Слишком большая сумма: {sum:decimal}. Лимит превышен"
+  Err: asdssadasds

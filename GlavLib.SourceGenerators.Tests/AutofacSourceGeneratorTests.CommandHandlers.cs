@@ -33,7 +33,7 @@ public partial class AutofacSourceGeneratorTests
 
                                     using Autofac;
 
-                                    namespace AutofacSourceGeneratorTests;
+                                    namespace GlavLib.SourceGenerators.Tests;
 
                                     internal sealed class CompositionRoot : Module
                                     {
@@ -76,7 +76,7 @@ public partial class AutofacSourceGeneratorTests
 
                                     using Autofac;
 
-                                    namespace AutofacSourceGeneratorTests;
+                                    namespace GlavLib.SourceGenerators.Tests;
 
                                     internal sealed class CompositionRoot : Module
                                     {

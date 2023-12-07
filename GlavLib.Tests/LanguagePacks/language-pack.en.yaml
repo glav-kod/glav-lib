@@ -1,0 +1,9 @@
+Language: en
+Bundles:
+  - Prefix: Spectr.Core.SystemErrors
+    Messages:
+      InternalServerError: Internal server error
+      
+  - Prefix: Spectr.Core.OtherErrors
+    Messages:
+      OtherError: Other error

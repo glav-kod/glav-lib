@@ -1,0 +1,6 @@
+Namespace: GlavLib.Sandbox.API
+ClassName: ApiErrors
+
+Errors:
+  FillValue: Заполните значение
+  InvalidOperation: Невозможно выполнить операцию

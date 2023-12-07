@@ -2,17 +2,26 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.24"/>
-    <PackageReference Include="FluentNHibernate" Version="3.3.0"/>
-    <PackageReference Include="Humanizer.Core.uk" Version="2.14.1"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
-    <PackageReference Include="NHibernate" Version="5.4.7" />
-    <PackageReference Include="Npgsql" Version="8.0.0"/>
+    <PackageReference Include="App.Metrics.AspNetCore"/>
+    <PackageReference Include="App.Metrics.Prometheus"/>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection"/>
+    <PackageReference Include="Dapper"/>
+    <PackageReference Include="FluentNHibernate"/>
+    <PackageReference Include="FluentValidation.AspNetCore"/>
+    <PackageReference Include="Humanizer.Core.uk"/>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration"/>
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream"/>
+    <PackageReference Include="NHibernate"/>
+    <PackageReference Include="Npgsql"/>
+    <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Endpoints"/>
+    <PackageReference Include="Swashbuckle.AspNetCore"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj"/>
+    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer" />
   </ItemGroup>
 </Project>

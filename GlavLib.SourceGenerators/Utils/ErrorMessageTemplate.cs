@@ -1,17 +1,25 @@
 ﻿using System.Text.RegularExpressions;
-using Humanizer;
 
 namespace GlavLib.SourceGenerators.Utils;
 
+public struct ErrorArgument
+{
+    public string Name { get; set; }
+
+    public string Type { get; set; }
+
+    public string? FormatString { get; set; }
+
+    public bool IsOptional { get; set; }
+}
+
 public sealed class ErrorMessageTemplate
 {
+    private static readonly Regex ReplaceRegex = new(@"{(?<name>\w+):(?<type>[\w?]+)(:(?<format>\w+))?}", RegexOptions.Compiled);
+
     public string InterpolatedMessage { get; private set; } = null!;
 
-    public IList<string> ArgumentNames { get; private set; } = null!;
-
-    public IList<string> ParameterNames { get; private set; } = null!;
-
-    public IList<string> ParameterTypes { get; private set; } = null!;
+    public IList<ErrorArgument> Arguments { get; private set; } = null!;
 
     private ErrorMessageTemplate()
     {
@@ -19,33 +27,35 @@ public sealed class ErrorMessageTemplate
 
     public static ErrorMessageTemplate Parse(string template)
     {
-        var argumentNames = new List<string>();
-        var parametersNames = new List<string>();
-        var parameterTypes = new List<string>();
+        var arguments = new List<ErrorArgument>();
 
-        var replaceRegex = new Regex(@"{(?<name>\w+):(?<type>[\w?]+)}", RegexOptions.Compiled);
-
-        var interpolatedString = replaceRegex.Replace(template, v =>
+        var interpolatedString = ReplaceRegex.Replace(template, v =>
         {
-            var nameGroup = v.Groups["name"];
-            var typeGroup = v.Groups["type"];
+            var nameGroup   = v.Groups["name"];
+            var typeGroup   = v.Groups["type"];
+            var formatGroup = v.Groups["format"];
 
-            var argumentName = nameGroup.Value.Camelize();
-            var parameterName = nameGroup.Value.Pascalize();
+            var argumentName = nameGroup.Value;
+            var typeName     = typeGroup.Value;
+            var formatString = string.IsNullOrWhiteSpace(formatGroup.Value) ? null : formatGroup.Value;
 
-            argumentNames.Add(argumentName);
-            parametersNames.Add(parameterName);
-            parameterTypes.Add(typeGroup.Value);
+            arguments.Add(new ErrorArgument
+            {
+                Name = argumentName,
+                Type = typeName,
+                FormatString = formatString,
+                IsOptional = typeName.EndsWith("?")
+            });
 
-            return $"{{{argumentName}}}";
+            return formatString is null
+                ? $"{{{argumentName}}}"
+                : $"{{{argumentName}:{formatString}}}";
         });
 
         return new ErrorMessageTemplate
         {
             InterpolatedMessage = interpolatedString,
-            ArgumentNames = argumentNames,
-            ParameterNames = parametersNames,
-            ParameterTypes = parameterTypes
+            Arguments = arguments
         };
     }
 }

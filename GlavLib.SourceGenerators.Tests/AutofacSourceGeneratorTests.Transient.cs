@@ -9,7 +9,7 @@ public partial class AutofacSourceGeneratorTests
         {
             //language=CSharp
             const string source = """
-                                  using GlavLib.Basics.DI;
+                                  using GlavLib.Abstractions.DI;
                                   
                                   namespace TestNamespace;
 
@@ -27,7 +27,7 @@ public partial class AutofacSourceGeneratorTests
 
                                     using Autofac;
 
-                                    namespace AutofacSourceGeneratorTests;
+                                    namespace GlavLib.SourceGenerators.Tests;
 
                                     internal sealed class CompositionRoot : Module
                                     {
@@ -46,7 +46,7 @@ public partial class AutofacSourceGeneratorTests
         {
             //language=CSharp
             const string source = """
-                                  using GlavLib.Basics.DI;
+                                  using GlavLib.Abstractions.DI;
                                   
                                   namespace TestNamespace;
 
@@ -66,7 +66,7 @@ public partial class AutofacSourceGeneratorTests
 
                                     using Autofac;
 
-                                    namespace AutofacSourceGeneratorTests;
+                                    namespace GlavLib.SourceGenerators.Tests;
 
                                     internal sealed class CompositionRoot : Module
                                     {

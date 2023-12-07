@@ -1,0 +1,9 @@
+Language: ru
+Bundles:
+  - Prefix: Spectr.Core.SystemErrors
+    Messages:
+      InternalServerError: Внутренняя ошибка системы
+      
+  - Prefix: Spectr.Core.OtherErrors
+    Messages:
+      OtherError: Другая ошибка

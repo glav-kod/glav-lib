@@ -1,4 +1,5 @@
-﻿using GlavLib.Basics.DataTypes;
+﻿using GlavLib.Abstractions.DataTypes;
+using GlavLib.Basics.DataTypes;
 using NHibernate;
 using NHibernate.Type;
 

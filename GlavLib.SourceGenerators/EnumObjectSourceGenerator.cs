@@ -11,9 +11,9 @@ namespace GlavLib.SourceGenerators;
 [Generator]
 public class EnumObjectSourceGenerator : IIncrementalGenerator
 {
-    private const string EnumObjectItemAttribute = "GlavLib.Basics.DataTypes.EnumObjectItemAttribute";
-    private const string EnumObject              = "GlavLib.Basics.DataTypes.EnumObject";
-    private const string IEnumObject             = "GlavLib.Basics.DataTypes.IEnumObject";
+    private const string EnumObjectItemAttribute = "GlavLib.Abstractions.DataTypes.EnumObjectItemAttribute";
+    private const string EnumObject              = "GlavLib.Abstractions.DataTypes.EnumObject";
+    private const string IEnumObject             = "GlavLib.Abstractions.DataTypes.IEnumObject";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

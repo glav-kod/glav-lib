@@ -5,8 +5,8 @@ public static class EnumerableExtensions
     /// <summary>
     /// Recursively traverses an object. The starting object is the first of the collection.
     /// </summary>
-    public static IEnumerable<T> DescendantsAndSelf<T>(this T obj,
-                                                       Func<T, T> selector,
+    public static IEnumerable<T> DescendantsAndSelf<T>(this T         obj,
+                                                       Func<T, T>     selector,
                                                        Func<T, bool>? traverse = null)
     {
         yield return obj;
@@ -18,8 +18,8 @@ public static class EnumerableExtensions
     /// <summary>
     /// Recursively traverses an object. The starting object is not part of the collection.
     /// </summary>
-    public static IEnumerable<T> Descendants<T>(this T obj,
-                                                Func<T, T> selector,
+    public static IEnumerable<T> Descendants<T>(this T         obj,
+                                                Func<T, T>     selector,
                                                 Func<T, bool>? traverse = null)
     {
         if (traverse != null && !traverse(obj))
@@ -36,9 +36,9 @@ public static class EnumerableExtensions
     /// <summary>
     /// Recursively traverses an object. The starting object is the first of the collection.
     /// </summary>
-    public static IEnumerable<T> DescendantsAndSelf<T>(this T obj,
+    public static IEnumerable<T> DescendantsAndSelf<T>(this T                  obj,
                                                        Func<T, IEnumerable<T>> selector,
-                                                       Func<T, bool>? traverse = null)
+                                                       Func<T, bool>?          traverse = null)
     {
         yield return obj;
 
@@ -49,9 +49,9 @@ public static class EnumerableExtensions
     /// <summary>
     /// Recursively traverses an object. The starting object is not part of the collection.
     /// </summary>
-    public static IEnumerable<T> Descendants<T>(this T obj,
+    public static IEnumerable<T> Descendants<T>(this T                  obj,
                                                 Func<T, IEnumerable<T>> selector,
-                                                Func<T, bool>? traverse = null)
+                                                Func<T, bool>?          traverse = null)
     {
         foreach (var child in selector(obj).Where(x => traverse == null || traverse(x)))
         foreach (var childOrDescendant in child.DescendantsAndSelf(selector, traverse))

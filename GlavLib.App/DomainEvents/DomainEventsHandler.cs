@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using GlavLib.Basics.DI;
+using GlavLib.Abstractions.DI;
 using GlavLib.Basics.DomainEvents;
 
 namespace GlavLib.App.DomainEvents;
 
-[Transient]
+[SingleInstance]
 public sealed class DomainEventsHandler
 {
     private readonly ILifetimeScope _lifetimeScope;

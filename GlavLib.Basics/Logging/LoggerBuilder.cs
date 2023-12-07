@@ -1,5 +1,6 @@
-﻿using GlavLib.Basics.DataTypes;
-using GlavLib.Basics.Errors;
+﻿using GlavLib.Abstractions.DataTypes;
+using GlavLib.Abstractions.Validation;
+using GlavLib.Basics.DataTypes;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Exceptions;
@@ -16,7 +17,7 @@ public sealed class LoggerBuilder
                             .Destructure.ByTransforming<Date>(d => d.Value)
                             .Destructure.ByTransforming<UtcDateTime>(d => d.Value)
                             .Destructure.ByTransformingWhere<EnumObject>(x => typeof(EnumObject).IsAssignableFrom(x), o => o.Key)
-                            .Destructure.ByTransforming<ErrorMessage>(d => new
+                            .Destructure.ByTransforming<Error>(d => new
                             {
                                 d.Key,
                                 d.Message,

@@ -14,8 +14,8 @@ public sealed class AutofacSourceGenerator : IIncrementalGenerator
     private const string UnitCommandHandler = "GlavLib.App.Commands.UnitCommandHandler";
     private const string DomainEventHandler = "GlavLib.App.DomainEvents.DomainEventHandler";
 
-    private const string SingleInstanceAttribute = "GlavLib.Basics.DI.SingleInstanceAttribute";
-    private const string TransientAttributeName  = "GlavLib.Basics.DI.TransientAttribute";
+    private const string SingleInstanceAttribute = "GlavLib.Abstractions.DI.SingleInstanceAttribute";
+    private const string TransientAttributeName  = "GlavLib.Abstractions.DI.TransientAttribute";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

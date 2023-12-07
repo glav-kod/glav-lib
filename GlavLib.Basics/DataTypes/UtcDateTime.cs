@@ -1,14 +1,12 @@
 ﻿using System.Globalization;
-using CSharpFunctionalExtensions;
-using GlavLib.Basics.Errors;
+using GlavLib.Abstractions.Results;
+using GlavLib.Abstractions.Validation;
 
 namespace GlavLib.Basics.DataTypes;
 
 public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
 {
     private const string Format = "yyyy-MM-ddTHH:mm:ssZ";
-
-    private static readonly ErrorMessage WrongFormat = new(nameof(WrongFormat), "Неверный формат");
 
     internal UtcDateTime(DateTime value)
         : base(value)
@@ -83,14 +81,14 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
         return new UtcDateTime(utcDateTime.Value - timeSpan);
     }
 
-    public static Result<UtcDateTime, ErrorMessage> FromString(string value)
+    public static Result<UtcDateTime, Error> FromString(string value)
     {
         if (!DateTime.TryParse(value,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
-                out var dateTime))
+                               CultureInfo.InvariantCulture,
+                               DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
+                               out var dateTime))
         {
-            return WrongFormat;
+            return BasicErrors.WrongFormat;
         }
 
         return new UtcDateTime(dateTime);

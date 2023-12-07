@@ -1,15 +1,12 @@
 ﻿using System.Globalization;
-using CSharpFunctionalExtensions;
-using GlavLib.Basics.Errors;
+using GlavLib.Abstractions.Results;
+using GlavLib.Abstractions.Validation;
 
 namespace GlavLib.Basics.DataTypes;
 
 public class Date : SingleValueObject<DateTime>
 {
     private const string Format = "yyyy-MM-dd";
-
-    private static readonly ErrorMessage WrongFormat = new(nameof(WrongFormat), "Неверный формат");
-
     public Date(int year, int month, int day)
         : base(new DateTime(year, month, day))
     {
@@ -76,11 +73,11 @@ public class Date : SingleValueObject<DateTime>
         return value.Value >= otherValue.Value;
     }
 
-    public static Result<Date, ErrorMessage> FromString(string value)
+    public static Result<Date, Error> FromString(string value)
     {
         if (!DateTime.TryParseExact(value, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
         {
-            return WrongFormat;
+            return BasicErrors.WrongFormat;
         }
 
         return new Date(dateTime);

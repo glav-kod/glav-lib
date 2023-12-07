@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Text.Json;
 using GlavLib.Basics.Extensions;
+using GlavLib.Basics.Serialization;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;

@@ -5,11 +5,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.SourceGenerators", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.SourceGenerators.Tests", "GlavLib.SourceGenerators.Tests\GlavLib.SourceGenerators.Tests.csproj", "{E7D33320-A268-4DD9-87D0-342704810E07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox", "GlavLib.Sandbox\GlavLib.Sandbox.csproj", "{1509B104-942B-40ED-BB02-53EA5DA1E01B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.App", "GlavLib.App\GlavLib.App.csproj", "{3601B2EE-8945-4910-A728-77CC5C374FF3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{A96C5BFF-C460-4AA4-8D72-192B1E0EB331}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Tests", "GlavLib.Tests\GlavLib.Tests.csproj", "{074C339A-ACE3-4E5F-A00A-B0678983E70E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{1931A30F-1B9E-488C-B62D-2185B22E7DDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox.Console", "Sandbox\GlavLib.Sandbox.Console\GlavLib.Sandbox.Console.csproj", "{CE913857-9CE4-4C7E-87D3-ADD03FAE2188}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox.API", "Sandbox\GlavLib.Sandbox.API\GlavLib.Sandbox.API.csproj", "{6424990C-7075-4542-A72F-ADCA824EBA12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Abstractions", "GlavLib.Abstractions\GlavLib.Abstractions.csproj", "{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,13 +39,29 @@ Global
 		{E7D33320-A268-4DD9-87D0-342704810E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7D33320-A268-4DD9-87D0-342704810E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7D33320-A268-4DD9-87D0-342704810E07}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1509B104-942B-40ED-BB02-53EA5DA1E01B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1509B104-942B-40ED-BB02-53EA5DA1E01B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1509B104-942B-40ED-BB02-53EA5DA1E01B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1509B104-942B-40ED-BB02-53EA5DA1E01B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3601B2EE-8945-4910-A728-77CC5C374FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3601B2EE-8945-4910-A728-77CC5C374FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3601B2EE-8945-4910-A728-77CC5C374FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3601B2EE-8945-4910-A728-77CC5C374FF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{074C339A-ACE3-4E5F-A00A-B0678983E70E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{074C339A-ACE3-4E5F-A00A-B0678983E70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{074C339A-ACE3-4E5F-A00A-B0678983E70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{074C339A-ACE3-4E5F-A00A-B0678983E70E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6424990C-7075-4542-A72F-ADCA824EBA12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6424990C-7075-4542-A72F-ADCA824EBA12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6424990C-7075-4542-A72F-ADCA824EBA12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6424990C-7075-4542-A72F-ADCA824EBA12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188} = {1931A30F-1B9E-488C-B62D-2185B22E7DDD}
+		{6424990C-7075-4542-A72F-ADCA824EBA12} = {1931A30F-1B9E-488C-B62D-2185B22E7DDD}
 	EndGlobalSection
 EndGlobal

@@ -1,9 +1,7 @@
 namespace GlavLib.Abstractions.DI;
 
-public sealed class TransientAttribute : Attribute
-{
-}
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class TransientAttribute : Attribute;
 
-public sealed class TransientAttribute<T> : Attribute
-{
-}
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class TransientAttribute<T> : Attribute;

@@ -5,10 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GlavLib.Basics\GlavLib.Basics.csproj"/>
     <ProjectReference Include="..\..\GlavLib.App\GlavLib.App.csproj"/>
-    <ProjectReference Include="..\..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer"/>
   </ItemGroup>
 </Project>

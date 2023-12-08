@@ -25,7 +25,7 @@ public class CreatePaymentResult
 }
 
 [SingleInstance]
-public sealed class PaymentCommands(TestService testService)
+public sealed class PaymentCommands(ITestService testService)
 {
     public async Task<CommandResult<Ok<CreatePaymentResult>>> CreatePaymentAsync(CreatePaymentArgs args, CancellationToken ct)
     {

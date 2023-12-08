@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox.API", "Sand
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Abstractions", "GlavLib.Abstractions\GlavLib.Abstractions.csproj", "{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlavLib.Sandbox.API.Tests", "Sandbox\GlavLib.Sandbox.API.Tests\GlavLib.Sandbox.API.Tests.csproj", "{1CB00775-12AC-4E09-92CD-60A78BFD41C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,9 +61,14 @@ Global
 		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70791B04-CCCD-42B2-9A48-F0B3EAF5C425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CB00775-12AC-4E09-92CD-60A78BFD41C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CB00775-12AC-4E09-92CD-60A78BFD41C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CB00775-12AC-4E09-92CD-60A78BFD41C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CB00775-12AC-4E09-92CD-60A78BFD41C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CE913857-9CE4-4C7E-87D3-ADD03FAE2188} = {1931A30F-1B9E-488C-B62D-2185B22E7DDD}
 		{6424990C-7075-4542-A72F-ADCA824EBA12} = {1931A30F-1B9E-488C-B62D-2185B22E7DDD}
+		{1CB00775-12AC-4E09-92CD-60A78BFD41C2} = {1931A30F-1B9E-488C-B62D-2185B22E7DDD}
 	EndGlobalSection
 EndGlobal

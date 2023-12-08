@@ -6,7 +6,6 @@
   <ItemGroup>
     <PackageReference Include="App.Metrics.AspNetCore"/>
     <PackageReference Include="App.Metrics.Prometheus"/>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection"/>
     <PackageReference Include="Dapper"/>
     <PackageReference Include="FluentNHibernate"/>
     <PackageReference Include="FluentValidation.AspNetCore"/>
@@ -22,6 +21,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj"/>
-    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" 
+                      OutputItemType="Analyzer" 
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 </Project>

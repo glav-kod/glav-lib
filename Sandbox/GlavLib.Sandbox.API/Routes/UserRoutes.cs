@@ -8,6 +8,7 @@ public static class UserRoutes
     {
         var usersGroup = baseGroup.MapGroup("/users");
 
+        usersGroup.MapGet("/get", UserCommands.GetAsync);
         usersGroup.MapPost("/create", UserCommands.CreateAsync);
         usersGroup.MapPost("/delete", UserCommands.DeleteAsync);
 

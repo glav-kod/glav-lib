@@ -1,7 +1,19 @@
-﻿using GlavLib.Sandbox;
+﻿using GlavLib.Sandbox.Console;
+using Microsoft.Extensions.DependencyInjection;
 
-var wrongSum = SystemErrors.WrongSum(1.2222m);
-Console.WriteLine(wrongSum.Message);
+var services = new ServiceCollection();
+
+services.Add_GlavLib_Sandbox_Console();
+
+var serviceProvider = services.BuildServiceProvider();
+
+var factory = serviceProvider.GetRequiredService<TestFactory>();
+
+var c1 = factory.Create("c1");
+var c2 = factory.Create("c2");
+
+Console.WriteLine(c1);
+Console.WriteLine(c2);
 
 // var wrongSum = SystemErrors.WrongSum(sum: 123);
 // Console.WriteLine(wrongSum.Key);
@@ -16,3 +28,4 @@ Console.WriteLine(wrongSum.Message);
 // public partial class MyEnum : EnumObject
 // {
 // }
+

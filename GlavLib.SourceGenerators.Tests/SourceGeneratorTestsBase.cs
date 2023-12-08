@@ -37,8 +37,7 @@ public abstract class SourceGeneratorTestsBase
         var syntaxTrees = new List<SyntaxTree>();
         if (sourceCode is not null)
             syntaxTrees.Add(CSharpSyntaxTree.ParseText(sourceCode));
-
-
+        
         var compilation = CSharpCompilation.Create(assemblyName: "GlavLib.SourceGenerators.Tests",
                                                    syntaxTrees: syntaxTrees,
                                                    references: references);

@@ -1,24 +1,24 @@
-﻿using Autofac;
-using GlavLib.Abstractions.DI;
+﻿using GlavLib.Abstractions.DI;
 using GlavLib.Basics.DomainEvents;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GlavLib.App.DomainEvents;
 
 [SingleInstance]
 public sealed class DomainEventsHandler
 {
-    private readonly ILifetimeScope _lifetimeScope;
+    private readonly IServiceProvider _serviceProvider;
 
-    public DomainEventsHandler(ILifetimeScope lifetimeScope)
+    public DomainEventsHandler(IServiceProvider serviceProvider)
     {
-        _lifetimeScope = lifetimeScope;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task HandleAsync(DomainEventsSession session, CancellationToken cancellationToken)
     {
         foreach (var domainEvent in session.Events)
         {
-            var domainEventHandler = _lifetimeScope.ResolveKeyed<IDomainEventHandler>(domainEvent.GetType());
+            var domainEventHandler = _serviceProvider.GetRequiredKeyedService<IDomainEventHandler>(domainEvent.GetType());
 
             await domainEventHandler.HandleAsync(domainEvent, cancellationToken);
         }

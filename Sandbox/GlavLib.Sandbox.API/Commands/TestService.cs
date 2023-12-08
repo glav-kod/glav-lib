@@ -2,8 +2,13 @@
 
 namespace GlavLib.Sandbox.API.Commands;
 
-[SingleInstance]
-public class TestService
+public interface ITestService
+{
+    string Foo();
+}
+
+[SingleInstance<ITestService>]
+public class TestService : ITestService
 {
     public string Foo()
     {

@@ -1,11 +1,8 @@
 ﻿using App.Metrics;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using GlavLib.Basics.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -22,21 +19,10 @@ public static class WebApplicationExtensions
                      .Configure(configuration)
                      .Build();
 
-        builder.Host.UseSerilog();
-
-        builder.Services.AddLogging(configure => { configure.AddSerilog(); });
-
-        return builder;
-    }
-
-    public static WebApplicationBuilder UseAutofac(this WebApplicationBuilder builder, Action<IConfiguration, ContainerBuilder>? build = null)
-    {
-        var configuration = builder.Configuration;
-
-        builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(containerBuilder => //
+        builder.Services.AddLogging(configure => //
         {
-            build?.Invoke(configuration, containerBuilder);
-        }));
+            configure.AddSerilog();
+        });
 
         return builder;
     }

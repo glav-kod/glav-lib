@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using GlavLib.App.Commands;
+using GlavLib.App.Http;
 using GlavLib.Basics.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -23,19 +24,50 @@ public class CreateUserResult
     public required string? Value { get; set; }
 }
 
-public static class UserCommands
+public class GetUserRequest
 {
-    public static async Task<CommandResult<Ok<CreateUserResult>>> CreateAsync(CreateUserArgs    command,
-                                                                               TestService       testService,
-                                                                               CancellationToken cancellationToken)
+    public string Field1 { get; init; } = null!;
+
+    public string Field2 { get; init; } = null!;
+
+    public sealed class Validator : AbstractValidator<GetUserRequest>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.Field1).NotNull().WithError(ApiErrors.FillValue);
+
+            RuleFor(x => x.Field2).NotNull().WithError(ApiErrors.FillValue);
+        }
+    }
+}
+
+public class UserCommands
+{
+    public static async Task<CommandResult<Ok>> GetAsync(FromJsonQuery<GetUserRequest> request,
+                                                         CancellationToken             cancellationToken)
+    {
+        await Task.Yield();
+
+        return Ok();
+
+        // return ApiErrors.FillValue;
+        // return (nameof(CreateUserArgs.Value), ApiErrors.FillValue);
+    }
+
+    public static async Task<CommandResult<Ok<CreateUserResult>>> CreateAsync(CreateUserArgs        args,
+                                                                              ILogger<UserCommands> logger,
+                                                                              ITestService          testService,
+                                                                              CancellationToken     cancellationToken)
     {
         await Task.Yield();
 
         var result = testService.Foo();
 
+        logger.LogInformation("User created");
+
         return Ok(new CreateUserResult
         {
-            Value = result
+            Value = $"{args.Value} {result}"
         });
 
         // return ApiErrors.FillValue;

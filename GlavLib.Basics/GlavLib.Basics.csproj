@@ -4,7 +4,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac"/>
     <PackageReference Include="FluentValidation"/>
     <PackageReference Include="Glob"/>
     <PackageReference Include="JetBrains.Annotations"/>
@@ -21,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GlavLib.Abstractions\GlavLib.Abstractions.csproj"/>
-    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" 
+                      OutputItemType="Analyzer" 
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 </Project>

@@ -1,9 +1,7 @@
 namespace GlavLib.Abstractions.DI;
 
-public sealed class SingleInstanceAttribute : Attribute
-{
-}
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class SingleInstanceAttribute : Attribute;
 
-public sealed class SingleInstanceAttribute<T> : Attribute
-{
-}
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class SingleInstanceAttribute<T> : Attribute;

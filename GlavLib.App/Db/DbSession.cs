@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using NHibernate;
 
 namespace GlavLib.App.Db;
@@ -33,7 +34,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     public IDbConnection Connection => NhSession.Connection;
 
-    private ITransaction? _nhTransaction;
+    private ITransaction?   _nhTransaction;
     private IDbTransaction? _transaction;
 
     public IDbTransaction Transaction => _transaction ?? throw new InvalidOperationException("No open transaction");
@@ -42,13 +43,13 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     private DbSession(ISession nhSession, bool isSessionBound)
     {
-        NhSession       = nhSession;
+        NhSession = nhSession;
         _isSessionBound = isSessionBound;
     }
 
     public DbSession(ISessionFactory sessionFactory)
     {
-        NhSession       = sessionFactory.OpenSession();
+        NhSession = sessionFactory.OpenSession();
         _isSessionBound = true;
     }
 
@@ -79,7 +80,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.CommitAsync();
 
         _nhTransaction = null;
-        _transaction   = null;
+        _transaction = null;
     }
 
     internal async Task RollbackAsync()
@@ -90,7 +91,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.RollbackAsync();
 
         _nhTransaction = null;
-        _transaction   = null;
+        _transaction = null;
     }
 
     internal async Task RollbackIfActiveAsync()
@@ -101,7 +102,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.RollbackAsync();
 
         _nhTransaction = null;
-        _transaction   = null;
+        _transaction = null;
     }
 
     public void Dispose()
@@ -153,14 +154,12 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
             CurrentSession.Value = null;
     }
 
-    /// <summary>
-    /// Создать новую сессию и сделать ее текущей.
-    /// </summary>
-    /// <param name="sessionFactory">Фабрика сессий</param>
-    /// <returns>Сессия подключения к базе данных</returns>
-    public static DbSession Bind(ISessionFactory sessionFactory)
+    public static DbSession Bind(ISessionFactory sessionFactory,
+                                 DbConnection    dbConnection)
     {
-        var session = sessionFactory.OpenSession();
+        var session = sessionFactory.WithOptions()
+                                    .Connection(dbConnection)
+                                    .OpenSession();
 
         var databaseSession = new DbSession(session, isSessionBound: true);
 

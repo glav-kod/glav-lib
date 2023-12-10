@@ -3,7 +3,8 @@ using GlavLib.App;
 
 namespace GlavLib.Sandbox.API;
 
-public class CompositionRoot : IHaveServiceRegistrations
+[AddServicesFrom(nameof(RegisterServices))]
+public static class CompositionRoot
 {
     public static void RegisterServices(IServiceCollection services)
     {

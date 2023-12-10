@@ -1,4 +1,7 @@
-﻿using GlavLib.Sandbox.API.Commands;
+﻿using GlavLib.App.Commands;
+using GlavLib.App.Db;
+using GlavLib.Sandbox.API.Commands;
+using GlavLib.Sandbox.API.Db;
 
 namespace GlavLib.Sandbox.API.Routes;
 
@@ -8,9 +11,13 @@ public static class UserRoutes
     {
         var usersGroup = baseGroup.MapGroup("/users");
 
-        usersGroup.MapGet("/get", UserCommands.GetAsync);
-        usersGroup.MapPost("/create", UserCommands.CreateAsync);
-        usersGroup.MapPost("/delete", UserCommands.DeleteAsync);
+        usersGroup.MapGet("/get", GetUser.ExecuteAsync)
+                  .AddDbSession(ConnectionStrings.Replica)
+                  .UseCommands();
+        
+        usersGroup.MapPost("/create", CreateUser.ExecuteAsync)
+                  .AddDbSession(ConnectionStrings.Master)
+                  .UseCommands();
 
         return app;
     }

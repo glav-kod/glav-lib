@@ -3,3 +3,4 @@ ClassName: BasicErrors
 
 Errors:
   WrongFormat: Неверный формат
+  FillValue: Заполните значение

@@ -1,15 +1,11 @@
 ﻿using System.Reflection;
-using Dapper;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.Helpers;
-using GlavLib.App.Db.Dapper;
 using GlavLib.App.Db.NhConventions;
 using GlavLib.App.Db.NhUserTypes;
-using GlavLib.Basics.DataTypes;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Configuration;
 using NHibernate.Dialect;
 using Environment = NHibernate.Cfg.Environment;
 
@@ -17,14 +13,6 @@ namespace GlavLib.App.Db;
 
 public static class FluentConfigurationExtensions
 {
-    static FluentConfigurationExtensions()
-    {
-        DefaultTypeMap.MatchNamesWithUnderscores = true;
-
-        SqlMapper.AddTypeHandler(typeof(Date), new DateHandler());
-        SqlMapper.AddTypeHandler(typeof(UtcDateTime), new UtcDateTimeHandler());
-    }
-
     [PublicAPI]
     public static FluentConfiguration AddFluentMappings(this FluentConfiguration fluentConfiguration, string assemblyName)
     {
@@ -44,22 +32,17 @@ public static class FluentConfigurationExtensions
     }
 
     [PublicAPI]
-    public static FluentConfiguration UseConfiguration(this FluentConfiguration fluentConfiguration,
-                                                       IConfiguration           configuration,
-                                                       string                   connectionStringName = "Default")
+    public static FluentConfiguration UsePostgreSQL(this FluentConfiguration fluentConfiguration)
     {
         var postgreSqlConfiguration = PostgreSQLConfiguration.Standard.Dialect<PostgreSQLDialect>();
-
-        var connectionString = ReadConnectionString(configuration, connectionStringName);
-        postgreSqlConfiguration.ConnectionString(connectionString);
-
+        postgreSqlConfiguration.ConnectionString(string.Empty);
         fluentConfiguration.Database(postgreSqlConfiguration);
 
         return fluentConfiguration;
     }
 
     [PublicAPI]
-    public static FluentConfiguration UseDefaultConventions(this FluentConfiguration fluentConfiguration)
+    public static FluentConfiguration UseDefaults(this FluentConfiguration fluentConfiguration)
     {
         return fluentConfiguration.Mappings(m =>
                                   {
@@ -75,16 +58,5 @@ public static class FluentConfigurationExtensions
                                       );
                                   })
                                   .ExposeConfiguration(cfg => cfg.SetProperty(Environment.Hbm2ddlKeyWords, "none"));
-    }
-
-    private static string ReadConnectionString(IConfiguration configuration, string connectionStringName)
-    {
-        foreach (var configurationSection in configuration.GetSection("ConnectionStrings").GetChildren())
-        {
-            if (configurationSection.Key == connectionStringName)
-                return configurationSection.Value ?? throw new InvalidOperationException($"ConnectionString '{configurationSection.Key}' is null");
-        }
-
-        throw new InvalidOperationException($"Cannot find ConnectionString '{connectionStringName}'");
     }
 }

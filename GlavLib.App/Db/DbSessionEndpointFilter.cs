@@ -1,37 +1,48 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
+using Npgsql;
 
 namespace GlavLib.App.Db;
 
 public static class DbSessionEndpointFilterExtensions
 {
-    public static RouteHandlerBuilder AddDbSession(this RouteHandlerBuilder routeHandlerBuilder)
+    public static RouteHandlerBuilder AddDbSession(this RouteHandlerBuilder routeHandlerBuilder,
+                                                   string                   connectionStringName)
     {
-        return routeHandlerBuilder.AddEndpointFilter<DbSessionEndpointFilter>();
+        return routeHandlerBuilder.AddEndpointFilterFactory((_, next) => DbSessionEndpointFilter.Create(next, connectionStringName));
     }
 
-    public static RouteGroupBuilder AddDbSession(this RouteGroupBuilder routeGroupBuilder)
+    public static RouteGroupBuilder AddDbSession(this RouteGroupBuilder routeGroupBuilder,
+                                                 string                 connectionStringName)
     {
-        return routeGroupBuilder.AddEndpointFilter<DbSessionEndpointFilter>();
+        return routeGroupBuilder.AddEndpointFilterFactory((_, next) => DbSessionEndpointFilter.Create(next, connectionStringName));
     }
 }
 
-public sealed class DbSessionEndpointFilter : IEndpointFilter
+internal sealed class DbSessionEndpointFilter
 {
-    private readonly ISessionFactory _sessionFactory;
-
-    public DbSessionEndpointFilter(ISessionFactory sessionFactory)
+    public static EndpointFilterDelegate Create(EndpointFilterDelegate next, string connectionStringName)
     {
-        _sessionFactory = sessionFactory;
-    }
-
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
-    {
-        using (DbSession.Bind(_sessionFactory))
+        return async context =>
         {
-            return await next(context);
-        }
+            var serviceProvider = context.HttpContext.RequestServices;
+
+            var configuration  = serviceProvider.GetRequiredService<IConfiguration>();
+            var sessionFactory = serviceProvider.GetRequiredService<ISessionFactory>();
+
+            var connectionString = configuration.GetConnectionString(connectionStringName);
+
+            await using var dbConnection = new NpgsqlConnection(connectionString);
+            await dbConnection.OpenAsync();
+
+            await using (DbSession.Bind(sessionFactory, dbConnection))
+            {
+                return await next(context);
+            }
+        };
     }
 }

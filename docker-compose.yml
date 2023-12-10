@@ -1,0 +1,67 @@
+version: "3"
+x-postgres-common:
+  &postgres-common
+  image: postgres:16
+  user: postgres
+  restart: always
+  healthcheck:
+    test: 'pg_isready -U sys --dbname=postgres'
+    interval: 10s
+    timeout: 5s
+    retries: 5
+  networks:
+    - glav-net
+
+services:
+  master_db:
+    <<: *postgres-common
+    container_name: glav-master-db
+    volumes:
+      - "postgres-master-data:/var/lib/postgresql/data"
+      - ./init-database:/docker-entrypoint-initdb.d
+    ports:
+      - 127.100.0.1:5432:5432
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    command: |
+      postgres
+      -c wal_level=replica 
+      -c hot_standby=on 
+      -c max_wal_senders=10 
+      -c max_replication_slots=10 
+      -c hot_standby_feedback=on
+      -c log_statement=all
+
+  replica_db:
+    <<: *postgres-common
+    container_name: glav-replica-db
+    volumes:
+      - "postgres-replica-data:/var/lib/postgresql/data"
+    ports:
+      - 127.100.0.2:5432:5432
+    depends_on:
+      - master_db
+    environment:
+      PGUSER: sys
+      PGPASSWORD: 123
+    command: |
+      bash -c "
+      rm -rf /var/lib/postgresql/data
+      until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=master_db --port=5432
+      do
+      echo 'Waiting for primary to connect...'
+      sleep 1s
+      done
+      echo 'Backup done, starting replica...'
+      chmod 0700 /var/lib/postgresql/data
+      postgres -c log_statement=all
+      "
+
+networks:
+  glav-net:
+    driver: bridge
+volumes:
+  postgres-master-data:
+  postgres-replica-data:

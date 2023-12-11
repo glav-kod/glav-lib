@@ -8,7 +8,7 @@ namespace GlavGlavLib.Sandbox.API.Tests;
 
 public abstract class IntegrationTestsBase : IAsyncLifetime
 {
-    protected TestWebApplicationFactory<Program> WebAppFactory { get; }
+    protected TestWebApplicationFactory<Program> SandboxApiFactory { get; }
 
     public readonly TestServiceFake TestServiceFake = new();
 
@@ -27,14 +27,14 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
         webAppFactory.ConfigureServices(services =>
         {
             services.AddSingleton<ITestService>(TestServiceFake);
-            
+
             services.AddLogging(config => //
             {
                 config.AddSerilog(logger);
             });
         });
 
-        WebAppFactory = webAppFactory;
+        SandboxApiFactory = webAppFactory;
     }
 
     protected void Using(IDisposable disposable)

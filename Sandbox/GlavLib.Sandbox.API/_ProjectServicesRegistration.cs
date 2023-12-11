@@ -4,7 +4,7 @@ using GlavLib.App;
 namespace GlavLib.Sandbox.API;
 
 [AddServicesFrom(nameof(RegisterServices))]
-public static class CompositionRoot
+public static class ProjectServicesRegistration
 {
     public static void RegisterServices(IServiceCollection services)
     {

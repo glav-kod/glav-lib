@@ -36,12 +36,12 @@ public class GetUser
     {
         var connection = DbSession.CurrentConnection;
 
-        const string sql = @"
-select t.id,
-       t.name
-  from public.users t
- where t.id = :id
-";
+        const string sql = """
+                           select t.id,
+                                  t.name
+                             from public.users t
+                            where t.id = :id
+                           """;
 
         var parameters = new
         {

@@ -1,9 +1,8 @@
 ﻿using GlavLib.Abstractions.DataTypes;
-using GlavLib.Basics.DataTypes;
 using NHibernate;
 using NHibernate.Type;
 
-namespace GlavLib.App.Db.NhUserTypes;
+namespace GlavLib.Db.NhUserTypes;
 
 public sealed class EnumObjectUserType<TValue> : SingleValueObjectType<TValue>
     where TValue : class, IEnumObject<TValue>

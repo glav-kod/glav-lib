@@ -9,7 +9,8 @@ public sealed class UtcDateTimeJsonConverter : JsonConverter<UtcDateTime>
     public override UtcDateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var value  = reader.GetString()!;
-        return (UtcDateTime)value;
+        
+        return UtcDateTime.FromString(value).Value;
     }
 
     public override void Write(Utf8JsonWriter writer, UtcDateTime value, JsonSerializerOptions options)

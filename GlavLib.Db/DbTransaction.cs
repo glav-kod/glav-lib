@@ -1,4 +1,4 @@
-namespace GlavLib.App.Db;
+namespace GlavLib.Db;
 
 public sealed class DbTransaction : IAsyncDisposable
 {

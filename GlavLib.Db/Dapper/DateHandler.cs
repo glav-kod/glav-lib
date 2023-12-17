@@ -2,7 +2,7 @@
 using Dapper;
 using GlavLib.Basics.DataTypes;
 
-namespace GlavLib.App.Db.Dapper;
+namespace GlavLib.Db.Dapper;
 
 public sealed class DateHandler : SqlMapper.TypeHandler<Date>
 {

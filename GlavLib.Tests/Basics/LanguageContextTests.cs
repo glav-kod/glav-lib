@@ -21,8 +21,8 @@ public sealed class LanguageContextTests
                                       """;
 
         var languageContext = new LanguageContextBuilder()
-                              .FromDirectory("./LanguagePacks", "language-pack.*.yaml")
-                              .FromYaml(kyLanguagePack)
+                              .AddFromDirectory("./LanguagePacks", "language-pack.*.yaml")
+                              .AddFromYaml(kyLanguagePack)
                               .Build();
 
         languageContext.Messages.Should().BeEquivalentTo(new Dictionary<string, MultiLangMessage>

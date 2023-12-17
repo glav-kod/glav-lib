@@ -2,7 +2,7 @@ using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.Instances;
 using GlavLib.Basics.DataTypes;
 
-namespace GlavLib.App.Db.NhUserTypes;
+namespace GlavLib.Db.NhUserTypes;
 
 internal class UserTypesConventions : IPropertyConvention, IIdConvention
 {

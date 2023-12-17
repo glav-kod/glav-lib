@@ -6,14 +6,14 @@ public sealed class LanguageContextBuilder
 {
     private readonly List<LanguagePack> _languagePacks = new();
 
-    public LanguageContextBuilder FromYaml(string yaml)
+    public LanguageContextBuilder AddFromYaml(string yaml)
     {
         var languagePack = LanguagePack.FromYaml(yaml);
         _languagePacks.Add(languagePack);
         return this;
     }
 
-    public LanguageContextBuilder FromDirectory(string directory, string globPattern)
+    public LanguageContextBuilder AddFromDirectory(string directory, string globPattern)
     {
         var glob = new Glob(globPattern);
 

@@ -3,13 +3,13 @@ using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.Helpers;
-using GlavLib.App.Db.NhConventions;
-using GlavLib.App.Db.NhUserTypes;
+using GlavLib.Db.NhConventions;
+using GlavLib.Db.NhUserTypes;
 using JetBrains.Annotations;
 using NHibernate.Dialect;
 using Environment = NHibernate.Cfg.Environment;
 
-namespace GlavLib.App.Db;
+namespace GlavLib.Db.Extensions;
 
 public static class FluentConfigurationExtensions
 {

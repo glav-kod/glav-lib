@@ -30,9 +30,10 @@ public partial class ServiceRegistrationSourceGeneratorTests
                                     
                                     public static class ServiceExtensions
                                     {
-                                        public static void Add_GlavLib_SourceGenerators_Tests(this IServiceCollection services)
+                                        public static IServiceCollection Add_GlavLib_SourceGenerators_Tests(this IServiceCollection services)
                                         {
                                             services.AddTransient<TestNamespace.TestClass>();
+                                            return services;
                                         }
                                     }
                                     """;
@@ -68,9 +69,10 @@ public partial class ServiceRegistrationSourceGeneratorTests
                                     
                                     public static class ServiceExtensions
                                     {
-                                        public static void Add_GlavLib_SourceGenerators_Tests(this IServiceCollection services)
+                                        public static IServiceCollection Add_GlavLib_SourceGenerators_Tests(this IServiceCollection services)
                                         {
                                             services.AddTransient<TestNamespace.ITest, TestNamespace.TestClass>();
+                                            return services;
                                         }
                                     }
                                     """;

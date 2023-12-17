@@ -1,10 +1,9 @@
+using GlavLib.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NHibernate;
-using Npgsql;
 
 namespace GlavLib.App.Db;
 
@@ -31,13 +30,12 @@ internal sealed class DbSessionEndpointFilter
         {
             var serviceProvider = context.HttpContext.RequestServices;
 
-            var configuration  = serviceProvider.GetRequiredService<IConfiguration>();
-            var sessionFactory = serviceProvider.GetRequiredService<ISessionFactory>();
+            var dataSourceProvider = serviceProvider.GetRequiredService<NpgsqlDataSourceProvider>();
+            var sessionFactory     = serviceProvider.GetRequiredService<ISessionFactory>();
 
-            var connectionString = configuration.GetConnectionString(connectionStringName);
+            var npgsqlDataSource = dataSourceProvider.GetDataSource(connectionStringName);
 
-            await using var dbConnection = new NpgsqlConnection(connectionString);
-            await dbConnection.OpenAsync();
+            await using var dbConnection = await npgsqlDataSource.OpenConnectionAsync();
 
             await using (DbSession.Bind(sessionFactory, dbConnection))
             {

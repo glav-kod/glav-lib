@@ -4,7 +4,7 @@ using NHibernate.SqlTypes;
 using NHibernate.Type;
 using NHibernate.UserTypes;
 
-namespace GlavLib.App.Db.NhUserTypes;
+namespace GlavLib.Db.NhUserTypes;
 
 public abstract class SingleValueObjectType<TValue> : IUserType where TValue : class
 {

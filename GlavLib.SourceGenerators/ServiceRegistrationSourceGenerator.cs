@@ -131,9 +131,10 @@ public sealed class ServiceRegistrationSourceGenerator : IIncrementalGenerator
 
                        public static class ServiceExtensions
                        {
-                           public static void {{methodName}}(this IServiceCollection services)
+                           public static IServiceCollection {{methodName}}(this IServiceCollection services)
                            {
                        {{registerMethodsBody}}
+                               return services;
                            }
                        }
                        """;

@@ -2,7 +2,7 @@ using GlavLib.Basics.DataTypes;
 using NHibernate;
 using NHibernate.Type;
 
-namespace GlavLib.App.Db.NhUserTypes;
+namespace GlavLib.Db.NhUserTypes;
 
 internal sealed class DateUserType : SingleValueObjectType<Date>
 {

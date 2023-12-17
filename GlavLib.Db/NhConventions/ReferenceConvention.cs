@@ -3,7 +3,7 @@ using FluentNHibernate.Conventions.Instances;
 using FluentNHibernate.Mapping;
 using Humanizer;
 
-namespace GlavLib.App.Db.NhConventions;
+namespace GlavLib.Db.NhConventions;
 
 public sealed class ReferenceConvention : IReferenceConvention
 {

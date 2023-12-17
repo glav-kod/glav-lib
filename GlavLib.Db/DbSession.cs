@@ -2,7 +2,7 @@
 using System.Data.Common;
 using NHibernate;
 
-namespace GlavLib.App.Db;
+namespace GlavLib.Db;
 
 /// <summary>
 /// Сессия подключения к базе данных.

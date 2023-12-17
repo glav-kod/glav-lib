@@ -1,13 +1,12 @@
 using System.Data.Common;
 using System.Text.Json;
-using GlavLib.Basics.Extensions;
 using GlavLib.Basics.Serialization;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
-namespace GlavLib.App.Db.NhUserTypes;
+namespace GlavLib.Db.NhUserTypes;
 
 public class JsonType<T> : IUserType where T : class
 {

@@ -6,21 +6,17 @@
   <ItemGroup>
     <PackageReference Include="App.Metrics.AspNetCore"/>
     <PackageReference Include="App.Metrics.Prometheus"/>
-    <PackageReference Include="Dapper"/>
-    <PackageReference Include="FluentNHibernate"/>
     <PackageReference Include="FluentValidation.AspNetCore"/>
-    <PackageReference Include="Humanizer.Core.uk"/>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
     <PackageReference Include="Microsoft.Extensions.Configuration"/>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream"/>
-    <PackageReference Include="NHibernate"/>
-    <PackageReference Include="Npgsql"/>
     <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Endpoints"/>
     <PackageReference Include="Swashbuckle.AspNetCore"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj"/>
+    <ProjectReference Include="..\GlavLib.Db\GlavLib.Db.csproj" />
     <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" 
                       OutputItemType="Analyzer" 
                       ReferenceOutputAssembly="false"/>

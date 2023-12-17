@@ -2,7 +2,7 @@ using FluentNHibernate.Conventions;
 using FluentNHibernate.Conventions.Instances;
 using FluentNHibernate.Mapping;
 
-namespace GlavLib.App.Db.NhConventions;
+namespace GlavLib.Db.NhConventions;
 
 public sealed class HasOneConvention : IHasOneConvention
 {

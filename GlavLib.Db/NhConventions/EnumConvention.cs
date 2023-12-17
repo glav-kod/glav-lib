@@ -4,7 +4,7 @@ using FluentNHibernate.Conventions.Inspections;
 using FluentNHibernate.Conventions.Instances;
 using NHibernate.Type;
 
-namespace GlavLib.App.Db.NhConventions;
+namespace GlavLib.Db.NhConventions;
 
 public sealed class EnumConvention : IUserTypeConvention
 {

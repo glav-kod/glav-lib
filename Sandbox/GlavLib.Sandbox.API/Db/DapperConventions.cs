@@ -1,6 +1,6 @@
 ﻿using Dapper;
-using GlavLib.App.Db.Dapper;
 using GlavLib.Basics.DataTypes;
+using GlavLib.Db.Dapper;
 
 namespace GlavLib.Sandbox.API.Db;
 

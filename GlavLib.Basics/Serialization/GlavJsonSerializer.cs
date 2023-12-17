@@ -20,18 +20,16 @@ public static class GlavJsonSerializer
     [return: NotNullIfNotNull("json")]
     public static T? Deserialize<T>(string? json)
     {
-        if (ReferenceEquals(json, null))
-            return default;
-
-        return JsonSerializer.Deserialize<T>(json, Options)!;
+        return json is not null
+            ? JsonSerializer.Deserialize<T>(json, Options)
+            : default;
     }
 
     [return: NotNullIfNotNull("json")]
     public static object? Deserialize(string? json, Type type)
     {
-        if (ReferenceEquals(json, null))
-            return default;
-
-        return JsonSerializer.Deserialize(json, type, Options)!;
+        return json is not null
+            ? JsonSerializer.Deserialize(json, type, Options)
+            : default;
     }
 }

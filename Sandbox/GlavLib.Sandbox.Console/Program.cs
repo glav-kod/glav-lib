@@ -1,31 +1,46 @@
-﻿using GlavLib.Sandbox.Console;
+﻿using Dapper;
+using GlavLib.Basics.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Serilog;
+
+var configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json")
+                    .AddJsonFile("appsettings.Development.json", optional: true)
+                    .Build();
+
+Log.Logger = new LoggerBuilder()
+             .Configure(configuration)
+             .Build();
 
 var services = new ServiceCollection();
-
-services.Add_GlavLib_Sandbox_Console();
+services.AddLogging(configure => //
+{
+    configure.AddSerilog();
+});
 
 var serviceProvider = services.BuildServiceProvider();
 
-var factory = serviceProvider.GetRequiredService<TestFactory>();
+var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
-var c1 = factory.Create("c1");
-var c2 = factory.Create("c2");
+var dsBuilder = new NpgsqlDataSourceBuilder("User ID=sys;Password=123;Host=127.100.0.1;Port=5432;Database=glavdb");
+dsBuilder.UseLoggerFactory(loggerFactory);
 
-Console.WriteLine(c1);
-Console.WriteLine(c2);
+var dataSource = dsBuilder.Build();
 
-// var wrongSum = SystemErrors.WrongSum(sum: 123);
-// Console.WriteLine(wrongSum.Key);
-// Console.WriteLine(wrongSum.Message);
-//
-//
-// CommandExecutor commandExecutor = null!;
-//
-// var result = await TestCommandHandler.HandleAsync(commandExecutor, new TestCommand(), default);
-//
-// [EnumObjectItem("KeyOne", "K1", "Ключ 1")]
-// public partial class MyEnum : EnumObject
-// {
-// }
+var connection = dataSource.OpenConnection();
 
+const string sql = "select * from test_table";
+
+var result = connection.Query(sql).ToList();
+
+Console.WriteLine(result.Count);
+    
+foreach (var row in result.Take(10))
+{
+    Console.WriteLine(row);
+}
+
+Log.CloseAndFlush();

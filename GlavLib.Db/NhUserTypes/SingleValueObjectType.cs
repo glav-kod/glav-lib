@@ -6,7 +6,7 @@ using NHibernate.UserTypes;
 
 namespace GlavLib.Db.NhUserTypes;
 
-public abstract class SingleValueObjectType<TValue> : IUserType where TValue : class
+public abstract class SingleValueObjectType<TValue> : IUserType
 {
     public SqlType[] SqlTypes => new[] {PrimitiveType.SqlType};
 

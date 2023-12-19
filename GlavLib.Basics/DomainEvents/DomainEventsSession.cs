@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-
-namespace GlavLib.Basics.DomainEvents;
+﻿namespace GlavLib.Basics.DomainEvents;
 
 public class DomainEventsSession : IDisposable
 {

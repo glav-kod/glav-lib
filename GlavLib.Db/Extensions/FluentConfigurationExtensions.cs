@@ -32,6 +32,7 @@ public static class FluentConfigurationExtensions
     }
 
     [PublicAPI]
+    // ReSharper disable once InconsistentNaming
     public static FluentConfiguration UsePostgreSQL(this FluentConfiguration fluentConfiguration)
     {
         var postgreSqlConfiguration = PostgreSQLConfiguration.Standard.Dialect<PostgreSQLDialect>();

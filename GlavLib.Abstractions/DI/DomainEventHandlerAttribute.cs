@@ -1,4 +1,6 @@
-﻿namespace GlavLib.Abstractions.DI;
+﻿using JetBrains.Annotations;
 
-[AttributeUsage(AttributeTargets.Class)]
+namespace GlavLib.Abstractions.DI;
+
+[AttributeUsage(AttributeTargets.Class), UsedImplicitly]
 public sealed class DomainEventHandlerAttribute<T> : Attribute;

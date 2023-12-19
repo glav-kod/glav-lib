@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GlavLib.Basics.DataTypes;
+﻿namespace GlavLib.Basics.DataTypes;
 
 public abstract class SingleValueObject<TValue>
 {

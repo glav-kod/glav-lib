@@ -4,7 +4,7 @@ using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.NhUserTypes;
 
-internal class UserTypesConventions : IPropertyConvention, IIdConvention
+public sealed class UserTypesConventions : IPropertyConvention, IIdConvention
 {
     public void Apply(IPropertyInstance instance)
     {

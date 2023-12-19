@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
 namespace GlavLib.Basics.MultiLang;
@@ -31,6 +32,7 @@ public sealed class LanguagePack
         };
     }
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class YamlLanguagePackBundle
     {
         public required string Prefix { get; init; }
@@ -38,6 +40,7 @@ public sealed class LanguagePack
         public required IDictionary<string, string> Messages { get; init; }
     }
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed class YamlLanguagePack
     {
         public required string Language { get; init; }

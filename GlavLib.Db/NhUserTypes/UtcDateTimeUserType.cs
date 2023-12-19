@@ -4,7 +4,7 @@ using NHibernate.Type;
 
 namespace GlavLib.Db.NhUserTypes;
 
-public sealed class UtcDateTimeUserType : SingleValueObjectType<UtcDateTime>
+internal sealed class UtcDateTimeUserType : SingleValueObjectType<UtcDateTime>
 {
     protected override NullableType PrimitiveType => NHibernateUtil.UtcDateTime;
 

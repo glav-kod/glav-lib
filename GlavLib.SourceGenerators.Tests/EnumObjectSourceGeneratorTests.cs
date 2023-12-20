@@ -41,7 +41,7 @@ public class EnumObjectSourceGeneratorTests : SourceGeneratorTestsBase
                                             {
                                                 SomKey => Som,
                                                 TengeKey => Tenge,
-                                                _ => throw new System.InvalidOperationException($"Неожиданный ключ '{key}'")};
+                                                _ => throw new global::System.InvalidOperationException($"Неожиданный ключ '{key}'")};
                                         }
                                     }
                                 }

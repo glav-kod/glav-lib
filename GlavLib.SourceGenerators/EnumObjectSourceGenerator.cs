@@ -166,7 +166,7 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
                                                                                   return key switch
                                                                                   {
                                                                                     {{switchBuilder}}
-                                                                                    _ => throw new System.InvalidOperationException($"Неожиданный ключ '{key}'")
+                                                                                    _ => throw new global::System.InvalidOperationException($"Неожиданный ключ '{key}'")
                                                                                   };
                                                                               }
                                                                               """);

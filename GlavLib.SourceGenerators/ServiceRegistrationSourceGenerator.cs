@@ -76,14 +76,34 @@ public sealed class ServiceRegistrationSourceGenerator : IIncrementalGenerator
                 asType = asTypeSymbol.ToDisplayString();
             }
 
+            string? key = null;
+            if (attributeData.AttributeConstructor is not null)
+            {
+                for (var i = 0; i < attributeData.AttributeConstructor.Parameters.Length; i++)
+                {
+                    var parameter = attributeData.AttributeConstructor.Parameters[i];
+                    var argument = attributeData.ConstructorArguments[i];
+                    
+                    if (argument.Value is null)
+                        continue;
+                    
+                    if (parameter.Name == "key")
+                    {
+                        key = argument.Value is string str 
+                            ? $"\"{str}\"" 
+                            : argument.Value.ToString();
+                    }
+                }
+            }
+
             switch (attributeTypeFullName)
             {
                 case SingleInstanceAttribute:
-                    registrations.Add(TypeRegistration.Singleton(fullClassName, asType));
+                    registrations.Add(TypeRegistration.Singleton(fullClassName, asType, key));
                     break;
 
                 case TransientAttributeName:
-                    registrations.Add(TypeRegistration.Transient(fullClassName, asType));
+                    registrations.Add(TypeRegistration.Transient(fullClassName, asType, key));
                     break;
 
                 case DomainEventHandlerAttribute when asType is not null:

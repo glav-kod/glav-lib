@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GlavLib.Db.Extensions;
 
-public static class ServicesExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddNh(this IServiceCollection services, Action<FluentConfiguration> setup)
     {

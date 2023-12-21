@@ -33,7 +33,7 @@ internal sealed class DbSessionEndpointFilter
             var dataSourceProvider = serviceProvider.GetRequiredService<NpgsqlDataSourceProvider>();
             var sessionFactory     = serviceProvider.GetRequiredService<ISessionFactory>();
 
-            await using var npgsqlDataSource = dataSourceProvider.GetDataSource(connectionStringName);
+            var npgsqlDataSource = dataSourceProvider.GetDataSource(connectionStringName);
 
             await using var dbConnection = await npgsqlDataSource.OpenConnectionAsync();
 

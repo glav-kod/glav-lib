@@ -5,7 +5,7 @@ using Npgsql;
 
 namespace GlavLib.App.Db;
 
-public sealed class NpgsqlDataSourceProvider
+public sealed class NpgsqlDataSourceProvider : IDisposable
 {
     private readonly ConcurrentDictionary<string, NpgsqlDataSource> _dataSources = new();
 
@@ -30,5 +30,13 @@ public sealed class NpgsqlDataSourceProvider
 
             return dsBuilder.Build();
         });
+    }
+
+    public void Dispose()
+    {
+        foreach (var (_, dataSource) in _dataSources)
+        {
+            dataSource.Dispose();
+        }
     }
 }

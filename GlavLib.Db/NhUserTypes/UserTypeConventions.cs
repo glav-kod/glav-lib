@@ -13,6 +13,9 @@ internal sealed class UserTypesConventions : IPropertyConvention, IIdConvention
 
         if (instance.Property.PropertyType == typeof(Date))
             instance.CustomType<DateUserType>();
+
+        if (instance.Property.PropertyType == typeof(TimeSpan))
+            instance.CustomType("TimeAsTimeSpan");
     }
 
     public void Apply(IIdentityInstance instance)

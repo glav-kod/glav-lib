@@ -64,12 +64,12 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
 
     public static bool operator <(UtcDateTime x, UtcDateTime y)
     {
-        return x.Value > y.Value;
+        return x.Value < y.Value;
     }
 
     public static bool operator <=(UtcDateTime x, UtcDateTime y)
     {
-        return x.Value >= y.Value;
+        return x.Value <= y.Value;
     }
 
     public static UtcDateTime operator +(UtcDateTime utcDateTime, TimeSpan timeSpan)

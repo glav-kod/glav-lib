@@ -9,7 +9,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
     <PackageVersion Include="NullGuard.Fody" Version="3.1.1" />
-    <PackageVersion Include="FluentValidation" Version="11.8.1" />
+    <PackageVersion Include="FluentValidation" Version="11.9.0" />
     <PackageVersion Include="Glob" Version="1.1.9" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageVersion Include="Serilog" Version="3.1.1" />

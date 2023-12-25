@@ -11,7 +11,7 @@ internal sealed class DateUserType : SingleValueObjectType<Date>
     protected override Date Create(object value)
     {
         var dateTime = Convert.ToDateTime(value);
-        
+
         return Date.FromDateTime(dateTime);
     }
 

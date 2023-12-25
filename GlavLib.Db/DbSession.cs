@@ -28,7 +28,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     public IDbConnection Connection => NhSession.Connection;
 
-    private ITransaction?   _nhTransaction;
+    private ITransaction? _nhTransaction;
     private IDbTransaction? _transaction;
 
     public IDbTransaction Transaction => _transaction ?? throw new InvalidOperationException("No open transaction");
@@ -37,12 +37,14 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     private DbSession(ISession nhSession, bool isSessionBound)
     {
-        NhSession = nhSession;
+        NhSession       = nhSession;
         _isSessionBound = isSessionBound;
     }
 
-    public DbSession(ISessionFactory sessionFactory,
-                     DbConnection    dbConnection)
+    public DbSession(
+            ISessionFactory sessionFactory,
+            DbConnection dbConnection
+        )
     {
         NhSession = sessionFactory.WithOptions()
                                   .Connection(dbConnection)
@@ -84,7 +86,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.CommitAsync();
 
         _nhTransaction = null;
-        _transaction = null;
+        _transaction   = null;
     }
 
     internal async Task RollbackAsync()
@@ -95,7 +97,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.RollbackAsync();
 
         _nhTransaction = null;
-        _transaction = null;
+        _transaction   = null;
     }
 
     internal async Task RollbackIfActiveAsync()
@@ -106,7 +108,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         await _nhTransaction.RollbackAsync();
 
         _nhTransaction = null;
-        _transaction = null;
+        _transaction   = null;
     }
 
     public void Dispose()
@@ -158,8 +160,10 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
             ClearCurrentSession();
     }
 
-    public static DbSession Bind(ISessionFactory sessionFactory,
-                                 DbConnection    dbConnection)
+    public static DbSession Bind(
+            ISessionFactory sessionFactory,
+            DbConnection dbConnection
+        )
     {
         var session = sessionFactory.WithOptions()
                                     .Connection(dbConnection)
@@ -179,7 +183,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
         CurrentSession.Value = dbSession;
     }
-    
+
     private static void ClearCurrentSession()
     {
         if (CurrentSession.Value is null)

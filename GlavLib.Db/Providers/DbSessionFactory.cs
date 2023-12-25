@@ -4,8 +4,10 @@ using NHibernate;
 namespace GlavLib.Db.Providers;
 
 [SingleInstance]
-public sealed class DbSessionFactory(ISessionFactory          sessionFactory,
-                                     NpgsqlDataSourceProvider npgsqlDataSourceProvider)
+public sealed class DbSessionFactory(
+        ISessionFactory sessionFactory,
+        NpgsqlDataSourceProvider npgsqlDataSourceProvider
+    )
 {
     public DbSession OpenDbSession(string connectionStringName)
     {

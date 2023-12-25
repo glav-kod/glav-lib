@@ -4,9 +4,6 @@ using NHibernate;
 
 namespace GlavLib.Db;
 
-/// <summary>
-/// Сессия подключения к базе данных.
-/// </summary>
 public sealed class DbSession : IDisposable, IAsyncDisposable
 {
     private static readonly AsyncLocal<DbSession?> CurrentSession = new(null);
@@ -27,9 +24,6 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     public static ISession CurrentNhSession => Current.NhSession;
 
-    /// <summary>
-    /// NHibernate сессия
-    /// </summary>
     public ISession NhSession { get; }
 
     public IDbConnection Connection => NhSession.Connection;
@@ -48,17 +42,24 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
     }
 
     public DbSession(ISessionFactory sessionFactory,
-                     DbConnection dbConnection)
+                     DbConnection    dbConnection)
     {
         NhSession = sessionFactory.WithOptions()
                                   .Connection(dbConnection)
                                   .OpenSession();
-        _isSessionBound = true;
+        _isSessionBound = false;
     }
 
     public DbSession(ISession nhSession)
         : this(nhSession, isSessionBound: false)
     {
+    }
+
+    public DbSession Bind()
+    {
+        SetCurrentSession(this);
+
+        return this;
     }
 
     internal void BeginTransaction()
@@ -129,7 +130,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         }
 
         if (_isSessionBound)
-            CurrentSession.Value = null;
+            ClearCurrentSession();
     }
 
     public async ValueTask DisposeAsync()
@@ -154,7 +155,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         }
 
         if (_isSessionBound)
-            CurrentSession.Value = null;
+            ClearCurrentSession();
     }
 
     public static DbSession Bind(ISessionFactory sessionFactory,
@@ -164,10 +165,26 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
                                     .Connection(dbConnection)
                                     .OpenSession();
 
-        var databaseSession = new DbSession(session, isSessionBound: true);
+        var dbSession = new DbSession(session, isSessionBound: true);
 
-        CurrentSession.Value = databaseSession;
+        SetCurrentSession(dbSession);
 
-        return databaseSession;
+        return dbSession;
+    }
+
+    private static void SetCurrentSession(DbSession dbSession)
+    {
+        if (CurrentSession.Value is not null)
+            throw new InvalidOperationException("Session is already bound. Probably you forgot close prior session");
+
+        CurrentSession.Value = dbSession;
+    }
+    
+    private static void ClearCurrentSession()
+    {
+        if (CurrentSession.Value is null)
+            throw new InvalidOperationException("Session was not bound. Probably you have already closed it");
+
+        CurrentSession.Value = null;
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace GlavLib.App.Db;
+namespace GlavLib.Db.Providers;
 
 public sealed class NpgsqlDataSourceProvider : IDisposable
 {

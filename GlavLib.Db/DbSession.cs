@@ -39,7 +39,7 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
 
     public IDbTransaction Transaction => _transaction ?? throw new InvalidOperationException("No open transaction");
 
-    private bool _isSessionBound;
+    private readonly bool _isSessionBound;
 
     private DbSession(ISession nhSession, bool isSessionBound)
     {
@@ -47,9 +47,12 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         _isSessionBound = isSessionBound;
     }
 
-    public DbSession(ISessionFactory sessionFactory)
+    public DbSession(ISessionFactory sessionFactory,
+                     DbConnection dbConnection)
     {
-        NhSession = sessionFactory.OpenSession();
+        NhSession = sessionFactory.WithOptions()
+                                  .Connection(dbConnection)
+                                  .OpenSession();
         _isSessionBound = true;
     }
 

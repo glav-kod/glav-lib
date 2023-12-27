@@ -1,4 +1,5 @@
-﻿using GlavLib.Abstractions.DI;
+﻿using System.Data;
+using GlavLib.Abstractions.DI;
 using NHibernate;
 
 namespace GlavLib.Db.Providers;
@@ -33,12 +34,30 @@ public sealed class DbSessionFactory(
                              .OpenSession();
     }
 
-    public IStatelessSession OpenStatelessSession(string connectionStringName)
+    public StatelessSessionWrapper OpenStatelessSession(string connectionStringName)
     {
         var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
 
         var dbConnection = npgsqlDataSource.OpenConnection();
+        var session      = sessionFactory.OpenStatelessSession(dbConnection);
 
-        return sessionFactory.OpenStatelessSession(dbConnection);
+        return new StatelessSessionWrapper(session: session,
+                                           connection: dbConnection);
+    }
+
+    public sealed class StatelessSessionWrapper(
+            IStatelessSession session,
+            IDbConnection connection
+        ) : IDisposable
+    {
+        public IStatelessSession Session { get; } = session;
+
+        public IDbConnection Connection { get; } = connection;
+
+        public void Dispose()
+        {
+            Session.Dispose();
+            Connection.Dispose();
+        }
     }
 }

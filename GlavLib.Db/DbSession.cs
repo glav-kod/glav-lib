@@ -1,13 +1,15 @@
 ﻿using System.Data;
 using System.Data.Common;
+using JetBrains.Annotations;
 using NHibernate;
 
 namespace GlavLib.Db;
 
-public sealed class DbSession : IDisposable, IAsyncDisposable
+public sealed class DbSession(ISession nhSession) : IDisposable
 {
     private static readonly AsyncLocal<DbSession?> CurrentSession = new(null);
 
+    [PublicAPI]
     public static DbSession Current
     {
         get
@@ -20,54 +22,38 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         }
     }
 
+    [PublicAPI]
     public static IDbConnection CurrentConnection => Current.Connection;
 
+    [PublicAPI]
     public static ISession CurrentNhSession => Current.NhSession;
 
-    public ISession NhSession { get; }
+    [PublicAPI]
+    public ISession NhSession { get; } = nhSession;
 
-    public IDbConnection Connection => NhSession.Connection;
+    [PublicAPI]
+    public DbConnection Connection => NhSession.Connection;
+
+    [PublicAPI]
+    public IDbTransaction Transaction => _transaction ?? throw new InvalidOperationException("No opened transaction");
 
     private ITransaction? _nhTransaction;
     private IDbTransaction? _transaction;
+    private bool _isSessionBound;
 
-    public IDbTransaction Transaction => _transaction ?? throw new InvalidOperationException("No open transaction");
-
-    private readonly bool _isSessionBound;
-
-    private DbSession(ISession nhSession, bool isSessionBound)
-    {
-        NhSession       = nhSession;
-        _isSessionBound = isSessionBound;
-    }
-
-    public DbSession(
-            ISessionFactory sessionFactory,
-            DbConnection dbConnection
-        )
-    {
-        NhSession = sessionFactory.WithOptions()
-                                  .Connection(dbConnection)
-                                  .OpenSession();
-        _isSessionBound = false;
-    }
-
-    public DbSession(ISession nhSession)
-        : this(nhSession, isSessionBound: false)
-    {
-    }
-
+    [PublicAPI]
     public DbSession Bind()
     {
-        SetCurrentSession(this);
+        BindSession(this);
 
         return this;
     }
 
-    internal void BeginTransaction()
+    [PublicAPI]
+    public DbSession BeginTransaction()
     {
         if (_transaction is not null)
-            throw new InvalidOperationException("Transaction is already begun");
+            throw new InvalidOperationException("Cannot begin transaction, there is already opened transaction");
 
         using var command = NhSession.Connection.CreateCommand();
 
@@ -75,112 +61,64 @@ public sealed class DbSession : IDisposable, IAsyncDisposable
         _nhTransaction.Enlist(command);
 
         _transaction = command.Transaction;
+
+        return this;
     }
 
-    internal async Task CommitAsync()
+    [PublicAPI]
+    public void Commit()
     {
         if (_nhTransaction is null)
-            throw new InvalidOperationException("Transaction is not active");
+            throw new InvalidOperationException("Cannot commit, no opened transaction");
 
-        await NhSession.FlushAsync();
-        await _nhTransaction.CommitAsync();
+        NhSession.Flush();
+        _nhTransaction.Commit();
 
         _nhTransaction = null;
         _transaction   = null;
     }
 
-    internal async Task RollbackAsync()
+    [PublicAPI]
+    public void Dispose()
     {
-        if (_nhTransaction is null)
-            throw new InvalidOperationException("Transaction is not active");
+        _nhTransaction?.Rollback();
+        NhSession.Connection.Dispose();
+        NhSession.Dispose();
 
-        await _nhTransaction.RollbackAsync();
-
-        _nhTransaction = null;
-        _transaction   = null;
+        if (_isSessionBound)
+            ClearCurrentSession();
     }
 
-    internal async Task RollbackIfActiveAsync()
+    internal void RollbackIfActive()
     {
         if (_nhTransaction is null)
             return;
 
-        await _nhTransaction.RollbackAsync();
+        _nhTransaction.Rollback();
 
         _nhTransaction = null;
         _transaction   = null;
     }
 
-    public void Dispose()
+    public void Deconstruct(out ISession nhSession, out DbConnection dbConnection)
     {
-        try
-        {
-            _nhTransaction?.Rollback();
-        }
-        catch
-        {
-            //ignore
-        }
-
-        try
-        {
-            NhSession.Dispose();
-        }
-        catch
-        {
-            //ignore
-        }
-
-        if (_isSessionBound)
-            ClearCurrentSession();
+        nhSession    = NhSession;
+        dbConnection = Connection;
+    }
+    
+    public void Deconstruct(out ISession nhSession, out DbConnection dbConnection, out IDbTransaction dbTransaction)
+    {
+        nhSession     = NhSession;
+        dbConnection  = Connection;
+        dbTransaction = Transaction;
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        try
-        {
-            if (_nhTransaction is not null)
-                await _nhTransaction.RollbackAsync();
-        }
-        catch
-        {
-            //ignore
-        }
-
-        try
-        {
-            NhSession.Dispose();
-        }
-        catch
-        {
-            //ignore
-        }
-
-        if (_isSessionBound)
-            ClearCurrentSession();
-    }
-
-    public static DbSession Bind(
-            ISessionFactory sessionFactory,
-            DbConnection dbConnection
-        )
-    {
-        var session = sessionFactory.WithOptions()
-                                    .Connection(dbConnection)
-                                    .OpenSession();
-
-        var dbSession = new DbSession(session, isSessionBound: true);
-
-        SetCurrentSession(dbSession);
-
-        return dbSession;
-    }
-
-    private static void SetCurrentSession(DbSession dbSession)
+    private void BindSession(DbSession dbSession)
     {
         if (CurrentSession.Value is not null)
             throw new InvalidOperationException("Session is already bound. Probably you forgot close prior session");
 
+        _isSessionBound      = true;
         CurrentSession.Value = dbSession;
     }
 

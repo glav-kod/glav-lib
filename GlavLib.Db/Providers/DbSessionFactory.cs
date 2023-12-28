@@ -1,5 +1,4 @@
-﻿using System.Data;
-using GlavLib.Abstractions.DI;
+﻿using GlavLib.Abstractions.DI;
 using NHibernate;
 
 namespace GlavLib.Db.Providers;
@@ -10,7 +9,7 @@ public sealed class DbSessionFactory(
         NpgsqlDataSourceProvider npgsqlDataSourceProvider
     )
 {
-    public DbSession OpenDbSession(string connectionStringName)
+    public DbSession OpenSession(string connectionStringName)
     {
         var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
 
@@ -23,41 +22,14 @@ public sealed class DbSessionFactory(
         return new DbSession(session);
     }
 
-    public ISession OpenNhSession(string connectionStringName)
+    public StatelessDbSession OpenStatelessSession(string connectionStringName)
     {
         var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
 
         var dbConnection = npgsqlDataSource.OpenConnection();
 
-        return sessionFactory.WithOptions()
-                             .Connection(dbConnection)
-                             .OpenSession();
-    }
+        var session = sessionFactory.OpenStatelessSession(dbConnection);
 
-    public StatelessSessionWrapper OpenStatelessSession(string connectionStringName)
-    {
-        var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
-
-        var dbConnection = npgsqlDataSource.OpenConnection();
-        var session      = sessionFactory.OpenStatelessSession(dbConnection);
-
-        return new StatelessSessionWrapper(session: session,
-                                           connection: dbConnection);
-    }
-
-    public sealed class StatelessSessionWrapper(
-            IStatelessSession session,
-            IDbConnection connection
-        ) : IDisposable
-    {
-        public IStatelessSession Session { get; } = session;
-
-        public IDbConnection Connection { get; } = connection;
-
-        public void Dispose()
-        {
-            Session.Dispose();
-            Connection.Dispose();
-        }
+        return new StatelessDbSession(session);
     }
 }

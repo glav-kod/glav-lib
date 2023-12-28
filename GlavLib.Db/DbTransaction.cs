@@ -1,40 +1,31 @@
+﻿using JetBrains.Annotations;
+
 namespace GlavLib.Db;
 
-public sealed class DbTransaction : IAsyncDisposable
+[PublicAPI]
+public sealed class DbTransaction :  IDisposable
 {
-    private readonly DbSession _session;
+    private readonly DbSession _dbSession;
 
     public DbTransaction()
     {
-        _session = DbSession.Current;
-        _session.BeginTransaction();
+        _dbSession = DbSession.Current;
+        _dbSession.BeginTransaction();
+    }
+    
+    public DbTransaction(DbSession dbSession)
+    {
+        _dbSession = dbSession;
+        _dbSession.BeginTransaction();
     }
 
-    public DbTransaction(DbSession session)
+    public void Commit()
     {
-        _session = session;
-        _session.BeginTransaction();
+        _dbSession.Commit();
     }
 
-    public async Task CommitAsync()
+    public void Dispose()
     {
-        await _session.CommitAsync();
-    }
-
-    public async Task RollbackAsync()
-    {
-        await _session.RollbackAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        try
-        {
-            await _session.RollbackIfActiveAsync();
-        }
-        catch
-        {
-            //ignore
-        }
+        _dbSession.RollbackIfActive();
     }
 }

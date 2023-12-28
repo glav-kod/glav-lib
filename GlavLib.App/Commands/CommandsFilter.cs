@@ -61,13 +61,13 @@ public class CommandsFilter(ILogger<CommandsFilter> logger, DomainEventsHandler 
 
         if (domainEventsSession.Events.Count > 0)
         {
-            await using var dbTransaction = new DbTransaction();
-
+            using var dbTransaction = new DbTransaction();
+            
             await domainEventsHandler.HandleAsync(domainEventsSession, context.HttpContext.RequestAborted);
 
-            await dbTransaction.CommitAsync();
-
             logger.LogInformation("Обработка команды ДоменныхСобытий завершилась успешно");
+            
+            dbTransaction.Commit();
         }
 
 

@@ -28,19 +28,21 @@ public class CreateUserResult
 
 public class CreateUser
 {
-    public static async Task<CommandResult<Ok<CreateUserResult>>> ExecuteAsync(CreateUserArgs      args,
-                                                                               ILogger<CreateUser> logger,
-                                                                               CancellationToken   cancellationToken)
+    public static async Task<CommandResult<Ok<CreateUserResult>>> ExecuteAsync(
+            CreateUserArgs args,
+            ILogger<CreateUser> logger,
+            CancellationToken cancellationToken
+        )
     {
         var nhSession = DbSession.CurrentNhSession;
 
-        await using var dbTransaction = new DbTransaction();
+        using var dbTransaction = new DbTransaction();
 
         var user = User.Create(args.Name);
         await nhSession.SaveAsync(user, cancellationToken);
         await nhSession.FlushAsync(cancellationToken);
 
-        await dbTransaction.CommitAsync();
+        dbTransaction.Commit();
 
         logger.LogInformation("User#{UserId} created", user.Id);
 

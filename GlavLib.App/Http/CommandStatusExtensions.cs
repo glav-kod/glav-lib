@@ -2,7 +2,7 @@
 
 namespace GlavLib.App.Http;
 
-internal static class CommandStatusExtensions
+public static class CommandStatusExtensions
 {
     private const string CommandStatus = "X-Status";
 

@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream"/>
     <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Endpoints"/>
     <PackageReference Include="Swashbuckle.AspNetCore"/>
+    <PackageReference Include="Serilog.AspNetCore"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,6 @@ using GlavLib.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -16,68 +15,73 @@ namespace GlavLib.App.Commands;
 
 public static class CommandsFilterExtensions
 {
-    public static RouteHandlerBuilder UseCommands(this RouteHandlerBuilder routeHandlerBuilder)
+    public static TBuilder UseCommands<TBuilder>(this TBuilder builder)
+        where TBuilder : IEndpointConventionBuilder
     {
-        routeHandlerBuilder.AddEndpointFilter<CommandsFilter>();
-        return routeHandlerBuilder;
-    }
-
-    public static RouteGroupBuilder UseCommands(this RouteGroupBuilder routeGroupBuilder)
-    {
-        routeGroupBuilder.AddEndpointFilter<CommandsFilter>();
-        return routeGroupBuilder;
+        return builder.AddEndpointFilterFactory(CommandsFilter.Factory);
     }
 }
 
-public class CommandsFilter(ILogger<CommandsFilter> logger, DomainEventsHandler domainEventsHandler) : IEndpointFilter
+public sealed class CommandsFilter
 {
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate> Factory => (_, next) => Create(next);
+
+    public static EndpointFilterDelegate Create(EndpointFilterDelegate next)
     {
-        using var domainEventsSession = DomainEventsSession.Bind();
-
-        var result = await next(context);
-
-        var httpContext = context.HttpContext;
-
-        if (result is ICommandResult commandResult)
+        return async context =>
         {
-            if (commandResult.IsFailure)
-                return ErrorResponse(httpContext, commandResult.ParameterName, commandResult.Error);
+            var serviceProvider = context.HttpContext.RequestServices;
 
-            httpContext.Response.Headers.AddOkStatus();
+            var logger              = serviceProvider.GetRequiredService<ILogger<CommandsFilter>>();
+            var domainEventsHandler = serviceProvider.GetRequiredService<DomainEventsHandler>();
 
-            result = commandResult.Value;
-        }
+            using var domainEventsSession = DomainEventsSession.Bind();
 
-        if (result is CommandUnitResult commandUnitResult)
-        {
-            if (commandUnitResult.IsFailure)
-                return ErrorResponse(httpContext, commandUnitResult.ParameterName, commandUnitResult.Error);
+            var result = await next(context);
 
-            httpContext.Response.Headers.AddOkStatus();
+            var httpContext = context.HttpContext;
 
-            result = Results.Ok();
-        }
+            if (result is ICommandResult commandResult)
+            {
+                if (commandResult.IsFailure)
+                    return ErrorResponse(httpContext, commandResult.ParameterName, commandResult.Error);
 
-        if (domainEventsSession.Events.Count > 0)
-        {
-            using var dbTransaction = new DbTransaction();
-            
-            await domainEventsHandler.HandleAsync(domainEventsSession, context.HttpContext.RequestAborted);
+                httpContext.Response.Headers.AddOkStatus();
 
-            logger.LogInformation("Обработка команды ДоменныхСобытий завершилась успешно");
-            
-            dbTransaction.Commit();
-        }
+                result = commandResult.Value;
+            }
+
+            if (result is CommandUnitResult commandUnitResult)
+            {
+                if (commandUnitResult.IsFailure)
+                    return ErrorResponse(httpContext, commandUnitResult.ParameterName, commandUnitResult.Error);
+
+                httpContext.Response.Headers.AddOkStatus();
+
+                result = Results.Ok();
+            }
+
+            if (domainEventsSession.Events.Count > 0)
+            {
+                using var dbTransaction = new DbTransaction();
+
+                await domainEventsHandler.HandleAsync(domainEventsSession, context.HttpContext.RequestAborted);
+
+                logger.LogInformation("Обработка ДоменныхСобытий завершилась успешно");
+
+                dbTransaction.Commit();
+            }
 
 
-        return result;
+            return result;
+        };
     }
 
-
-    private static JsonHttpResult<ErrorResponse> ErrorResponse(HttpContext httpContext,
-                                                               string?     parameterName,
-                                                               Error       error)
+    private static JsonHttpResult<ErrorResponse> ErrorResponse(
+            HttpContext httpContext,
+            string? parameterName,
+            Error error
+        )
     {
         httpContext.Response.Headers.AddErrorStatus();
 
@@ -105,14 +109,16 @@ public class CommandsFilter(ILogger<CommandsFilter> logger, DomainEventsHandler 
         return ErrorResponse(parameterName, localizedMessage);
     }
 
-    private static JsonHttpResult<ErrorResponse> ErrorResponse(string? parameterName,
-                                                               string  errorMessage)
+    private static JsonHttpResult<ErrorResponse> ErrorResponse(
+            string? parameterName,
+            string errorMessage
+        )
     {
         if (parameterName is null)
         {
             return TypedResults.Json(new ErrorResponse
             {
-                Message = errorMessage,
+                Message         = errorMessage,
                 ParameterErrors = null
             });
         }

@@ -52,9 +52,4 @@ public static class ServicesExtensions
 
         return services;
     }
-
-    public static IServiceCollection AddNpgsqlDataSourceProvider(this IServiceCollection services)
-    {
-        return services.AddSingleton<NpgsqlDataSourceProvider>();
-    }
 }

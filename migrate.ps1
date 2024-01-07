@@ -1,0 +1,1 @@
+.\migrations\liquibase-tool\liquibase.bat migrate 2>&1 | % ToString

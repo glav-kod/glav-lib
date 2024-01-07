@@ -40,7 +40,6 @@ appBuilder.Services
           })
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.App"))
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.Sandbox.API"))
-          .AddNpgsqlDataSourceProvider()
           .AddNh(config =>
           {
               config.UsePostgreSQL()

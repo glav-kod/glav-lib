@@ -3,21 +3,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace GlavLib.App.Http;
 
-public sealed class XmlResult<T> : IResult
+public sealed class XmlResult<T>(T result) : IResult
 {
     private static readonly XmlSerializer Serializer = new(typeof(T));
-
-    private readonly T _result;
-
-    public XmlResult(T result)
-    {
-        _result = result;
-    }
 
     public async Task ExecuteAsync(HttpContext httpContext)
     {
         await using var ms = XmlResultHelper.Instance.GetStream();
-        Serializer.Serialize(ms, _result, XmlResultHelper.EmptyNamespaces);
+        Serializer.Serialize(ms, result, XmlResultHelper.EmptyNamespaces);
 
         httpContext.Response.ContentType = "application/xml";
 

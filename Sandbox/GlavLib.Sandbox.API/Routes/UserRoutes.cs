@@ -1,5 +1,6 @@
 ﻿using GlavLib.App.Commands;
 using GlavLib.App.Db;
+using GlavLib.App.Http;
 using GlavLib.Sandbox.API.Commands;
 using GlavLib.Sandbox.API.Db;
 
@@ -14,7 +15,7 @@ public static class UserRoutes
         usersGroup.MapGet("/get", GetUser.ExecuteAsync)
                   .AddDbSession(ConnectionStrings.Replica)
                   .UseCommands();
-        
+
         usersGroup.MapPost("/create", CreateUser.ExecuteAsync)
                   .AddDbSession(ConnectionStrings.Master)
                   .UseCommands();

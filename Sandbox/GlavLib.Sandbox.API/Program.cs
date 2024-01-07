@@ -66,9 +66,7 @@ app.MapHealthChecks("/healthz")
 
 app.UseRequestTimeouts();
 
-var apiGroup = app.MapGroup("/api")
-                  .WithOpenApi()
-                  .AddAutoValidation();
+var apiGroup = app.MapGroup("/api");
 
 
 app.MapUserRoutes(apiGroup);

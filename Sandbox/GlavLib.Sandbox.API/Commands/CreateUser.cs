@@ -1,15 +1,18 @@
-﻿using FluentValidation;
+﻿using System.Xml.Serialization;
+using FluentValidation;
 using GlavLib.App.Commands;
+using GlavLib.App.Http;
 using GlavLib.Basics.Extensions;
 using GlavLib.Db;
 using GlavLib.Errors;
 using GlavLib.Sandbox.API.Model;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GlavLib.Sandbox.API.Commands;
 
+[XmlRoot("root")]
 public class CreateUserArgs
 {
+    [XmlElement("name")]
     public required string Name { get; init; }
 
     public sealed class Validator : AbstractValidator<CreateUserArgs>
@@ -28,8 +31,8 @@ public class CreateUserResult
 
 public class CreateUser
 {
-    public static async Task<CommandResult<Ok<CreateUserResult>>> ExecuteAsync(
-            CreateUserArgs args,
+    public static async Task<IResult> ExecuteAsync(
+            FromXml<CreateUserArgs> args,
             ILogger<CreateUser> logger,
             CancellationToken cancellationToken
         )
@@ -38,7 +41,7 @@ public class CreateUser
 
         using var dbTransaction = new DbTransaction();
 
-        var user = User.Create(args.Name);
+        var user = User.Create(args.Value.Name);
         await nhSession.SaveAsync(user, cancellationToken);
         await nhSession.FlushAsync(cancellationToken);
 
@@ -46,9 +49,9 @@ public class CreateUser
 
         logger.LogInformation("User#{UserId} created", user.Id);
 
-        return Ok(new CreateUserResult
+        return new CreateUserResult
         {
             UserId = user.Id
-        });
+        }.AsXml();
     }
 }

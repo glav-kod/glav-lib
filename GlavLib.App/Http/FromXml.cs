@@ -1,6 +1,7 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
 
 namespace GlavLib.App.Http;
@@ -8,37 +9,31 @@ namespace GlavLib.App.Http;
 internal static class XmlResultHelper
 {
     public static readonly RecyclableMemoryStreamManager Instance = new();
-    
-    public static readonly XmlSerializerNamespaces EmptyNamespaces = new(new[]
-    {
+
+    public static readonly XmlSerializerNamespaces EmptyNamespaces = new([
         new XmlQualifiedName(string.Empty, string.Empty)
-    });
-    
+    ]);
 }
 
-public class FromXml<T> : IQueryArg
+public class FromXml<T> : IEndpointArg
 {
     private static readonly XmlSerializer Serializer = new(typeof(T));
 
     public required T Value { get; init; }
 
     [PublicAPI]
-    public static bool TryParse(string? value, out FromXml<T>? result)
+    public static ValueTask<FromXml<T>?> BindAsync(HttpContext context)
     {
-        if (value is null)
-        {
-            result = null;
-            return false;
-        }
+        using var stringReader = new StreamReader(context.Request.Body);
 
-        using var stringReader = new StringReader(value);
-        using var xmlReader    = new XmlTextReader(stringReader);
+        using var xmlReader = new XmlTextReader(stringReader);
 
-        result = new FromXml<T>
+        var result = new FromXml<T>
         {
             Value = (T)Serializer.Deserialize(xmlReader)!
         };
-        return true;
+
+        return ValueTask.FromResult<FromXml<T>?>(result);
     }
 
     public object? GetArgumentValue() => Value;

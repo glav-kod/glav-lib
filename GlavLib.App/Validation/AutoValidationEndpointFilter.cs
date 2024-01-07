@@ -43,7 +43,7 @@ public sealed class AutoValidationEndpointFilter : IEndpointFilter
             if (instanceToValidate is null)
                 continue;
 
-            if (instanceToValidate is IQueryArg validateValue)
+            if (instanceToValidate is IEndpointArg validateValue)
             {
                 instanceToValidate = validateValue.GetArgumentValue();
 

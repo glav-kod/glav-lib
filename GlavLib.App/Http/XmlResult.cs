@@ -16,7 +16,7 @@ public sealed class XmlResult<T> : IResult
 
     public async Task ExecuteAsync(HttpContext httpContext)
     {
-        using var ms = XmlResultHelper.Instance.GetStream();
+        await using var ms = XmlResultHelper.Instance.GetStream();
         Serializer.Serialize(ms, _result, XmlResultHelper.EmptyNamespaces);
 
         httpContext.Response.ContentType = "application/xml";

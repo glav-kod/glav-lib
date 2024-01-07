@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace GlavLib.App.Http;
 
-public class FromEnumObject<T> : IQueryArg
+public class FromEnumObject<T> : IEndpointArg
     where T : IEnumObject<T>
 {
     public required T Value { get; init; }

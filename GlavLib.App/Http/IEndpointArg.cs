@@ -1,6 +1,6 @@
 namespace GlavLib.App.Http;
 
-public interface IQueryArg
+public interface IEndpointArg
 {
     public object? GetArgumentValue();
 }

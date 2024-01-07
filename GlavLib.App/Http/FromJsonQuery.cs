@@ -9,7 +9,7 @@ public static class FromJsonQuery
     public static JsonSerializerOptions JsonOptions { get; set; } = GlavJsonSerializer.Options;
 }
 
-public class FromJsonQuery<T> : IQueryArg
+public class FromJsonQuery<T> : IEndpointArg
 {
     public required T Value { get; init; }
 

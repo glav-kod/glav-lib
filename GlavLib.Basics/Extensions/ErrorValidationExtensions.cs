@@ -9,9 +9,9 @@ public static class ErrorValidationExtensions
 {
     public static IRuleBuilderOptions<T, TProperty> WithError<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, Error error)
     {
-        return rule.WithErrorCode(error.Key)
-                   .WithState(_ => error.Args)
-                   .WithMessage(error.Message);
+        return rule.WithErrorCode(error.Code)
+                   .WithMessage(error.Message)
+                   .WithState(_ => error);
     }
 
     public static IRuleBuilderOptions<T, TProperty> MustBeValueObject<T, TValueObject, TProperty>(
@@ -30,9 +30,9 @@ public static class ErrorValidationExtensions
 
             context.AddFailure(new ValidationFailure
             {
-                ErrorCode    = error.Key,
-                CustomState  = error.Args,
-                ErrorMessage = error.Message
+                ErrorCode    = error.Code,
+                ErrorMessage = error.Message,
+                CustomState  = error
             });
         });
     }

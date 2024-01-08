@@ -24,15 +24,8 @@ public static class AutoValidationExtensions
     }
 }
 
-public sealed class AutoValidationEndpointFilter : IEndpointFilter
+public sealed class AutoValidationEndpointFilter(IServiceProvider serviceProvider) : IEndpointFilter
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public AutoValidationEndpointFilter(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context,
                                                 EndpointFilterDelegate next)
     {
@@ -53,7 +46,7 @@ public sealed class AutoValidationEndpointFilter : IEndpointFilter
 
             var instanceType = instanceToValidate.GetType();
 
-            if (instanceType.IsCustomType() && _serviceProvider.GetValidator(instanceType) is IValidator validator)
+            if (instanceType.IsCustomType() && serviceProvider.GetValidator(instanceType) is IValidator validator)
             {
                 var validationContext = new ValidationContext<object>(instanceToValidate);
 
@@ -61,7 +54,7 @@ public sealed class AutoValidationEndpointFilter : IEndpointFilter
                 if (validationResult.IsValid)
                     continue;
 
-                var resultFactory = _serviceProvider.GetService<IFluentValidationAutoValidationResultFactory>();
+                var resultFactory = serviceProvider.GetService<IFluentValidationAutoValidationResultFactory>();
                 if (resultFactory is null)
                     resultFactory = new FluentValidationAutoValidationDefaultResultFactory();
 

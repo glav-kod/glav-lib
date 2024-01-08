@@ -85,51 +85,64 @@ public sealed class CommandsFilter
     {
         httpContext.Response.Headers.AddErrorStatus();
 
+        var errorCode = error.Code;
+        
         var acceptLanguageHeaders = httpContext.Request.Headers.AcceptLanguage;
         if (acceptLanguageHeaders.Count == 0)
-            return ErrorResponse(parameterName, error.Message);
+            return ErrorResponse(parameterName, error.Message, errorCode);
 
         var serviceProvider = httpContext.RequestServices;
 
         var langContext = serviceProvider.GetService<LanguageContext>();
         if (langContext is null)
-            return ErrorResponse(parameterName, error.Message);
+            return ErrorResponse(parameterName, error.Message, errorCode);
 
         var acceptLanguageHeader = acceptLanguageHeaders.FirstOrDefault(h => h is not null);
         if (acceptLanguageHeader is null)
-            return ErrorResponse(parameterName, error.Message);
+            return ErrorResponse(parameterName, error.Message, errorCode);
 
         var languages = AcceptLanguageHeaderHelper.Parse(acceptLanguageHeader);
 
         if (!langContext.Messages.TryGetValue(error.Key, out var message))
-            return ErrorResponse(parameterName, error.Message);
+            return ErrorResponse(parameterName, error.Message, errorCode);
 
         var localizedMessage = message.Format(languages, error.Args) ?? error.Message;
 
-        return ErrorResponse(parameterName, localizedMessage);
+        return ErrorResponse(parameterName, localizedMessage, errorCode);
     }
 
     private static JsonHttpResult<ErrorResponse> ErrorResponse(
             string? parameterName,
-            string errorMessage
+            string errorMessage,
+            string? errorCode
         )
     {
         if (parameterName is null)
         {
             return TypedResults.Json(new ErrorResponse
             {
-                Message         = errorMessage,
-                ParameterErrors = null
+                Code    = errorCode,
+                Message = errorMessage,
             });
         }
 
-        return TypedResults.Json(new ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Message = null,
-            ParameterErrors = new Dictionary<string, string>
+            ParameterMessages = new Dictionary<string, string>
             {
                 [parameterName] = errorMessage
             }
-        });
+        };
+
+        if (errorCode is not null)
+        {
+            errorResponse.ParameterCodes = new Dictionary<string, string>
+            {
+                [parameterName] = errorCode
+            };
+        }
+
+        return TypedResults.Json(errorResponse);
     }
 }

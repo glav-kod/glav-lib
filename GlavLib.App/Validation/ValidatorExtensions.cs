@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using FluentValidation.Results;
+using GlavLib.Abstractions.Validation;
 using GlavLib.Basics.MultiLang;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,23 +11,35 @@ public static class ValidatorExtensions
 {
     public static ErrorResponse ToErrorResponse(this ValidationResult validationResult, HttpContext httpContext)
     {
-        if (!TryLocaliseParameterErrors(httpContext, validationResult, out var parameterErrors))
+        if (!TryLocalizeParameterErrors(httpContext, validationResult, out var parameterMessages))
         {
-            parameterErrors = new Dictionary<string, string>();
+            parameterMessages = new Dictionary<string, string>();
 
             foreach (var error in validationResult.Errors)
-                parameterErrors[error.PropertyName] = error.ErrorMessage;
+                parameterMessages[error.PropertyName] = error.ErrorMessage;
         }
 
-
-        return new ErrorResponse
+        var errorResponse = new ErrorResponse
         {
-            Message         = null,
-            ParameterErrors = parameterErrors
+            Message           = null,
+            ParameterMessages = parameterMessages
         };
+
+        var parameterCodes = new Dictionary<string, string>();
+
+        foreach (var error in validationResult.Errors)
+        {
+            if (error.ErrorCode is not null)
+                parameterCodes[error.PropertyName] = error.ErrorCode;
+        }
+
+        if (parameterCodes.Count > 0)
+            errorResponse.ParameterCodes = parameterCodes;
+
+        return errorResponse;
     }
 
-    private static bool TryLocaliseParameterErrors(
+    private static bool TryLocalizeParameterErrors(
             HttpContext httpContext,
             ValidationResult validationResult,
             [MaybeNullWhen(false)] out Dictionary<string, string> parameterErrors
@@ -58,18 +71,18 @@ public static class ValidatorExtensions
 
         var languages = AcceptLanguageHeaderHelper.Parse(acceptLanguageHeader);
 
-        foreach (var error in validationResult.Errors)
+        foreach (var validationFailure in validationResult.Errors)
         {
-            if (!langContext.Messages.TryGetValue(error.ErrorCode, out var message))
+            var error = (Error)validationFailure.CustomState;
+
+            if (!langContext.Messages.TryGetValue(error.Key, out var message))
             {
-                parameterErrors[error.PropertyName] = error.ErrorMessage;
+                parameterErrors[validationFailure.PropertyName] = validationFailure.ErrorMessage;
                 continue;
             }
 
-            var args = (IDictionary<string, string>)error.CustomState;
-
-            var str = message.Format(languages, args);
-            parameterErrors[error.PropertyName] = str ?? error.ErrorMessage;
+            var str = message.Format(languages, error.Args);
+            parameterErrors[validationFailure.PropertyName] = str ?? validationFailure.ErrorMessage;
         }
 
         return true;

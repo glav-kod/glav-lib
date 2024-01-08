@@ -1,21 +1,19 @@
 ﻿namespace GlavLib.Abstractions.Validation;
 
-public struct Error
+public struct Error(
+        string key,
+        string? code,
+        string message,
+        IDictionary<string, string>? args = default
+    )
 {
-    public string Key { get; }
+    public string Key { get; } = key;
 
-    public string Message { get; }
+    public string? Code { get; } = code;
 
-    public IDictionary<string, string>? Args { get; }
+    public string Message { get; } = message;
 
-    public Error(string key, 
-                 string message, 
-                 IDictionary<string, string>? args = default)
-    {
-        Key = key;
-        Message = message;
-        Args = args;
-    }
+    public IDictionary<string, string>? Args { get; } = args;
 
     public override string ToString()
     {

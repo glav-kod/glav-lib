@@ -30,8 +30,10 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(translations, GenerateCode);
     }
 
-    private static void GenerateCode(SourceProductionContext context,
-                                     ImmutableArray<string>  errorYamls)
+    private static void GenerateCode(
+            SourceProductionContext context,
+            ImmutableArray<string> errorYamls
+        )
     {
         foreach (var errorYamlText in errorYamls)
         {
@@ -55,19 +57,30 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
         foreach (var kvp in errorsBundle.Errors)
         {
             var errorName = kvp.Key;
+            var errorCode = "null";
             var message   = kvp.Value;
+
+            var isErrorCode = errorName.EndsWith("!");
+            if (isErrorCode)
+            {
+                errorName = errorName.Substring(0, errorName.Length - 1);
+                errorCode = $"\"{errorName}\"";
+            }
 
             var messageTemplate = ErrorMessageTemplate.Parse(message);
 
             if (messageTemplate.Arguments.Count == 0)
             {
                 var field =
-                    $"public static readonly Error {errorName} = new (\"{errorKeyPrefix}.{errorName}\", \"{messageTemplate.InterpolatedMessage}\");";
+                    $"public static readonly Error {errorName} = new (\"{errorKeyPrefix}.{errorName}\", {errorCode}, \"{messageTemplate.InterpolatedMessage}\");";
                 fields.Add(ParseMemberDeclaration(field)!);
             }
             else
             {
-                var messageFunction = BuildMessageFunction(errorKeyPrefix, errorName, messageTemplate);
+                var messageFunction = BuildMessageFunction(errorKeyPrefix: errorKeyPrefix,
+                                                           errorName: errorName,
+                                                           errorCode: errorCode,
+                                                           messageTemplate: messageTemplate);
 
                 methods.Add(messageFunction);
             }
@@ -106,9 +119,12 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
                               .ToFullString();
     }
 
-    private static MemberDeclarationSyntax BuildMessageFunction(string               errorKeyPrefix,
-                                                                string               errorName,
-                                                                ErrorMessageTemplate messageTemplate)
+    private static MemberDeclarationSyntax BuildMessageFunction(
+            string errorKeyPrefix,
+            string errorName,
+            string errorCode,
+            ErrorMessageTemplate messageTemplate
+        )
     {
         var methodArgsSb     = new StringBuilder();
         var dictionaryArgsSb = new StringBuilder();
@@ -154,7 +170,7 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
                            var args = new Dictionary<string, string>();
                        {{dictionaryArgsSb}}
                            FormattableString message = $"{{messageTemplate.InterpolatedMessage}}";
-                           return new Error("{{errorKeyPrefix}}.{{errorName}}", message.ToString(CultureInfo.InvariantCulture), args);
+                           return new Error("{{errorKeyPrefix}}.{{errorName}}", {{errorCode}}, message.ToString(CultureInfo.InvariantCulture), args);
                        }
                        """;
 

@@ -56,15 +56,18 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
 
         foreach (var kvp in errorsBundle.Errors)
         {
-            var errorName = kvp.Key;
-            var errorCode = "null";
-            var message   = kvp.Value;
+            var    errorName = kvp.Key;
+            var    errorCode = "null";
+            string message;
 
-            var isErrorCode = errorName.EndsWith("!");
-            if (isErrorCode)
+            if (kvp.Value is Dictionary<object, object> errorWithCode)
             {
-                errorName = errorName.Substring(0, errorName.Length - 1);
-                errorCode = $"\"{errorName}\"";
+                message   = errorWithCode["Message"].ToString();
+                errorCode = $"\"{errorWithCode["Code"]}\"";
+            }
+            else
+            {
+                message = kvp.Value.ToString();
             }
 
             var messageTemplate = ErrorMessageTemplate.Parse(message);
@@ -185,6 +188,6 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
 
         public string ClassName { get; set; } = null!;
 
-        public IDictionary<string, string> Errors { get; set; } = null!;
+        public IDictionary<string, object> Errors { get; set; } = null!;
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace GlavLib.SourceGenerators.Tests;
 
-public class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
+public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
 {
     [Fact]
     public void It_should_generate_error_message()
@@ -39,7 +39,7 @@ public class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
     }
 
     [Fact]
-    public void It_should_generate_error_message_with_code()
+    public void It_should_generate_error_message_with_custom_code()
     {
         //language=yaml
         const string source = """
@@ -47,7 +47,9 @@ public class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                               ClassName: SystemErrors
 
                               Errors:
-                                WrongFormat!: Неверный формат
+                                WrongFormat:
+                                  Code: PaymentDenied
+                                  Message: Неверный формат
                               """;
 
         var result = Run("system.errors.yaml", source);
@@ -63,7 +65,7 @@ public class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                 {
                                     public static class SystemErrors
                                     {
-                                        public static readonly Error WrongFormat = new("GlavKod.Tests.SystemErrors.WrongFormat", "WrongFormat", "Неверный формат");
+                                        public static readonly Error WrongFormat = new("GlavKod.Tests.SystemErrors.WrongFormat", "PaymentDenied", "Неверный формат");
                                     }
                                 }
                                 """;
@@ -119,7 +121,9 @@ public class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                               ClassName: SystemErrors
 
                               Errors:
-                                WrongSum!: "Неверная сумма: {sum:decimal}"
+                                WrongSum:
+                                  Code: WrongSum
+                                  Message: "Неверная сумма: {sum:decimal}"
                               """;
 
         var result = Run("system.errors.yaml", source);

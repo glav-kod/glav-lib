@@ -9,9 +9,13 @@ public static class ErrorValidationExtensions
 {
     public static IRuleBuilderOptions<T, TProperty> WithError<T, TProperty>(this IRuleBuilderOptions<T, TProperty> rule, Error error)
     {
-        return rule.WithErrorCode(error.Code)
-                   .WithMessage(error.Message)
-                   .WithState(_ => error);
+        rule.WithMessage(error.Message)
+            .WithState(_ => error);
+
+        if (error.Code is not null)
+            rule.WithErrorCode(error.Code);
+
+        return rule;
     }
 
     public static IRuleBuilderOptions<T, TProperty> MustBeValueObject<T, TValueObject, TProperty>(

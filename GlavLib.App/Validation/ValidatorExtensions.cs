@@ -27,10 +27,13 @@ public static class ValidatorExtensions
 
         var parameterCodes = new Dictionary<string, string>();
 
-        foreach (var error in validationResult.Errors)
+        foreach (var validationFailure in validationResult.Errors)
         {
-            if (error.ErrorCode is not null)
-                parameterCodes[error.PropertyName] = error.ErrorCode;
+            if (validationFailure.CustomState is not Error error)
+                continue;
+
+            if (error.Code is not null)
+                parameterCodes[validationFailure.PropertyName] = error.Code;
         }
 
         if (parameterCodes.Count > 0)
@@ -73,16 +76,21 @@ public static class ValidatorExtensions
 
         foreach (var validationFailure in validationResult.Errors)
         {
-            var error = (Error)validationFailure.CustomState;
+            if (validationFailure.CustomState is Error error)
+            {
+                if (!langContext.Messages.TryGetValue(error.Key, out var message))
+                {
+                    parameterErrors[validationFailure.PropertyName] = validationFailure.ErrorMessage;
+                    continue;
+                }
 
-            if (!langContext.Messages.TryGetValue(error.Key, out var message))
+                var str = message.Format(languages, error.Args);
+                parameterErrors[validationFailure.PropertyName] = str ?? validationFailure.ErrorMessage;
+            }
+            else
             {
                 parameterErrors[validationFailure.PropertyName] = validationFailure.ErrorMessage;
-                continue;
             }
-
-            var str = message.Format(languages, error.Args);
-            parameterErrors[validationFailure.PropertyName] = str ?? validationFailure.ErrorMessage;
         }
 
         return true;

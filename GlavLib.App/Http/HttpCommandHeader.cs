@@ -1,4 +1,5 @@
-﻿using GlavLib.Abstractions.DataTypes;
+﻿using System.Net;
+using GlavLib.Abstractions.DataTypes;
 using Microsoft.AspNetCore.Http;
 
 namespace GlavLib.App.Http;
@@ -23,7 +24,7 @@ public static class HttpCommandHeaderExtensions
 
     public static IHeaderDictionary SetXDebug(this IHeaderDictionary headerDictionary, string debugMessage)
     {
-        headerDictionary.Append(HttpCommandHeader.XDebug, debugMessage);
+        headerDictionary.Append(HttpCommandHeader.XDebug, WebUtility.UrlEncode(debugMessage));
         return headerDictionary;
     }
 }

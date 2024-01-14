@@ -23,7 +23,7 @@ public static class NhExtensions
 
     public static async Task SaveAndFlushAsync(this ISession session, object entity, CancellationToken cancellationToken)
     {
-        await session.SaveAsync(entity, cancellationToken);
+        await session.SaveOrUpdateAsync(entity, cancellationToken);
         await session.FlushAsync(cancellationToken);
     }
 }

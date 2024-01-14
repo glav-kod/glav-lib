@@ -2,6 +2,7 @@
 using GlavLib.Abstractions.DataTypes;
 using GlavLib.Db.NhUserTypes;
 using JetBrains.Annotations;
+using NHibernate;
 
 namespace GlavLib.Db.Extensions;
 
@@ -18,5 +19,11 @@ public static class NhExtensions
         where TEnumObject : class, IEnumObject<TEnumObject>
     {
         return identityPart.CustomType<EnumObjectUserType<TEnumObject>>();
+    }
+
+    public static async Task SaveAndFlushAsync(this ISession session, object entity, CancellationToken cancellationToken)
+    {
+        await session.SaveAsync(entity, cancellationToken);
+        await session.FlushAsync(cancellationToken);
     }
 }

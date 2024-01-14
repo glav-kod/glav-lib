@@ -51,7 +51,7 @@ public class GetUser
         var user = await connection.QuerySingleOrDefaultAsync<UserDTO>(sql, parameters);
 
         if (user is null)
-            return ("p1", ApiErrors.UserIsNotFound(request.Value.UserId));
+            return ApiErrors.UserIsNotFound(request.Value.UserId);
 
         return Ok(user);
     }

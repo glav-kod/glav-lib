@@ -44,9 +44,12 @@ public sealed class CommandsFilter
             if (result is ICommandResult commandResult)
             {
                 if (commandResult.IsFailure)
-                    return ErrorResponse(httpContext, commandResult.ParameterName, commandResult.Error);
+                    return ErrorResponse(httpContext,
+                                         commandResult.ParameterName,
+                                         commandResult.Error,
+                                         commandResult.XDebug);
 
-                httpContext.Response.Headers.AddOkStatus();
+                httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
                 result = commandResult.Value;
             }
@@ -54,9 +57,12 @@ public sealed class CommandsFilter
             if (result is CommandUnitResult commandUnitResult)
             {
                 if (commandUnitResult.IsFailure)
-                    return ErrorResponse(httpContext, commandUnitResult.ParameterName, commandUnitResult.Error);
+                    return ErrorResponse(httpContext,
+                                         commandUnitResult.ParameterName,
+                                         commandUnitResult.Error,
+                                         commandUnitResult.XDebug);
 
-                httpContext.Response.Headers.AddOkStatus();
+                httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
                 result = Results.Ok();
             }
@@ -80,13 +86,18 @@ public sealed class CommandsFilter
     private static JsonHttpResult<ErrorResponse> ErrorResponse(
             HttpContext httpContext,
             string? parameterName,
-            Error error
+            Error error,
+            string? debugMessage
         )
     {
-        httpContext.Response.Headers.AddErrorStatus();
+        var responseHeaders = httpContext.Response.Headers;
+        responseHeaders.SetXStatus(XStatus.Error);
+
+        if (debugMessage is not null)
+            responseHeaders.SetXDebug(debugMessage);
 
         var errorCode = error.Code;
-        
+
         var acceptLanguageHeaders = httpContext.Request.Headers.AcceptLanguage;
         if (acceptLanguageHeaders.Count == 0)
             return ErrorResponse(parameterName, error.Message, errorCode);

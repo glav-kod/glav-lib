@@ -11,7 +11,7 @@ public sealed class ErrorResponseFactory : IFluentValidationAutoValidationResult
     {
         var errorResponse = validationResult.ToErrorResponse(context.HttpContext);
 
-        context.HttpContext.Response.Headers.AddErrorStatus();
+        context.HttpContext.Response.Headers.SetXStatus(XStatus.OK);
 
         return Results.Ok(errorResponse);
     }

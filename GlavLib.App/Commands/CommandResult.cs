@@ -12,6 +12,8 @@ public interface ICommandResult
     public Error Error { get; }
 
     public string? ParameterName { get; }
+
+    public string? XDebug { get; }
 }
 
 public class CommandResult<TResult> : ICommandResult
@@ -19,25 +21,28 @@ public class CommandResult<TResult> : ICommandResult
 {
     public bool IsFailure { get; }
 
-    private IResult? _value;
-    public  IResult  Value => _value ?? throw new InvalidOperationException("Cannot get value of error result");
+    private readonly IResult? _value;
+    public IResult Value => _value ?? throw new InvalidOperationException("Cannot get value of error result");
 
     private readonly Error? _error;
-    public           Error  Error => _error ?? throw new InvalidOperationException("Cannot get error of success result");
+    public Error Error => _error ?? throw new InvalidOperationException("Cannot get error of success result");
 
     public string? ParameterName { get; }
 
-    private CommandResult(string? parameterName, Error error)
+    public string? XDebug { get; }
+
+    private CommandResult(string? parameterName, Error error, string? xDebug)
     {
-        IsFailure = true;
+        IsFailure     = true;
         ParameterName = parameterName;
-        _error = error;
+        _error        = error;
+        XDebug        = xDebug;
     }
 
     private CommandResult(IResult value)
     {
         IsFailure = false;
-        _value = value;
+        _value    = value;
     }
 
     public static implicit operator CommandResult<TResult>(TResult result)
@@ -48,12 +53,21 @@ public class CommandResult<TResult> : ICommandResult
     public static implicit operator CommandResult<TResult>(Error error)
     {
         return new CommandResult<TResult>(parameterName: null,
-                                          error: error);
+                                          error: error,
+                                          xDebug: null);
     }
 
-    public static implicit operator CommandResult<TResult>((string parameterName, Error error) result)
+    public static implicit operator CommandResult<TResult>((string param, Error error) result)
     {
-        return new CommandResult<TResult>(parameterName: result.parameterName,
-                                          error: result.error);
+        return new CommandResult<TResult>(parameterName: result.param,
+                                          error: result.error,
+                                          xDebug: null);
+    }
+
+    public static implicit operator CommandResult<TResult>((Error error, string xDebug) result)
+    {
+        return new CommandResult<TResult>(parameterName: null,
+                                          error: result.error,
+                                          xDebug: result.xDebug);
     }
 }

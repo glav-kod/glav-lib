@@ -2,5 +2,7 @@ Namespace: GlavLib.Sandbox.API
 ClassName: ApiErrors
 
 Errors:
-  UserIsNotFound: Пользователь#{userId:long} не найден
+  UserIsNotFound:
+    Code: UNF
+    Message: Пользователь#{userId:long} не найден
   InvalidOperation: Невозможно выполнить операцию

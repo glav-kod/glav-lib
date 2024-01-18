@@ -6,6 +6,7 @@ using GlavLib.Basics.Extensions;
 using GlavLib.Db;
 using GlavLib.Errors;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace GlavLib.Sandbox.API.Commands;
 
@@ -51,7 +52,7 @@ public class GetUser
         var user = await connection.QuerySingleOrDefaultAsync<UserDTO>(sql, parameters);
 
         if (user is null)
-            return ApiErrors.UserIsNotFound(request.Value.UserId);
+            return (ApiErrors.UserIsNotFound(request.Value.UserId), xDebug: $"User#{request.Value.UserId} is not found");
 
         return Ok(user);
     }

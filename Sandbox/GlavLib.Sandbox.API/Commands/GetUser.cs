@@ -6,7 +6,6 @@ using GlavLib.Basics.Extensions;
 using GlavLib.Db;
 using GlavLib.Errors;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace GlavLib.Sandbox.API.Commands;
 

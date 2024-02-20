@@ -7,12 +7,12 @@ public readonly struct UnitResult<TError>
     public bool IsSuccess => !IsFailure;
 
     private readonly TError? _error;
-    public           TError  Error => _error ?? throw new InvalidOperationException("Cannot access error in success result");
+    public TError Error => _error ?? throw new InvalidOperationException("Cannot access error in success result");
 
     internal UnitResult(bool isFailure, TError? error)
     {
         IsFailure = isFailure;
-        _error = error;
+        _error    = error;
     }
 
     public static implicit operator UnitResult<TError>(TError error)

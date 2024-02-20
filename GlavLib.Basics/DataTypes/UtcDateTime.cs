@@ -1,7 +1,4 @@
-﻿using System.Globalization;
-using GlavLib.Abstractions.Results;
-using GlavLib.Abstractions.Validation;
-using GlavLib.Errors;
+﻿using JetBrains.Annotations;
 
 namespace GlavLib.Basics.DataTypes;
 
@@ -19,6 +16,7 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
         return Value.ToString(Format);
     }
 
+    [PublicAPI]
     public Date ToDate(TimeZoneInfo timeZone)
     {
         var tzNow = TimeZoneInfo.ConvertTimeFromUtc(Value, timeZone);
@@ -40,16 +38,6 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
     public static explicit operator string(UtcDateTime value)
     {
         return value.Value.ToString(Format);
-    }
-
-    public static explicit operator UtcDateTime(string value)
-    {
-        var result = FromString(value);
-
-        if (result.IsFailure)
-            throw new InvalidOperationException(result.Error.Message);
-
-        return result.Value;
     }
 
     public static bool operator >(UtcDateTime x, UtcDateTime y)
@@ -82,27 +70,32 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
         return new UtcDateTime(utcDateTime.Value - timeSpan);
     }
 
-    public static Result<UtcDateTime, Error> FromString(string value)
-    {
-        if (!DateTime.TryParse(value,
-                               CultureInfo.InvariantCulture,
-                               DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
-                               out var dateTime))
-        {
-            return BasicErrors.WrongFormat;
-        }
-
-        return new UtcDateTime(dateTime);
-    }
-
     public static UtcDateTime FromDateTime(DateTime dateTime)
     {
         if (dateTime.Kind == DateTimeKind.Unspecified)
+        {
             throw new InvalidOperationException(
-                $"Wrong DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff}, DateTime.Kind is unspecified");
+                    $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
+                    "DateTime.Kind is not specified"
+                );
+        }
 
-        var universalTime = dateTime.ToUniversalTime();
+        var utcDateTime = dateTime.ToUniversalTime();
 
-        return new UtcDateTime(universalTime);
+        return new UtcDateTime(utcDateTime);
+    }
+
+    public static UtcDateTime FromDateTime(DateTime dateTime, TimeZoneInfo timeZone)
+    {
+        if (dateTime.Kind != DateTimeKind.Unspecified)
+        {
+            throw new InvalidOperationException(
+                    $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
+                    $"DateTime.Kind is {dateTime.Kind} (must be unspecified)"
+                );
+        }
+
+        var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZone);
+        return new UtcDateTime(utcDateTime);
     }
 }

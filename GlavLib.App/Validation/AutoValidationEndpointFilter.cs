@@ -26,8 +26,10 @@ public static class AutoValidationExtensions
 
 public sealed class AutoValidationEndpointFilter(IServiceProvider serviceProvider) : IEndpointFilter
 {
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context,
-                                                EndpointFilterDelegate next)
+    public async ValueTask<object?> InvokeAsync(
+            EndpointFilterInvocationContext context,
+            EndpointFilterDelegate next
+        )
     {
         for (var i = 0; i < context.Arguments.Count; i++)
         {

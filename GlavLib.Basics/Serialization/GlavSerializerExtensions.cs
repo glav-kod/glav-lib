@@ -26,6 +26,7 @@ public static class GlavSerializerExtensions
         options.Converters.Add(new UtcDateTimeJsonConverter());
         options.Converters.Add(new DateJsonConverter());
         options.Converters.Add(new EnumObjectJsonConverter());
+        options.Converters.Add(new TimeZoneInfoJsonConverter());
 
         return options;
     }

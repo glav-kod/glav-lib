@@ -8,7 +8,7 @@ public abstract class EnumObject
 
     protected EnumObject(string key, string displayName)
     {
-        Key = key;
+        Key         = key;
         DisplayName = displayName;
     }
 
@@ -40,6 +40,17 @@ public abstract class EnumObject
     public override int GetHashCode()
     {
         return Key.GetHashCode();
+    }
+
+    public static bool Equals(EnumObject? a, EnumObject? b)
+    {
+        if (a is null && b is null)
+            return true;
+
+        if (a is null || b is null)
+            return false;
+
+        return a.Equals(b);
     }
 
     public static bool operator ==(EnumObject? left, EnumObject? right)

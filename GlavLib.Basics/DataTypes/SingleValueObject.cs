@@ -49,7 +49,7 @@ public abstract class SingleValueObject<TValue>
         return a.Equals(b);
     }
 
-    public static bool operator !=(SingleValueObject<TValue> a, SingleValueObject<TValue> b)
+    public static bool operator !=(SingleValueObject<TValue>? a, SingleValueObject<TValue>? b)
     {
         return !(a == b);
     }

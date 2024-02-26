@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using GlavLib.Basics.DataTypes;
 
@@ -11,9 +10,11 @@ public sealed class UtcDateTimeJsonConverter : JsonConverter<UtcDateTime>
     {
         var value = reader.GetString()!;
 
-        var dateTime = DateTime.ParseExact("yyyy-MM-ddTHH:mm:ssK", value, CultureInfo.InvariantCulture);
+        var result = UtcDateTime.Create(value);
+        if (result.IsFailure)
+            throw new InvalidOperationException($"Cannot convert {value} to UtcDateTime, " + result.Error.Message);
 
-        return UtcDateTime.FromDateTime(dateTime);
+        return result.Value;
     }
 
     public override void Write(Utf8JsonWriter writer, UtcDateTime value, JsonSerializerOptions options)

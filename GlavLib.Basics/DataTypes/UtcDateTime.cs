@@ -1,4 +1,8 @@
-﻿using JetBrains.Annotations;
+﻿using System.Globalization;
+using GlavLib.Abstractions.Results;
+using GlavLib.Abstractions.Validation;
+using GlavLib.Errors;
+using JetBrains.Annotations;
 
 namespace GlavLib.Basics.DataTypes;
 
@@ -97,5 +101,19 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
 
         var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZone);
         return new UtcDateTime(utcDateTime);
+    }
+
+    public static Result<UtcDateTime, Error> Create(string value)
+    {
+        if (!DateTime.TryParseExact(s: "yyyy-MM-ddTHH:mm:ssK",
+                                    format: value,
+                                    provider: CultureInfo.InvariantCulture,
+                                    style: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
+                                    result: out var dateTime))
+        {
+            return BasicErrors.WrongFormat;
+        }
+
+        return new UtcDateTime(dateTime);
     }
 }

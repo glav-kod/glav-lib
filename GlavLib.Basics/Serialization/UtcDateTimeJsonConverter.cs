@@ -12,7 +12,7 @@ public sealed class UtcDateTimeJsonConverter : JsonConverter<UtcDateTime>
 
         var result = UtcDateTime.Create(value);
         if (result.IsFailure)
-            throw new InvalidOperationException($"Cannot convert {value} to UtcDateTime, " + result.Error.Message);
+            throw new InvalidOperationException($"Cannot convert {value} to {nameof(UtcDateTime)}, " + result.Error.Message);
 
         return result.Value;
     }

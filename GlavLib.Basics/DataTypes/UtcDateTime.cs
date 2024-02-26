@@ -105,8 +105,8 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
 
     public static Result<UtcDateTime, Error> Create(string value)
     {
-        if (!DateTime.TryParseExact(s: "yyyy-MM-ddTHH:mm:ssK",
-                                    format: value,
+        if (!DateTime.TryParseExact(s: value,
+                                    format: "yyyy-MM-ddTHH:mm:ssZ",
                                     provider: CultureInfo.InvariantCulture,
                                     style: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
                                     result: out var dateTime))

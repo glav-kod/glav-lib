@@ -3,7 +3,7 @@
 public abstract class SingleValueObject<TValue>
 {
     public TValue Value { get; }
-    
+
     protected SingleValueObject(TValue value)
     {
         Value = value;
@@ -25,7 +25,7 @@ public abstract class SingleValueObject<TValue>
         if (ReferenceEquals(this, obj))
             return true;
 
-        return Equals((SingleValueObject<TValue>) obj);
+        return Equals((SingleValueObject<TValue>)obj);
     }
 
     public override int GetHashCode()
@@ -51,6 +51,12 @@ public abstract class SingleValueObject<TValue>
 
     public static bool operator !=(SingleValueObject<TValue>? a, SingleValueObject<TValue>? b)
     {
+        if (a is null && b is null)
+            return true;
+
+        if (a is null || b is null)
+            return false;
+
         return !(a == b);
     }
 

@@ -78,6 +78,8 @@ public sealed class CommandsFilter
                 dbTransaction.Commit();
             }
 
+            if (result is FileContentHttpResult)
+                httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
             return result;
         };

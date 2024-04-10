@@ -2,47 +2,43 @@
 
 internal interface IOptional
 {
-    public bool HasValue { get; }
+    public bool IsUndefined { get; }
 }
 
-public readonly struct Optional<T> : IOptional
+public struct Optional<T> : IOptional
 {
-    public static readonly Optional<T> Undefined = new()
+    public static readonly Optional<T> Undefined = default;
+
+    private bool _hasValue;
+
+    public T Value { get; private init; }
+
+    public bool IsUndefined => !_hasValue;
+
+    public T GetValue(T undefinedValue)
     {
-        Value    = default,
-        HasValue = false
-    };
-
-    public static readonly Optional<T> Null = new()
-    {
-        Value    = default,
-        HasValue = true
-    };
-
-    public T? Value { get; private init; }
-
-    public bool HasValue { get; private init; }
-
-    public static implicit operator Optional<T>(T? value)
-    {
-        if (value is null)
-            return Null;
-
-        return new Optional<T>
-        {
-            HasValue = true,
-            Value    = value
-        };
+        return IsUndefined 
+            ? undefinedValue 
+            : Value;
     }
 
     public override string ToString()
     {
-        if (!HasValue)
+        if (IsUndefined)
             return "<undefined>";
 
         if (Value is null)
             return "<null>";
 
         return Value.ToString()!;
+    }
+
+    public static implicit operator Optional<T>(T value)
+    {
+        return new Optional<T>
+        {
+            _hasValue = true,
+            Value     = value
+        };
     }
 }

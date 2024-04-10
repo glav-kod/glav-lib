@@ -60,7 +60,7 @@ public static class GlavSerializerExtensions
                     return false;
                 
                 var opt = (IOptional)propValue;
-                return opt.HasValue;
+                return !opt.IsUndefined;
             };
         }
     }

@@ -33,12 +33,12 @@ public sealed class SerializationOptionalPropertyTests
 
         using (new AssertionScope())
         {
-            foo.A.HasValue.Should().BeFalse();
+            foo.A.IsUndefined.Should().BeTrue();
 
-            foo.B.HasValue.Should().BeTrue();
+            foo.B.IsUndefined.Should().BeFalse();
             foo.B.Value.Should().BeNull();
 
-            foo.C.HasValue.Should().BeTrue();
+            foo.C.IsUndefined.Should().BeFalse();
             foo.C.Value.Should().Be(123);
         }
     }
@@ -49,7 +49,7 @@ public sealed class SerializationOptionalPropertyTests
         var foo = new Foo
         {
             A = Optional<int>.Undefined,
-            B = Optional<int?>.Null,
+            B = null,
             C = 123
         };
 

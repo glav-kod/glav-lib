@@ -26,7 +26,7 @@ public sealed class OptionalTests
     }
 
     [Fact]
-    public void It_should_not_leave_value_if_undefined()
+    public void It_should_leave_value_if_undefined()
     {
         var oValue = Optional<long?>.Undefined;
 
@@ -36,12 +36,12 @@ public sealed class OptionalTests
     }
 
     [Fact]
-    public void It_should_not_leave_null_if_undefined()
+    public void It_should_leave_null_if_undefined()
     {
         var oValue = Optional<long?>.Undefined;
 
         var result = oValue.GetValue(null);
 
-        result.Should().Be(1);
+        result.Should().Be(null);
     }
 }

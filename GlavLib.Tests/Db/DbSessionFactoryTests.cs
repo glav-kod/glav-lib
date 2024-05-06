@@ -51,7 +51,7 @@ public sealed class DbSessionFactoryTests : IDisposable
     {
         for (var i = 0; i < 200; i++)
         {
-            var dbSession = _dbSessionFactory.OpenSession(ConnectionStringNames.Master);
+            var dbSession = _dbSessionFactory.OpenStatefulSession(ConnectionStringNames.Master);
             dbSession.BeginTransaction();
             dbSession.Commit();
             
@@ -66,7 +66,7 @@ public sealed class DbSessionFactoryTests : IDisposable
     [Fact]
     public void DbSession_should_open_transaction_many_times()
     {
-        using var dbSession = _dbSessionFactory.OpenSession(ConnectionStringNames.Master);
+        using var dbSession = _dbSessionFactory.OpenStatefulSession(ConnectionStringNames.Master);
         
         dbSession.BeginTransaction();
         dbSession.Commit();

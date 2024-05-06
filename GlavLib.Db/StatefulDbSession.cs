@@ -6,20 +6,24 @@ using NHibernate;
 namespace GlavLib.Db;
 
 [PublicAPI]
-public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
+public sealed class StatefulDbSession(ISession nhSession) : DbSession
 {
-    public static StatelessDbSession Current
+    public static StatefulDbSession Current
     {
         get
         {
-            if (CurrentSession.Value is not StatelessDbSession session)
-                throw new InvalidOperationException("No current StatelessDbSession");
+            if (CurrentSession.Value is not StatefulDbSession session)
+                throw new InvalidOperationException("No current StatefulDbSession");
 
             return session;
         }
     }
 
-    public IStatelessSession NhSession { get; } = nhSession;
+    public static IDbConnection CurrentConnection => Current.Connection;
+
+    public static ISession CurrentNhSession => Current.NhSession;
+
+    public ISession NhSession { get; } = nhSession;
 
     public override DbConnection Connection => NhSession.Connection;
 
@@ -29,7 +33,7 @@ public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
     private IDbTransaction? _transaction;
     private bool _isSessionBound;
 
-    public StatelessDbSession Bind()
+    public StatefulDbSession Bind()
     {
         if (CurrentSession.Value is not null)
             throw new InvalidOperationException("Session is already bound. Probably you forgot close prior session");
@@ -40,7 +44,7 @@ public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
         return this;
     }
 
-    public override StatelessDbSession BeginTransaction()
+    public override StatefulDbSession BeginTransaction()
     {
         if (_transaction is not null)
             throw new InvalidOperationException("Cannot begin transaction, there is already opened transaction");
@@ -60,10 +64,26 @@ public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
         if (_nhTransaction is null)
             throw new InvalidOperationException("Cannot commit, no opened transaction");
 
+        NhSession.Flush();
         _nhTransaction.Commit();
 
         _nhTransaction = null;
         _transaction   = null;
+    }
+
+    public override void Dispose()
+    {
+        _nhTransaction?.Rollback();
+        NhSession.Connection.Dispose();
+        NhSession.Dispose();
+
+        if (!_isSessionBound) 
+            return;
+        
+        if (CurrentSession.Value is null)
+            throw new InvalidOperationException("Session was not bound. Probably you have already closed it");
+
+        CurrentSession.Value = null;
     }
 
     internal override void RollbackIfActive()
@@ -77,18 +97,16 @@ public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
         _transaction   = null;
     }
 
-    public override void Dispose()
+    public void Deconstruct(out ISession nhSession, out DbConnection dbConnection)
     {
-        _nhTransaction?.Rollback();
-        NhSession.Connection.Dispose();
-        NhSession.Dispose();
+        nhSession    = NhSession;
+        dbConnection = Connection;
+    }
 
-        if (!_isSessionBound)
-            return;
-
-        if (CurrentSession.Value is null)
-            throw new InvalidOperationException("Session was not bound. Probably you have already closed it");
-
-        CurrentSession.Value = null;
+    public void Deconstruct(out ISession nhSession, out DbConnection dbConnection, out IDbTransaction dbTransaction)
+    {
+        nhSession     = NhSession;
+        dbConnection  = Connection;
+        dbTransaction = Transaction;
     }
 }

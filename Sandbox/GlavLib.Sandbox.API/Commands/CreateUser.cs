@@ -37,7 +37,7 @@ public class CreateUser
             CancellationToken cancellationToken
         )
     {
-        var nhSession = DbSession.CurrentNhSession;
+        var nhSession = StatefulDbSession.CurrentNhSession;
 
         using var dbTransaction = new DbTransaction();
 

@@ -34,7 +34,7 @@ public class GetUser
     public static async Task<CommandResult<Ok<UserDTO>>> ExecuteAsync(FromJsonQuery<GetUserRequest> request,
                                                                       CancellationToken             cancellationToken)
     {
-        var connection = DbSession.CurrentConnection;
+        var connection = StatefulDbSession.CurrentConnection;
 
         const string sql = """
                            select t.id,

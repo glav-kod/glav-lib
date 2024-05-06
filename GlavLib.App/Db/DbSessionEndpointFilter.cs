@@ -33,7 +33,7 @@ public static class DbSessionEndpointFilter
 
             var dbSessionFactory = serviceProvider.GetRequiredService<DbSessionFactory>();
 
-            using (dbSessionFactory.OpenSession(connectionStringName).Bind())
+            using (dbSessionFactory.OpenStatefulSession(connectionStringName).Bind())
             {
                 return await next(context);
             }

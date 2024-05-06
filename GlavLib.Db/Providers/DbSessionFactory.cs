@@ -9,7 +9,7 @@ public sealed class DbSessionFactory(
         NpgsqlDataSourceProvider npgsqlDataSourceProvider
     )
 {
-    public DbSession OpenSession(string connectionStringName)
+    public StatefulDbSession OpenStatefulSession(string connectionStringName)
     {
         var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
 
@@ -19,7 +19,7 @@ public sealed class DbSessionFactory(
                                     .Connection(dbConnection)
                                     .OpenSession();
 
-        return new DbSession(session);
+        return new StatefulDbSession(session);
     }
 
     public StatelessDbSession OpenStatelessSession(string connectionStringName)

@@ -5,20 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 namespace GlavLib.App.DomainEvents;
 
 [SingleInstance]
-public sealed class DomainEventsHandler
+public sealed class DomainEventsHandler(IServiceProvider serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public DomainEventsHandler(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task HandleAsync(DomainEventsSession session, CancellationToken cancellationToken)
     {
         foreach (var domainEvent in session.Events)
         {
-            var domainEventHandler = _serviceProvider.GetRequiredKeyedService<IDomainEventHandler>(domainEvent.GetType());
+            var domainEventHandler = serviceProvider.GetRequiredKeyedService<IDomainEventHandler>(domainEvent.GetType());
 
             await domainEventHandler.HandleAsync(domainEvent, cancellationToken);
         }

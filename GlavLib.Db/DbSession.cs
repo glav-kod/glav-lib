@@ -5,7 +5,7 @@ using NHibernate;
 
 namespace GlavLib.Db;
 
-public sealed class DbSession(ISession nhSession) : IDisposable
+public sealed class DbSession(ISession nhSession) : IDbSession
 {
     private static readonly AsyncLocal<DbSession?> CurrentSession = new(null);
 

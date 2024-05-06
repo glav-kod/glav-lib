@@ -5,7 +5,7 @@ using NHibernate;
 
 namespace GlavLib.Db;
 
-public sealed class StatelessDbSession(IStatelessSession nhStatelessSession) : IDisposable
+public sealed class StatelessDbSession(IStatelessSession nhStatelessSession) : IDbSession
 {
     [PublicAPI]
     public IStatelessSession NhStatelessSession { get; } = nhStatelessSession;

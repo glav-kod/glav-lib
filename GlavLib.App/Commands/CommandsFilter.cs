@@ -7,7 +7,6 @@ using GlavLib.Basics.MultiLang;
 using GlavLib.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -44,10 +43,17 @@ public sealed class CommandsFilter
             if (result is ICommandResult commandResult)
             {
                 if (commandResult.IsFailure)
-                    return ErrorResponse(httpContext,
-                                         commandResult.ParameterName,
-                                         commandResult.Error,
-                                         commandResult.XDebug);
+                {
+                    var errorResponse = CreateErrorResponse(
+                            httpContext: httpContext,
+                            error: commandResult.Error,
+                            parameterName: commandResult.ParameterName,
+                            parameterError: commandResult.ParameterError,
+                            debugMessage: commandResult.XDebug
+                        );
+
+                    return TypedResults.Json(errorResponse);
+                }
 
                 httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
@@ -57,10 +63,17 @@ public sealed class CommandsFilter
             if (result is CommandUnitResult commandUnitResult)
             {
                 if (commandUnitResult.IsFailure)
-                    return ErrorResponse(httpContext,
-                                         commandUnitResult.ParameterName,
-                                         commandUnitResult.Error,
-                                         commandUnitResult.XDebug);
+                {
+                    var errorResponse = CreateErrorResponse(
+                            httpContext: httpContext,
+                            error: commandUnitResult.Error,
+                            parameterName: commandUnitResult.ParameterName,
+                            parameterError: commandUnitResult.ParameterError,
+                            debugMessage: commandUnitResult.XDebug
+                        );
+
+                    return TypedResults.Json(errorResponse);
+                }
 
                 httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
@@ -85,10 +98,11 @@ public sealed class CommandsFilter
         };
     }
 
-    private static JsonHttpResult<ErrorResponse> ErrorResponse(
+    private static ErrorResponse CreateErrorResponse(
             HttpContext httpContext,
-            string? parameterName,
             Error error,
+            string? parameterName,
+            Error? parameterError,
             string? debugMessage
         )
     {
@@ -98,64 +112,21 @@ public sealed class CommandsFilter
         if (debugMessage is not null)
             responseHeaders.SetXDebug(debugMessage);
 
-        var errorCode = error.Code;
-
-        var acceptLanguageHeaders = httpContext.Request.Headers.AcceptLanguage;
-        if (acceptLanguageHeaders.Count == 0)
-            return ErrorResponse(parameterName, error.Message, errorCode);
-
         var serviceProvider = httpContext.RequestServices;
+        var langContext     = serviceProvider.GetService<LanguageContext>();
 
-        var langContext = serviceProvider.GetService<LanguageContext>();
-        if (langContext is null)
-            return ErrorResponse(parameterName, error.Message, errorCode);
+        var localizedError = LocalizedError.Create(httpContext, langContext, error);
 
-        var acceptLanguageHeader = acceptLanguageHeaders.FirstOrDefault(h => h is not null);
-        if (acceptLanguageHeader is null)
-            return ErrorResponse(parameterName, error.Message, errorCode);
+        if (parameterName is null || parameterError is null)
+            return ErrorResponse.Create(localizedError, parameterErrors: null);
 
-        var languages = AcceptLanguageHeaderHelper.Parse(acceptLanguageHeader);
+        var localizedParameterError = LocalizedError.Create(httpContext, langContext, parameterError.Value);
 
-        if (!langContext.Messages.TryGetValue(error.Key, out var message))
-            return ErrorResponse(parameterName, error.Message, errorCode);
-
-        var localizedMessage = message.Format(languages, error.Args) ?? error.Message;
-
-        return ErrorResponse(parameterName, localizedMessage, errorCode);
-    }
-
-    private static JsonHttpResult<ErrorResponse> ErrorResponse(
-            string? parameterName,
-            string errorMessage,
-            string? errorCode
-        )
-    {
-        if (parameterName is null)
+        var parameterErrors = new Dictionary<string, LocalizedError>
         {
-            return TypedResults.Json(new ErrorResponse
-            {
-                Code    = errorCode,
-                Message = errorMessage,
-            });
-        }
-
-        var errorResponse = new ErrorResponse
-        {
-            Message = null,
-            ParameterMessages = new Dictionary<string, string>
-            {
-                [parameterName] = errorMessage
-            }
+            { parameterName, localizedParameterError }
         };
 
-        if (errorCode is not null)
-        {
-            errorResponse.ParameterCodes = new Dictionary<string, string>
-            {
-                [parameterName] = errorCode
-            };
-        }
-
-        return TypedResults.Json(errorResponse);
+        return ErrorResponse.Create(localizedError, parameterErrors);
     }
 }

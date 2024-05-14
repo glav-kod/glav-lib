@@ -1,4 +1,6 @@
-﻿using GlavLib.Abstractions.Validation;
+﻿using System.Diagnostics.CodeAnalysis;
+using GlavLib.Abstractions.Validation;
+using GlavLib.Errors;
 using Microsoft.AspNetCore.Http;
 
 namespace GlavLib.App.Commands;
@@ -12,6 +14,8 @@ public interface ICommandResult
     public Error Error { get; }
 
     public string? ParameterName { get; }
+    
+    public Error? ParameterError { get; }
 
     public string? XDebug { get; }
 }
@@ -19,6 +23,7 @@ public interface ICommandResult
 public class CommandResult<TResult> : ICommandResult
     where TResult : IResult
 {
+    [MemberNotNullWhen(true, nameof(_error))]
     public bool IsFailure { get; }
 
     private readonly IResult? _value;
@@ -27,16 +32,31 @@ public class CommandResult<TResult> : ICommandResult
     private readonly Error? _error;
     public Error Error => _error ?? throw new InvalidOperationException("Cannot get error of success result");
 
+    public Error? ParameterError { get; }
+
     public string? ParameterName { get; }
 
     public string? XDebug { get; }
 
-    private CommandResult(string? parameterName, Error error, string? xDebug)
+    private CommandResult(
+            Error error,
+            string parameterName,
+            Error parameterError,
+            string? xDebug
+        )
     {
-        IsFailure     = true;
-        ParameterName = parameterName;
-        _error        = error;
-        XDebug        = xDebug;
+        IsFailure      = true;
+        _error         = error;
+        ParameterName  = parameterName;
+        ParameterError = parameterError;
+        XDebug         = xDebug;
+    }
+
+    private CommandResult(Error error, string? xDebug)
+    {
+        IsFailure = true;
+        _error    = error;
+        XDebug    = xDebug;
     }
 
     private CommandResult(IResult value)
@@ -52,22 +72,21 @@ public class CommandResult<TResult> : ICommandResult
 
     public static implicit operator CommandResult<TResult>(Error error)
     {
-        return new CommandResult<TResult>(parameterName: null,
-                                          error: error,
+        return new CommandResult<TResult>(error: error,
                                           xDebug: null);
     }
 
-    public static implicit operator CommandResult<TResult>((string param, Error error) result)
+    public static implicit operator CommandResult<TResult>((string name, Error error) param)
     {
-        return new CommandResult<TResult>(parameterName: result.param,
-                                          error: result.error,
+        return new CommandResult<TResult>(error: BasicErrors.CheckFields,
+                                          parameterName: param.name,
+                                          parameterError: param.error,
                                           xDebug: null);
     }
 
     public static implicit operator CommandResult<TResult>((Error error, string xDebug) result)
     {
-        return new CommandResult<TResult>(parameterName: null,
-                                          error: result.error,
+        return new CommandResult<TResult>(error: result.error,
                                           xDebug: result.xDebug);
     }
 }

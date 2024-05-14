@@ -1,7 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using GlavLib.Abstractions.Validation;
+using GlavLib.App.Commands;
 using GlavLib.Basics.MultiLang;
+using GlavLib.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,88 +12,21 @@ public static class ValidatorExtensions
 {
     public static ErrorResponse ToErrorResponse(this ValidationResult validationResult, HttpContext httpContext)
     {
-        if (!TryLocalizeParameterErrors(httpContext, validationResult, out var parameterMessages))
-        {
-            parameterMessages = new Dictionary<string, string>();
+        var langContext = httpContext.RequestServices.GetService<LanguageContext>();
 
-            foreach (var error in validationResult.Errors)
-                parameterMessages[error.PropertyName] = error.ErrorMessage;
-        }
-
-        var errorResponse = new ErrorResponse
-        {
-            Message           = null,
-            ParameterMessages = parameterMessages
-        };
-
-        var parameterCodes = new Dictionary<string, string>();
+        var parameterErrors = new Dictionary<string, Error>();
 
         foreach (var validationFailure in validationResult.Errors)
         {
-            if (validationFailure.CustomState is not Error error)
+            if (validationFailure.CustomState is not Error parameterError)
                 continue;
 
-            if (error.Code is not null)
-                parameterCodes[validationFailure.PropertyName] = error.Code;
+            parameterErrors[validationFailure.PropertyName] = parameterError;
         }
 
-        if (parameterCodes.Count > 0)
-            errorResponse.ParameterCodes = parameterCodes;
+        var localizedError           = LocalizedError.Create(httpContext, langContext, BasicErrors.CheckFields);
+        var localizedParameterErrors = LocalizedError.Create(httpContext, langContext, parameterErrors);
 
-        return errorResponse;
-    }
-
-    private static bool TryLocalizeParameterErrors(
-            HttpContext httpContext,
-            ValidationResult validationResult,
-            [MaybeNullWhen(false)] out Dictionary<string, string> parameterErrors
-        )
-    {
-        var acceptLanguageHeaders = httpContext.Request.Headers.AcceptLanguage;
-        if (acceptLanguageHeaders.Count == 0)
-        {
-            parameterErrors = null;
-            return false;
-        }
-
-
-        var langContext = httpContext.RequestServices.GetService<LanguageContext>();
-        if (langContext is null)
-        {
-            parameterErrors = null;
-            return false;
-        }
-
-        var acceptLanguageHeader = acceptLanguageHeaders.FirstOrDefault(h => h is not null);
-        if (acceptLanguageHeader is null)
-        {
-            parameterErrors = null;
-            return false;
-        }
-
-        parameterErrors = new Dictionary<string, string>();
-
-        var languages = AcceptLanguageHeaderHelper.Parse(acceptLanguageHeader);
-
-        foreach (var validationFailure in validationResult.Errors)
-        {
-            if (validationFailure.CustomState is Error error)
-            {
-                if (!langContext.Messages.TryGetValue(error.Key, out var message))
-                {
-                    parameterErrors[validationFailure.PropertyName] = validationFailure.ErrorMessage;
-                    continue;
-                }
-
-                var str = message.Format(languages, error.Args);
-                parameterErrors[validationFailure.PropertyName] = str ?? validationFailure.ErrorMessage;
-            }
-            else
-            {
-                parameterErrors[validationFailure.PropertyName] = validationFailure.ErrorMessage;
-            }
-        }
-
-        return true;
+        return ErrorResponse.Create(localizedError, localizedParameterErrors);
     }
 }

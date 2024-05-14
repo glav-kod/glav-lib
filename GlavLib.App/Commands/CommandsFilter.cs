@@ -53,6 +53,7 @@ public sealed class CommandsFilter
                             debugMessage: commandResult.XDebug
                         );
 
+                    httpContext.Response.Headers.SetXStatus(XStatus.Error);
                     return TypedResults.Json(errorResponse);
                 }
 
@@ -73,6 +74,7 @@ public sealed class CommandsFilter
                             debugMessage: commandUnitResult.XDebug
                         );
 
+                    httpContext.Response.Headers.SetXStatus(XStatus.Error);
                     return TypedResults.Json(errorResponse);
                 }
 
@@ -91,9 +93,6 @@ public sealed class CommandsFilter
 
                 dbTransaction.Commit();
             }
-
-            if (result is FileContentHttpResult)
-                httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
             return result;
         };

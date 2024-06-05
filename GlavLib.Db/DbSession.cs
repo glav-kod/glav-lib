@@ -7,6 +7,17 @@ namespace GlavLib.Db;
 [PublicAPI]
 public abstract class DbSession : IDisposable
 {
+    public static DbSession Current
+    {
+        get
+        {
+            if (CurrentSession.Value is null)
+                throw new InvalidOperationException("No current DbSession");
+
+            return CurrentSession.Value;
+        }
+    }
+
     protected internal static readonly AsyncLocal<DbSession?> CurrentSession = new(null);
 
     public abstract DbConnection Connection { get; }

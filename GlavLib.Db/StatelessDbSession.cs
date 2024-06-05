@@ -8,7 +8,7 @@ namespace GlavLib.Db;
 [PublicAPI]
 public sealed class StatelessDbSession(IStatelessSession nhSession) : DbSession
 {
-    public static StatelessDbSession Current
+    public new static StatelessDbSession Current
     {
         get
         {

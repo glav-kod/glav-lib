@@ -107,7 +107,6 @@ public sealed class CommandsFilter
         )
     {
         var responseHeaders = httpContext.Response.Headers;
-        responseHeaders.SetXStatus(XStatus.Error);
 
         if (debugMessage is not null)
             responseHeaders.SetXDebug(debugMessage);

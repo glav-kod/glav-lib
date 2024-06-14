@@ -7,10 +7,12 @@ namespace GlavLib.SourceGenerators.Tests;
 
 public abstract class SourceGeneratorTestsBase
 {
-    protected static string RunSourceGenerator(ISourceGenerator      sourceGenerator,
-                                string?               sourceCode,
-                                string                resultFile,
-                                TestAdditionalText[]? additionalTexts = null)
+    protected static string RunSourceGenerator(
+            ISourceGenerator sourceGenerator,
+            string? sourceCode,
+            string resultFile,
+            TestAdditionalText[]? additionalTexts = null
+        )
     {
         var generators = new[]
         {
@@ -30,14 +32,13 @@ public abstract class SourceGeneratorTestsBase
             MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")),
             MetadataReference.CreateFromFile(Assembly.Load("GlavLib.Abstractions").Location),
             MetadataReference.CreateFromFile(Assembly.Load("GlavLib.Basics").Location),
-            MetadataReference.CreateFromFile(Assembly.Load("GlavLib.App").Location),
             MetadataReference.CreateFromFile(Assembly.Load("GlavLib.SourceGenerators").Location),
         };
 
         var syntaxTrees = new List<SyntaxTree>();
         if (sourceCode is not null)
             syntaxTrees.Add(CSharpSyntaxTree.ParseText(sourceCode));
-        
+
         var compilation = CSharpCompilation.Create(assemblyName: "GlavLib.SourceGenerators.Tests",
                                                    syntaxTrees: syntaxTrees,
                                                    references: references);

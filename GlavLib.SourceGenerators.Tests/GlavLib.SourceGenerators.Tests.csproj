@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GlavLib.App\GlavLib.App.csproj"/>
-    <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj"/>
-    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer"/>
+    <ProjectReference Include="..\GlavLib.SourceGenerators\GlavLib.SourceGenerators.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\GlavLib.Abstractions\GlavLib.Abstractions.csproj" />
+    <ProjectReference Include="..\GlavLib.Basics\GlavLib.Basics.csproj" />
   </ItemGroup>
 </Project>

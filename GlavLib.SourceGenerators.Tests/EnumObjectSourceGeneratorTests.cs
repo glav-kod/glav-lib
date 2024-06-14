@@ -32,7 +32,7 @@ public class EnumObjectSourceGeneratorTests : SourceGeneratorTestsBase
                                         public const string TengeKey = "KZT";
                                         public static readonly Currency Som = new(SomKey, "Сом");
                                         public static readonly Currency Tenge = new(TengeKey, "Тенге");
-                                        public static readonly System.Collections.Generic.IReadOnlyList<Currency> Items = [Som, Tenge];
+                                        public static readonly global::System.Collections.Generic.IReadOnlyList<Currency> Items = [Som, Tenge];
                                         private Currency(string key, string displayName) : base(key, displayName)
                                         {
                                         }

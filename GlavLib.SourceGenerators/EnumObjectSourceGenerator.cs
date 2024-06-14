@@ -158,7 +158,7 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         }
 
         var itemNames = string.Join(", ", enumRegistration.Items.Select(x => x.FieldName));
-        fields.Add(ParseMemberDeclaration($"public static readonly System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
+        fields.Add(ParseMemberDeclaration($"public static readonly global::System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
 
         var constructorMember = ParseMemberDeclaration($$"""
                                                        private {{className}}(string key, string displayName) : base(key, displayName)

@@ -21,6 +21,12 @@ public static class NhExtensions
         return identityPart.CustomType<EnumObjectUserType<TEnumObject>>();
     }
 
+    public static IndexPart EnumObjectType<TEnumObject>(this IndexPart identityPart)
+        where TEnumObject : class, IEnumObject<TEnumObject>
+    {
+        return identityPart.Type<EnumObjectUserType<TEnumObject>>();
+    }
+
     public static async Task SaveAndFlushAsync(this ISession session, object entity, CancellationToken cancellationToken)
     {
         await session.SaveOrUpdateAsync(entity, cancellationToken);

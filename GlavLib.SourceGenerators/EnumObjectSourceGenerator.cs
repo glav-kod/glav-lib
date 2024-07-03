@@ -85,15 +85,13 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
             if (attributeName != EnumObjectItemAttribute)
                 continue;
 
-            var fieldNameArg       = attributeData.ConstructorArguments[0];
-            var valueArg           = attributeData.ConstructorArguments[1];
-            var displayNameArg     = attributeData.ConstructorArguments[2];
-            var refStaticFieldName = attributeData.ConstructorArguments[3];
+            var fieldNameArg   = attributeData.ConstructorArguments[0];
+            var valueArg       = attributeData.ConstructorArguments[1];
+            var displayNameArg = attributeData.ConstructorArguments[2];
 
             enumItems.Add(new EnumItem(fieldName: fieldNameArg.Value!.ToString(),
                                        value: valueArg.Value!.ToString(),
-                                       displayName: displayNameArg.Value!.ToString(),
-                                       refStaticFieldName: refStaticFieldName.Value?.ToString()));
+                                       displayName: displayNameArg.Value!.ToString()));
         }
 
         string? ns = null;
@@ -148,8 +146,6 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         var keys   = new List<MemberDeclarationSyntax>();
         var fields = new List<MemberDeclarationSyntax>();
 
-        var staticFields = new List<MemberDeclarationSyntax>();
-
         var switchBuilder = new StringBuilder();
 
         foreach (var enumItem in enumRegistration.Items)
@@ -159,17 +155,10 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
                            $"public static readonly {className} {enumItem.FieldName} = new ({enumItem.FieldName}Key, \"{enumItem.DisplayName}\");")!);
 
             switchBuilder.AppendLine($"{enumItem.FieldName}Key => {enumItem.FieldName},");
-
-            if (enumItem.RefStaticFieldName is not null)
-            {
-                staticFields.Add(ParseMemberDeclaration(
-                                     $"public static readonly {className} {enumItem.RefStaticFieldName!} = {enumItem.FieldName};")!);
-            }
         }
 
         var itemNames = string.Join(", ", enumRegistration.Items.Select(x => x.FieldName));
-        fields.Add(ParseMemberDeclaration(
-                       $"public static readonly global::System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
+        fields.Add(ParseMemberDeclaration($"public static readonly global::System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
 
         var constructorMember = ParseMemberDeclaration($$"""
                                                        private {{className}}(string key, string displayName) : base(key, displayName)
@@ -245,7 +234,6 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
                .AddModifiers(Token(SyntaxKind.PartialKeyword))
                .AddMembers(keys.ToArray())
                .AddMembers(fields.ToArray())
-               .AddMembers(staticFields.ToArray())
                .AddMembers(constructorMember!, equalsMember!, getHashCodeMember!)
                .AddMembers(createMethod!, equalityOperator!, inequalityOperator!)
                .AddMembers();
@@ -309,19 +297,11 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
 
         public string DisplayName { get; }
 
-        public string? RefStaticFieldName { get; }
-
-        public EnumItem(
-                string fieldName,
-                string value,
-                string displayName,
-                string? refStaticFieldName
-            )
+        public EnumItem(string fieldName, string value, string displayName)
         {
-            FieldName          = fieldName;
-            Value              = value;
-            DisplayName        = displayName;
-            RefStaticFieldName = refStaticFieldName;
+            FieldName   = fieldName;
+            Value       = value;
+            DisplayName = displayName;
         }
     }
 }

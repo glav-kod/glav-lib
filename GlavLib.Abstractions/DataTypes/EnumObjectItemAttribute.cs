@@ -9,18 +9,10 @@ public class EnumObjectItemAttribute : Attribute
 
     public string DisplayName { get; set; }
 
-    public string? RefStaticFieldName { get; set; }
-
-    public EnumObjectItemAttribute(
-            string fieldName,
-            string value,
-            string displayName,
-            string? refStaticFieldName = null
-        )
+    public EnumObjectItemAttribute(string fieldName, string value, string displayName)
     {
-        FieldName          = fieldName;
-        Value              = value;
-        DisplayName        = displayName;
-        RefStaticFieldName = refStaticFieldName;
+        FieldName   = fieldName;
+        Value       = value;
+        DisplayName = displayName;
     }
 }

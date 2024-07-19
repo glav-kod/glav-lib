@@ -7,7 +7,6 @@ using GlavLib.Basics.MultiLang;
 using GlavLib.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -48,8 +47,7 @@ public sealed class CommandsFilter
                     var errorResponse = CreateErrorResponse(
                             httpContext: httpContext,
                             error: commandResult.Error,
-                            parameterName: commandResult.ParameterName,
-                            parameterError: commandResult.ParameterError,
+                            parameterErrors: commandResult.ParameterErrors,
                             debugMessage: commandResult.XDebug
                         );
 
@@ -69,8 +67,7 @@ public sealed class CommandsFilter
                     var errorResponse = CreateErrorResponse(
                             httpContext: httpContext,
                             error: commandUnitResult.Error,
-                            parameterName: commandUnitResult.ParameterName,
-                            parameterError: commandUnitResult.ParameterError,
+                            parameterErrors: commandUnitResult.ParameterErrors,
                             debugMessage: commandUnitResult.XDebug
                         );
 
@@ -101,8 +98,7 @@ public sealed class CommandsFilter
     private static ErrorResponse CreateErrorResponse(
             HttpContext httpContext,
             Error error,
-            string? parameterName,
-            Error? parameterError,
+            IDictionary<string, Error>? parameterErrors,
             string? debugMessage
         )
     {
@@ -116,16 +112,18 @@ public sealed class CommandsFilter
 
         var localizedError = LocalizedError.Create(httpContext, langContext, error);
 
-        if (parameterName is null || parameterError is null)
+        if (parameterErrors is null)
             return ErrorResponse.Create(localizedError, parameterErrors: null);
 
-        var localizedParameterError = LocalizedError.Create(httpContext, langContext, parameterError.Value);
+        var localizedParameterErrors = new Dictionary<string, LocalizedError>();
 
-        var parameterErrors = new Dictionary<string, LocalizedError>
+        foreach (var (parameterName, parameterError) in parameterErrors)
         {
-            { parameterName, localizedParameterError }
-        };
+            var localizedParameterError = LocalizedError.Create(httpContext, langContext, parameterError);
 
-        return ErrorResponse.Create(localizedError, parameterErrors);
+            localizedParameterErrors.Add(parameterName, localizedParameterError);
+        }
+
+        return ErrorResponse.Create(localizedError, localizedParameterErrors);
     }
 }

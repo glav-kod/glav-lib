@@ -13,9 +13,7 @@ public interface ICommandResult
 
     public Error Error { get; }
 
-    public string? ParameterName { get; }
-    
-    public Error? ParameterError { get; }
+    public IDictionary<string, Error>? ParameterErrors { get; }
 
     public string? XDebug { get; }
 }
@@ -32,24 +30,20 @@ public class CommandResult<TResult> : ICommandResult
     private readonly Error? _error;
     public Error Error => _error ?? throw new InvalidOperationException("Cannot get error of success result");
 
-    public Error? ParameterError { get; }
-
-    public string? ParameterName { get; }
+    public IDictionary<string, Error>? ParameterErrors { get; }
 
     public string? XDebug { get; }
 
     private CommandResult(
             Error error,
-            string parameterName,
-            Error parameterError,
+            IDictionary<string, Error> parameterErrors,
             string? xDebug
         )
     {
-        IsFailure      = true;
-        _error         = error;
-        ParameterName  = parameterName;
-        ParameterError = parameterError;
-        XDebug         = xDebug;
+        IsFailure       = true;
+        _error          = error;
+        ParameterErrors = parameterErrors;
+        XDebug          = xDebug;
     }
 
     private CommandResult(Error error, string? xDebug)
@@ -78,9 +72,20 @@ public class CommandResult<TResult> : ICommandResult
 
     public static implicit operator CommandResult<TResult>((string name, Error error) param)
     {
+        var parameterErrors = new Dictionary<string, Error>
+        {
+            { param.name, param.error }
+        };
+
         return new CommandResult<TResult>(error: BasicErrors.CheckFields,
-                                          parameterName: param.name,
-                                          parameterError: param.error,
+                                          parameterErrors: parameterErrors,
+                                          xDebug: null);
+    }
+
+    public static implicit operator CommandResult<TResult>(Dictionary<string, Error> parameterErrors)
+    {
+        return new CommandResult<TResult>(error: BasicErrors.CheckFields,
+                                          parameterErrors: parameterErrors,
                                           xDebug: null);
     }
 

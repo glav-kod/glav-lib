@@ -15,9 +15,7 @@ public class CommandUnitResult
     private readonly Error? _error;
     public Error Error => _error ?? throw new InvalidOperationException("Cannot get error of success result");
 
-    public Error? ParameterError { get; }
-
-    public string? ParameterName { get; }
+    public IDictionary<string, Error>? ParameterErrors { get; }
 
     public string? XDebug { get; }
 
@@ -33,13 +31,12 @@ public class CommandUnitResult
         XDebug    = xDebug;
     }
 
-    private CommandUnitResult(string parameterName, Error parameterError, string? xDebug)
+    private CommandUnitResult(IDictionary<string, Error> parameterErrors, string? xDebug)
     {
-        IsFailure      = true;
-        _error         = BasicErrors.CheckFields;
-        ParameterName  = parameterName;
-        ParameterError = parameterError;
-        XDebug         = xDebug;
+        IsFailure       = true;
+        _error          = BasicErrors.CheckFields;
+        ParameterErrors = parameterErrors;
+        XDebug          = xDebug;
     }
 
     public static implicit operator CommandUnitResult(Error error)
@@ -49,9 +46,17 @@ public class CommandUnitResult
 
     public static implicit operator CommandUnitResult((string paramName, Error paramError) result)
     {
-        return new CommandUnitResult(parameterName: result.paramName,
-                                     parameterError: result.paramError,
-                                     xDebug: null);
+        var parameterErrors = new Dictionary<string, Error>
+        {
+            { result.paramName, result.paramError }
+        };
+
+        return new CommandUnitResult(parameterErrors: parameterErrors, xDebug: null);
+    }
+
+    public static implicit operator CommandUnitResult(Dictionary<string, Error> parameterErrors)
+    {
+        return new CommandUnitResult(parameterErrors: parameterErrors, xDebug: null);
     }
 
     public static implicit operator CommandUnitResult((Error error, string xDebug) result)

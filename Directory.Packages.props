@@ -33,7 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
     <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
-    <PackageVersion Include="NHibernate" Version="5.5.1" />
+    <PackageVersion Include="NHibernate" Version="5.5.2" />
     <PackageVersion Include="Npgsql" Version="8.0.3" />
     <PackageVersion Include="SharpGrip.FluentValidation.AutoValidation.Endpoints" Version="1.4.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.1" />

@@ -3,6 +3,7 @@ using GlavLib.Abstractions.Validation;
 using GlavLib.Basics.DataTypes;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Core;
 using Serilog.Exceptions;
 
 namespace GlavLib.Basics.Logging;
@@ -46,7 +47,7 @@ public sealed class LoggerBuilder
         return this;
     }
 
-    public ILogger Build()
+    public Logger Build()
     {
         return _loggerConfiguration.CreateLogger();
     }

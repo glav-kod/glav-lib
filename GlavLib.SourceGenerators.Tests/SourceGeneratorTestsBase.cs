@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Reflection;
 using GlavLib.SourceGenerators.Tests.Helpers;
 using Microsoft.CodeAnalysis;
@@ -11,6 +12,19 @@ public abstract class SourceGeneratorTestsBase
             ISourceGenerator sourceGenerator,
             string? sourceCode,
             string resultFile,
+            TestAdditionalText[]? additionalTexts = null
+        )
+    {
+        var runResult = RunSourceGenerator(sourceGenerator, sourceCode, additionalTexts);
+
+        var generatedFileSyntax = runResult.GeneratedTrees.Single(t => t.FilePath.EndsWith(resultFile));
+
+        return generatedFileSyntax.GetText().ToString();
+    }
+    
+    protected static GeneratorDriverRunResult RunSourceGenerator(
+            ISourceGenerator sourceGenerator,
+            string? sourceCode,
             TestAdditionalText[]? additionalTexts = null
         )
     {
@@ -43,10 +57,6 @@ public abstract class SourceGeneratorTestsBase
                                                    syntaxTrees: syntaxTrees,
                                                    references: references);
 
-        var runResult = driver.RunGenerators(compilation).GetRunResult();
-
-        var generatedFileSyntax = runResult.GeneratedTrees.Single(t => t.FilePath.EndsWith(resultFile));
-
-        return generatedFileSyntax.GetText().ToString();
+        return driver.RunGenerators(compilation).GetRunResult();
     }
 }

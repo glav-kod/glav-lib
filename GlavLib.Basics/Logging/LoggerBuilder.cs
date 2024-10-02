@@ -1,6 +1,7 @@
 ﻿using GlavLib.Abstractions.DataTypes;
 using GlavLib.Abstractions.Validation;
 using GlavLib.Basics.DataTypes;
+using GlavLib.Basics.Logging.Enrichers;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
@@ -26,7 +27,8 @@ public sealed class LoggerBuilder
                             })
                             .Enrich.WithExceptionDetails()
                             .Enrich.WithMachineName()
-                            .Enrich.FromLogContext();
+                            .Enrich.FromLogContext()
+                            .Enrich.With<ClassNameEnricher>();
     }
 
     public LoggerBuilder WithApplicationName(string applicationName)

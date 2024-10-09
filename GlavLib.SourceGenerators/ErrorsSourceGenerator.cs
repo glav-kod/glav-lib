@@ -18,6 +18,14 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
 
     private const string ValidationNamespace = "GlavLib.Abstractions.Validation";
 
+    private static readonly DiagnosticDescriptor UnhandledException =
+        new("XX0002",
+            "Unhandled exception occurred",
+            "The ErrorsSourceGenerator caused an exception {0}: {1} {2}",
+            "Error",
+            DiagnosticSeverity.Error,
+            true);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var translations = context.AdditionalTextsProvider
@@ -35,13 +43,26 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
             ImmutableArray<string> errorYamls
         )
     {
-        foreach (var errorYamlText in errorYamls)
+        try
         {
-            var errorsBundle = YamlDeserializer.Deserialize<ErrorsBundle>(errorYamlText);
+            foreach (var errorYamlText in errorYamls)
+            {
+                var errorsBundle = YamlDeserializer.Deserialize<ErrorsBundle>(errorYamlText);
 
-            var bundleClassSource = GenerateErrorsClassSource(errorsBundle);
+                var bundleClassSource = GenerateErrorsClassSource(errorsBundle);
 
-            context.AddSource($"{errorsBundle.ClassName}.g.cs", SourceText.From(bundleClassSource, Encoding.UTF8));
+                context.AddSource($"{errorsBundle.ClassName}.g.cs", SourceText.From(bundleClassSource, Encoding.UTF8));
+            }
+        }
+        catch (Exception ex)
+        {
+            var diagnostic = Diagnostic.Create(UnhandledException,
+                                               null,
+                                               ex.GetType(),
+                                               ex.Message,
+                                               ex.StackTrace);
+
+            context.ReportDiagnostic(diagnostic);
         }
     }
 
@@ -168,14 +189,14 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
         }
 
         var method = $$"""
-                       public static Error {{errorName}}({{methodArgsSb}})
-                       {
-                           var args = new Dictionary<string, string>();
-                       {{dictionaryArgsSb}}
-                           FormattableString message = $"{{messageTemplate.InterpolatedMessage}}";
-                           return new Error("{{errorKeyPrefix}}.{{errorName}}", {{errorCode}}, message.ToString(CultureInfo.InvariantCulture), args);
-                       }
-                       """;
+            public static Error {{errorName}}({{methodArgsSb}})
+            {
+                var args = new Dictionary<string, string>();
+            {{dictionaryArgsSb}}
+                FormattableString message = $"{{messageTemplate.InterpolatedMessage}}";
+                return new Error("{{errorKeyPrefix}}.{{errorName}}", {{errorCode}}, message.ToString(CultureInfo.InvariantCulture), args);
+            }
+            """;
 
         return ParseMemberDeclaration(method)!;
     }

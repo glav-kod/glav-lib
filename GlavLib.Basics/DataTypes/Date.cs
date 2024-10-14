@@ -5,9 +5,10 @@ using GlavLib.Errors;
 
 namespace GlavLib.Basics.DataTypes;
 
-public class Date : SingleValueObject<DateTime>
+public class Date : SingleValueObject<DateTime>, IComparable<Date>
 {
     private const string Format = "yyyy-MM-dd";
+
     public Date(int year, int month, int day)
         : base(new DateTime(year, month, day))
     {
@@ -20,7 +21,7 @@ public class Date : SingleValueObject<DateTime>
     public UtcDateTime UtcStartOfTheDay(TimeZoneInfo timeZone)
     {
         var dateTime = new DateTime(Value.Year, Value.Month, Value.Day);
-        var result = TimeZoneInfo.ConvertTime(dateTime, timeZone, TimeZoneInfo.Utc);
+        var result   = TimeZoneInfo.ConvertTime(dateTime, timeZone, TimeZoneInfo.Utc);
 
         return new UtcDateTime(result);
     }
@@ -47,6 +48,13 @@ public class Date : SingleValueObject<DateTime>
     public Date AddYears(int yearsNumber)
     {
         return new Date(Value.AddYears(yearsNumber));
+    }
+
+    public int CompareTo(Date? other)
+    {
+        return other is null
+            ? 1
+            : DateTime.Compare(Value, other.Value);
     }
 
     public override string ToString()

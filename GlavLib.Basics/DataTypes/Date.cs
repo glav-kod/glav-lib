@@ -5,7 +5,7 @@ using GlavLib.Errors;
 
 namespace GlavLib.Basics.DataTypes;
 
-public class Date : SingleValueObject<DateTime>, IComparable<Date>
+public class Date : SingleValueObject<DateTime>, IComparable<Date?>
 {
     private const string Format = "yyyy-MM-dd";
 

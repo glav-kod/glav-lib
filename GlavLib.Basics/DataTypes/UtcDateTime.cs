@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace GlavLib.Basics.DataTypes;
 
-public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime>
+public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?>
 {
     private const string Format = "yyyy-MM-ddTHH:mm:ssZ";
 

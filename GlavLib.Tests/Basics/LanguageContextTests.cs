@@ -1,4 +1,5 @@
 using FluentAssertions;
+using GlavLib.Basics.DataTypes;
 using GlavLib.Basics.MultiLang;
 
 namespace GlavLib.Tests.Basics;
@@ -10,15 +11,15 @@ public sealed class LanguageContextTests
     {
         //language=yaml
         const string kyLanguagePack = """
-                                      Language: ky
-                                      Bundles:
-                                        - Prefix: Spectr.Core.SystemErrors
-                                          Messages:
-                                            InternalServerError: Ички система катасы
-                                        - Prefix: Spectr.Core.OtherErrors
-                                          Messages:
-                                            OtherError: Дагы бир ката
-                                      """;
+            Language: ky
+            Bundles:
+              - Prefix: Spectr.Core.SystemErrors
+                Messages:
+                  InternalServerError: Ички система катасы
+              - Prefix: Spectr.Core.OtherErrors
+                Messages:
+                  OtherError: Дагы бир ката
+            """;
 
         var languageContext = new LanguageContextBuilder()
                               .AddFromDirectory("./LanguagePacks", "language-pack.*.yaml")
@@ -40,5 +41,11 @@ public sealed class LanguageContextTests
                 ["ky"] = "Дагы бир ката"
             }),
         });
+
+        var date = new Date(2024, 10, 14);
+
+        Date? expectedDate = null;
+
+        date.Should().Be(expectedDate);
     }
 }

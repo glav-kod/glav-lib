@@ -43,6 +43,19 @@ internal sealed class EnumObjectJsonConverter<TEnum> : JsonConverter<TEnum>
         writer.WriteStringValue(value.Key);
     }
 
+    public override TEnum ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var stringValue = reader.GetString()!;
+
+        var enumFactory = GetEnumFactory();
+        return enumFactory(stringValue);
+    }
+
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, TEnum value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value.Key);
+    }
+
     private static Func<string, TEnum> GetEnumFactory()
     {
         if (_enumFactory is null)

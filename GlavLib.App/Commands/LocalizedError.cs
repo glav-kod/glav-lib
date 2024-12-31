@@ -17,6 +17,9 @@ internal readonly struct LocalizedError(string? code, string message)
             Error error
         )
     {
+        if (error.Key is null)
+            return new LocalizedError(code: null, message: error.Message);
+
         var acceptLanguageHeaders = httpContext.Request.Headers.AcceptLanguage;
         if (acceptLanguageHeaders.Count == 0)
             return new LocalizedError(error.Code, error.Message);
@@ -61,6 +64,12 @@ internal readonly struct LocalizedError(string? code, string message)
 
         foreach (var (key, error) in errors)
         {
+            if (error.Key is null)
+            {
+                result[key] = new LocalizedError(code: null, error.Message);
+                continue;
+            }
+
             if (!langContext.Messages.TryGetValue(error.Key, out var message))
             {
                 result[key] = new LocalizedError(error.Code, error.Message);

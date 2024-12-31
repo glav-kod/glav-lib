@@ -15,15 +15,30 @@ public sealed class LoggerBuilder
 
     public LoggerBuilder()
     {
-        _loggerConfiguration.Destructure.ByTransforming<TimeZoneInfo>(d => d.Id)
-                            .Destructure.ByTransforming<Date>(d => d.Value)
-                            .Destructure.ByTransforming<UtcDateTime>(d => d.Value)
-                            .Destructure.ByTransformingWhere<EnumObject>(x => typeof(EnumObject).IsAssignableFrom(x), o => o.Key)
-                            .Destructure.ByTransforming<Error>(d => new
+        _loggerConfiguration.Destructure.ByTransforming<TimeZoneInfo>(x => x.Id)
+                            .Destructure.ByTransforming<Date>(x => x.Value)
+                            .Destructure.ByTransforming<UtcDateTime>(x => x.Value)
+                            .Destructure.ByTransformingWhere<EnumObject>(x => typeof(EnumObject).IsAssignableFrom(x), x => x.Key)
+                            .Destructure.ByTransforming<Error>(x =>
                             {
-                                d.Key,
-                                d.Message,
-                                d.Args
+                                if (x.Key is null)
+                                    return x.Message;
+
+                                if (x.Args is null)
+                                {
+                                    return new
+                                    {
+                                        x.Key,
+                                        x.Message
+                                    };
+                                }
+
+                                return new
+                                {
+                                    x.Key,
+                                    x.Message,
+                                    x.Args
+                                };
                             })
                             .Enrich.WithExceptionDetails()
                             .Enrich.WithMachineName()

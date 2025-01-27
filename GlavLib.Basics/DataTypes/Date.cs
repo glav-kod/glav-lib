@@ -82,6 +82,16 @@ public class Date : SingleValueObject<DateTime>, IComparable<Date?>
         return value.Value >= otherValue.Value;
     }
 
+    public static bool operator <(Date value, Date otherValue)
+    {
+        return value.Value < otherValue.Value;
+    }
+
+    public static bool operator >(Date value, Date otherValue)
+    {
+        return value.Value > otherValue.Value;
+    }
+
     public static Result<Date, Error> FromString(string value)
     {
         if (!DateTime.TryParseExact(value, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))

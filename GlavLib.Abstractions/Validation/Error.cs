@@ -1,32 +1,19 @@
 ﻿namespace GlavLib.Abstractions.Validation;
 
-public readonly struct Error
+public readonly struct Error(
+        string message,
+        string? key = null,
+        string? code = null,
+        IDictionary<string, string>? args = null
+    )
 {
-    public Error(
-            string key,
-            string? code,
-            string message,
-            IDictionary<string, string>? args = null
-        )
-    {
-        Key     = key;
-        Code    = code;
-        Message = message;
-        Args    = args;
-    }
+    public string Message { get; } = message;
 
-    public Error(string message)
-    {
-        Message = message;
-    }
+    public string? Key { get; } = key;
 
-    public string Message { get; }
+    public string? Code { get; } = code;
 
-    public string? Key { get; }
-
-    public string? Code { get; }
-
-    public IDictionary<string, string>? Args { get; }
+    public IDictionary<string, string>? Args { get; } = args;
 
     public static implicit operator Error(string message)
     {

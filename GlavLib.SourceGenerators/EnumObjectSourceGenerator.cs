@@ -128,9 +128,9 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
             var valueArg       = attributeData.ConstructorArguments[1];
             var displayNameArg = attributeData.ConstructorArguments[2];
 
-            enumItems.Add(new EnumItem(fieldName: fieldNameArg.Value!.ToString(),
-                                       value: valueArg.Value!.ToString(),
-                                       displayName: displayNameArg.Value!.ToString()));
+            enumItems.Add(new EnumItem(FieldName: fieldNameArg.Value!.ToString(),
+                                       Value: valueArg.Value!.ToString(),
+                                       DisplayName: displayNameArg.Value!.ToString()));
         }
 
         string? ns = null;
@@ -352,19 +352,16 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         context.ReportDiagnostic(diagnostic);
     }
 
-    private struct EnumItem
+    private readonly record struct EnumItem(
+            string FieldName,
+            string Value,
+            string DisplayName
+        )
     {
-        public string FieldName { get; }
+        public string FieldName { get; } = FieldName;
 
-        public string Value { get; }
+        public string Value { get; } = Value;
 
-        public string DisplayName { get; }
-
-        public EnumItem(string fieldName, string value, string displayName)
-        {
-            FieldName   = fieldName;
-            Value       = value;
-            DisplayName = displayName;
-        }
+        public string DisplayName { get; } = DisplayName;
     }
 }

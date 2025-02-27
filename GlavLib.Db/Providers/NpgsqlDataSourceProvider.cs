@@ -6,10 +6,16 @@ using Npgsql;
 
 namespace GlavLib.Db.Providers;
 
+public sealed class NpgsqlDataSourceProviderOptions
+{
+    public string? ApplicationName { get; set; }
+}
+
 [SingleInstance]
 public sealed class NpgsqlDataSourceProvider(
         ILoggerFactory loggerFactory,
-        IConfiguration configuration
+        IConfiguration configuration,
+        NpgsqlDataSourceProviderOptions? npgsqlOptions = null
     ) : IDisposable
 {
     private readonly ConcurrentDictionary<string, NpgsqlDataSource> _dataSources = new();
@@ -20,7 +26,14 @@ public sealed class NpgsqlDataSourceProvider(
         {
             var connectionString = configuration.GetConnectionString(cs);
 
-            var dsBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            var dsBuilder = new NpgsqlDataSourceBuilder(connectionString)
+            {
+                ConnectionStringBuilder =
+                {
+                    ApplicationName = npgsqlOptions?.ApplicationName
+                }
+            };
+
             dsBuilder.UseLoggerFactory(loggerFactory);
 
             return dsBuilder.Build();

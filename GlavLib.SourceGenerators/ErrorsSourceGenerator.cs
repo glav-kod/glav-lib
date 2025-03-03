@@ -96,7 +96,7 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
             if (messageTemplate.Arguments.Count == 0)
             {
                 var field =
-                    $"public static readonly Error {errorName} = new (\"{errorKeyPrefix}.{errorName}\", {errorCode}, \"{messageTemplate.InterpolatedMessage}\");";
+                    $"public static readonly Error {errorName} = new (\"{messageTemplate.InterpolatedMessage}\", \"{errorKeyPrefix}.{errorName}\", {errorCode});";
                 fields.Add(ParseMemberDeclaration(field)!);
             }
             else
@@ -194,7 +194,7 @@ public class ErrorsSourceGenerator : IIncrementalGenerator
                 var args = new Dictionary<string, string>();
             {{dictionaryArgsSb}}
                 FormattableString message = $"{{messageTemplate.InterpolatedMessage}}";
-                return new Error("{{errorKeyPrefix}}.{{errorName}}", {{errorCode}}, message.ToString(CultureInfo.InvariantCulture), args);
+                return new Error(message.ToString(CultureInfo.InvariantCulture), "{{errorKeyPrefix}}.{{errorName}}", {{errorCode}}, args);
             }
             """;
 

@@ -1,5 +1,4 @@
 using FluentAssertions;
-using GlavLib.Basics.DataTypes;
 using GlavLib.Basics.MultiLang;
 
 namespace GlavLib.Tests.Basics;
@@ -41,11 +40,5 @@ public sealed class LanguageContextTests
                 ["ky"] = "Дагы бир ката"
             }),
         });
-
-        var date = new Date(2024, 10, 14);
-
-        Date? expectedDate = null;
-
-        date.Should().Be(expectedDate);
     }
 }

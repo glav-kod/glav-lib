@@ -30,7 +30,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                 {
                                     public static class SystemErrors
                                     {
-                                        public static readonly Error WrongFormat = new("GlavKod.Tests.SystemErrors.WrongFormat", null, "Неверный формат");
+                                        public static readonly Error WrongFormat = new("Неверный формат", "GlavKod.Tests.SystemErrors.WrongFormat", null);
                                     }
                                 }
                                 """;
@@ -65,7 +65,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                 {
                                     public static class SystemErrors
                                     {
-                                        public static readonly Error WrongFormat = new("GlavKod.Tests.SystemErrors.WrongFormat", "PaymentDenied", "Неверный формат");
+                                        public static readonly Error WrongFormat = new("Неверный формат", "GlavKod.Tests.SystemErrors.WrongFormat", "PaymentDenied");
                                     }
                                 }
                                 """;
@@ -103,7 +103,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                             var args = new Dictionary<string, string>();
                                             args["sum"] = sum.ToString();
                                             FormattableString message = $"Неверная сумма: {sum}";
-                                            return new Error("GlavKod.Tests.SystemErrors.WrongSum", null, message.ToString(CultureInfo.InvariantCulture), args);
+                                            return new Error(message.ToString(CultureInfo.InvariantCulture), "GlavKod.Tests.SystemErrors.WrongSum", null, args);
                                         }
                                     }
                                 }
@@ -144,7 +144,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                             var args = new Dictionary<string, string>();
                                             args["sum"] = sum.ToString();
                                             FormattableString message = $"Неверная сумма: {sum}";
-                                            return new Error("GlavKod.Tests.SystemErrors.WrongSum", "WrongSum", message.ToString(CultureInfo.InvariantCulture), args);
+                                            return new Error(message.ToString(CultureInfo.InvariantCulture), "GlavKod.Tests.SystemErrors.WrongSum", "WrongSum", args);
                                         }
                                     }
                                 }
@@ -183,7 +183,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                             var args = new Dictionary<string, string>();
                                             args["sum"] = sum.ToString("F2");
                                             FormattableString message = $"Неверная сумма: {sum:F2}";
-                                            return new Error("GlavKod.Tests.SystemErrors.WrongSum", null, message.ToString(CultureInfo.InvariantCulture), args);
+                                            return new Error(message.ToString(CultureInfo.InvariantCulture), "GlavKod.Tests.SystemErrors.WrongSum", null, args);
                                         }
                                     }
                                 }
@@ -223,7 +223,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                             if (sum is not null)
                                                 args["sum"] = sum.Value.ToString();
                                             FormattableString message = $"Неверная сумма: {sum}";
-                                            return new Error("GlavKod.Tests.SystemErrors.WrongSum", null, message.ToString(CultureInfo.InvariantCulture), args);
+                                            return new Error(message.ToString(CultureInfo.InvariantCulture), "GlavKod.Tests.SystemErrors.WrongSum", null, args);
                                         }
                                     }
                                 }
@@ -263,7 +263,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
                                             if (sum is not null)
                                                 args["sum"] = sum.Value.ToString("F2");
                                             FormattableString message = $"Неверная сумма: {sum:F2}";
-                                            return new Error("GlavKod.Tests.SystemErrors.WrongSum", null, message.ToString(CultureInfo.InvariantCulture), args);
+                                            return new Error(message.ToString(CultureInfo.InvariantCulture), "GlavKod.Tests.SystemErrors.WrongSum", null, args);
                                         }
                                     }
                                 }
@@ -294,7 +294,7 @@ public sealed class ErrorsSourceGeneratorTests : SourceGeneratorTestsBase
 
                                 public static class SystemErrors
                                 {
-                                    public static readonly Error WrongFormat = new("SystemErrors.WrongFormat", null, "Неверный формат");
+                                    public static readonly Error WrongFormat = new("Неверный формат", "SystemErrors.WrongFormat", null);
                                 }
                                 """;
 

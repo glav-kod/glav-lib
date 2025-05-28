@@ -52,12 +52,12 @@ public abstract class SingleValueObject<TValue>
     public static bool operator !=(SingleValueObject<TValue>? a, SingleValueObject<TValue>? b)
     {
         if (a is null && b is null)
-            return true;
-
-        if (a is null || b is null)
             return false;
 
-        return !(a == b);
+        if (a is null || b is null)
+            return true;
+
+        return !a.Equals(b);
     }
 
     private static Type UnproxyType(object obj)

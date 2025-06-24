@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using GlavLib.Abstractions.DI;
+﻿using GlavLib.Abstractions.DI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -18,33 +17,49 @@ public sealed class NpgsqlDataSourceProvider(
         NpgsqlDataSourceProviderOptions? npgsqlOptions = null
     ) : IDisposable
 {
-    private readonly ConcurrentDictionary<string, NpgsqlDataSource> _dataSources = new();
+    private readonly object _syncObject = new object();
+
+    private readonly Dictionary<string, NpgsqlDataSource> _dataSources = new();
 
     public NpgsqlDataSource GetDataSource(string connectionStringName)
     {
-        return _dataSources.GetOrAdd(connectionStringName, cs =>
+        lock (_syncObject)
         {
-            var connectionString = configuration.GetConnectionString(cs);
-
-            var dsBuilder = new NpgsqlDataSourceBuilder(connectionString)
+            if (!_dataSources.TryGetValue(connectionStringName, out var dataSource))
             {
-                ConnectionStringBuilder =
+                var connectionString = configuration.GetConnectionString(connectionStringName);
+
+                var dsBuilder = new NpgsqlDataSourceBuilder(connectionString)
                 {
-                    ApplicationName = npgsqlOptions?.ApplicationName
-                }
-            };
+                    ConnectionStringBuilder =
+                    {
+                        ApplicationName = npgsqlOptions?.ApplicationName
+                    }
+                };
 
-            dsBuilder.UseLoggerFactory(loggerFactory);
+                dsBuilder.UseLoggerFactory(loggerFactory);
 
-            return dsBuilder.Build();
-        });
+                dataSource                         = dsBuilder.Build();
+                _dataSources[connectionStringName] = dataSource;
+            }
+
+            return dataSource;
+        }
+    }
+
+    public void CloseAllConnections()
+    {
+        lock (_syncObject)
+        {
+            foreach (var (_, dataSource) in _dataSources)
+                dataSource.Dispose();
+
+            _dataSources.Clear();
+        }
     }
 
     public void Dispose()
     {
-        foreach (var (_, dataSource) in _dataSources)
-        {
-            dataSource.Dispose();
-        }
+        CloseAllConnections();
     }
 }

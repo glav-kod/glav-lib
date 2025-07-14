@@ -14,6 +14,9 @@ internal sealed class UserTypesConventions : IPropertyConvention, IIdConvention
         if (instance.Property.PropertyType == typeof(Date))
             instance.CustomType<DateUserType>();
 
+        if (instance.Property.PropertyType == typeof(YearMonth))
+            instance.CustomType<YearMonthUserType>();
+
         if (instance.Property.PropertyType == typeof(TimeSpan))
             instance.CustomType("TimeAsTimeSpan");
     }
@@ -25,5 +28,8 @@ internal sealed class UserTypesConventions : IPropertyConvention, IIdConvention
 
         if (instance.Type == typeof(Date))
             instance.CustomType<DateUserType>();
+
+        if (instance.Type == typeof(YearMonth))
+            instance.CustomType<YearMonthUserType>();
     }
 }

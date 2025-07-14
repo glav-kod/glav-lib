@@ -32,6 +32,7 @@ public static class GlavSerializerExtensions
         options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         options.Converters.Add(new UtcDateTimeJsonConverter());
         options.Converters.Add(new DateJsonConverter());
+        options.Converters.Add(new YearMonthJsonConverter());
         options.Converters.Add(new EnumObjectJsonConverter());
         options.Converters.Add(new TimeZoneInfoJsonConverter());
         options.Converters.Add(new OptionalJsonConverter());

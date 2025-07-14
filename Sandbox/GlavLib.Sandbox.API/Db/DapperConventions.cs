@@ -12,5 +12,6 @@ public static class DapperConventions
 
         SqlMapper.AddTypeHandler(typeof(Date), new DateHandler());
         SqlMapper.AddTypeHandler(typeof(UtcDateTime), new UtcDateTimeHandler());
+        SqlMapper.AddTypeHandler(typeof(YearMonth), new YearMonthHandler());
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using GlavLib.Abstractions.Results;
 using GlavLib.Abstractions.Validation;
 using GlavLib.Errors;
@@ -9,6 +10,18 @@ namespace GlavLib.Basics.DataTypes;
 public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?>
 {
     private const string Format = "yyyy-MM-ddTHH:mm:ssZ";
+
+    public UtcDateTime(
+            int year,
+            int month,
+            int day,
+            int hour,
+            int minute,
+            int second
+        )
+        : base(new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc))
+    {
+    }
 
     internal UtcDateTime(DateTime value)
         : base(value)
@@ -74,6 +87,7 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
         return new UtcDateTime(utcDateTime.Value - timeSpan);
     }
 
+    [PublicAPI]
     public static UtcDateTime FromDateTime(DateTime dateTime)
     {
         if (dateTime.Kind == DateTimeKind.Unspecified)
@@ -89,6 +103,7 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
         return new UtcDateTime(utcDateTime);
     }
 
+    [PublicAPI]
     public static UtcDateTime FromDateTime(DateTime dateTime, TimeZoneInfo timeZone)
     {
         if (dateTime.Kind != DateTimeKind.Unspecified)
@@ -103,7 +118,16 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
         return new UtcDateTime(utcDateTime);
     }
 
-    public static Result<UtcDateTime, Error> Create(string value)
+    [PublicAPI]
+    public static UtcDateTime FromString(string value)
+    {
+        return TryParse(value, out var result)
+            ? result
+            : throw new InvalidOperationException($"Wrong value format: {value}");
+    }
+
+    [PublicAPI]
+    public static bool TryParse(string value, [MaybeNullWhen(false)] out UtcDateTime result)
     {
         if (!DateTime.TryParseExact(s: value,
                                     format: "yyyy-MM-ddTHH:mm:ssZ",
@@ -111,9 +135,20 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
                                     style: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
                                     result: out var dateTime))
         {
-            return BasicErrors.WrongFormat;
+            result = null;
+            return false;
         }
 
-        return new UtcDateTime(dateTime);
+        result = new UtcDateTime(dateTime);
+        return true;
+    }
+
+    [PublicAPI]
+    public static Result<UtcDateTime, Error> Create(string value)
+    {
+        if (!TryParse(value, out var result))
+            return BasicErrors.WrongFormat;
+
+        return result;
     }
 }

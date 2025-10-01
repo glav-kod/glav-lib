@@ -1,7 +1,9 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using GlavLib.Abstractions.Results;
 using GlavLib.Abstractions.Validation;
 using GlavLib.Errors;
+using JetBrains.Annotations;
 
 namespace GlavLib.Basics.DataTypes;
 
@@ -64,7 +66,7 @@ public class Date : SingleValueObject<DateTime>, IComparable<Date?>
 
     public static explicit operator Date(string value)
     {
-        var result = FromString(value);
+        var result = Create(value);
 
         if (result.IsFailure)
             throw new InvalidOperationException(result.Error.Message);
@@ -92,7 +94,42 @@ public class Date : SingleValueObject<DateTime>, IComparable<Date?>
         return value.Value > otherValue.Value;
     }
 
-    public static Result<Date, Error> FromString(string value)
+    [PublicAPI]
+    public static Date FromDateTime(DateTime dateTime)
+    {
+        if (dateTime.Hour != 0 || dateTime.Minute != 0 || dateTime.Second != 0 || dateTime.Millisecond != 0)
+            throw new InvalidOperationException($"Date must not contain time. DateTime: {dateTime:yyyy.MM.dd HH:mm:ss fffffff}");
+
+        return new Date(dateTime.Date);
+    }
+
+    [PublicAPI]
+    public static Date FromString(string value)
+    {
+        return TryParse(value, out var result)
+            ? result
+            : throw new InvalidOperationException($"Wrong value format: {value}");
+    }
+    
+    [PublicAPI]
+    public static bool TryParse(string value, [MaybeNullWhen(false)] out Date result)
+    {
+        if (!DateTime.TryParseExact(s: value,
+                                    format: Format, 
+                                    provider: CultureInfo.InvariantCulture, 
+                                    style: DateTimeStyles.None, 
+                                    result: out var dateTime))
+        {
+            result = null;
+            return false;
+        }
+
+        result = new Date(dateTime);
+        return true;
+    }
+
+    [PublicAPI]
+    public static Result<Date, Error> Create(string value)
     {
         if (!DateTime.TryParseExact(value, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
         {
@@ -100,13 +137,5 @@ public class Date : SingleValueObject<DateTime>, IComparable<Date?>
         }
 
         return new Date(dateTime);
-    }
-
-    public static Date FromDateTime(DateTime dateTime)
-    {
-        if (dateTime.Hour != 0 || dateTime.Minute != 0 || dateTime.Second != 0 || dateTime.Millisecond != 0)
-            throw new InvalidOperationException($"Date must not contain time. DateTime: {dateTime:yyyy.MM.dd HH:mm:ss fffffff}");
-
-        return new Date(dateTime.Date);
     }
 }

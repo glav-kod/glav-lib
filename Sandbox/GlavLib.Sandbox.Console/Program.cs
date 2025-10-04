@@ -1,10 +1,12 @@
 ﻿using Dapper;
+using Destructurama.Attributed;
 using GlavLib.Basics.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Serilog;
+using Serilog.Core;
 
 var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")
@@ -25,22 +27,25 @@ var serviceProvider = services.BuildServiceProvider();
 
 var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
-var dsBuilder = new NpgsqlDataSourceBuilder("User ID=sys;Password=123;Host=127.100.0.1;Port=5432;Database=glavdb");
-dsBuilder.UseLoggerFactory(loggerFactory);
+var logger = loggerFactory.CreateLogger<Program>();
 
-var dataSource = dsBuilder.Build();
-
-var connection = dataSource.OpenConnection();
-
-const string sql = "select * from test_table";
-
-var result = connection.Query(sql).ToList();
-
-Console.WriteLine(result.Count);
-    
-foreach (var row in result.Take(10))
+logger.LogInformation("Foo: {@Foo}", new Foo
 {
-    Console.WriteLine(row);
-}
+    Value    = "123",
+    Password = "pass!@#",
+    Text = "text"
+});
 
 Log.CloseAndFlush();
+
+
+public sealed class Foo
+{
+    public required string Value { get; init; }
+ 
+    [LogMasked]
+    public required string Password { get; init; }
+    
+    [NotLogged]
+    public required string Text { get; init; }
+}

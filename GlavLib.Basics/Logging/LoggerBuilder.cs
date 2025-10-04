@@ -1,4 +1,5 @@
-﻿using GlavLib.Abstractions.DataTypes;
+﻿using Destructurama;
+using GlavLib.Abstractions.DataTypes;
 using GlavLib.Abstractions.Validation;
 using GlavLib.Basics.DataTypes;
 using GlavLib.Basics.Logging.Enrichers;
@@ -40,6 +41,7 @@ public sealed class LoggerBuilder
                                     x.Args
                                 };
                             })
+                            .Destructure.UsingAttributes()
                             .Enrich.WithExceptionDetails()
                             .Enrich.WithMachineName()
                             .Enrich.FromLogContext()

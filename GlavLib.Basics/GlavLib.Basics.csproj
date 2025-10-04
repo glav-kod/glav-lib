@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Destructurama.Attributed" />
     <PackageReference Include="FluentValidation"/>
     <PackageReference Include="Glob"/>
     <PackageReference Include="JetBrains.Annotations"/>

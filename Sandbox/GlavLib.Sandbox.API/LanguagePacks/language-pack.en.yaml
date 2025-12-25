@@ -3,4 +3,5 @@ Bundles:
   - Prefix: GlavLib.Sandbox.API.ApiErrors
     Messages:
       FillValue: Fill value
-      InvalidOperation: Invalid operation 
+      InvalidOperation: Invalid operation
+      ClientFormattedError: "Protocol error: {clientError:string}"

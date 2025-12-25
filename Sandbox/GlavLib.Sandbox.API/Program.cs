@@ -31,25 +31,29 @@ appBuilder.Services
           .Add_GlavLib_Sandbox_API()
           .AddAppMetrics(defaultContextLabel: "sandbox")
           .ConfigureHttpJsonOptions(options => //
-          {
-              options.SerializerOptions.GlavConfiguration();
-          })
+                  {
+                      options.SerializerOptions.GlavConfiguration();
+                  }
+              )
           .AddFluentValidationAutoValidation(config => //
-          {
-              config.OverrideDefaultResultFactoryWith<ErrorResponseFactory>();
-          })
+                  {
+                      config.OverrideDefaultResultFactoryWith<ErrorResponseFactory>();
+                  }
+              )
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.App"))
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.Sandbox.API"))
           .AddNh(config =>
-          {
-              config.UsePostgreSQL()
-                    .UseDefaults()
-                    .AddFluentMappings("GlavLib.Sandbox.API");
-          })
+                  {
+                      config.UsePostgreSQL()
+                            .UseDefaults()
+                            .AddFluentMappings("GlavLib.Sandbox.API");
+                  }
+              )
           .AddMultiLang(builder => //
-          {
-              builder.AddFromDirectory("./LanguagePacks", "*.yaml");
-          });
+                  {
+                      builder.AddFromDirectory("./LanguagePacks", "*.yaml");
+                  }
+              );
 
 var app = appBuilder.Build();
 
@@ -71,7 +75,10 @@ var apiGroup = app.MapGroup("/api")
                   .AddAutoValidation();
 
 
-app.MapUserRoutes(apiGroup);
+app
+    .MapUserRoutes(apiGroup)
+    .MapErrorRoutes(apiGroup)
+    ;
 
 app.Run();
 

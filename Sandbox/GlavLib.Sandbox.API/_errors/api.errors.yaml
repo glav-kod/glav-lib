@@ -6,3 +6,4 @@ Errors:
     Code: UNF
     Message: Пользователь#{userId:long} не найден
   InvalidOperation: Невозможно выполнить операцию
+  ClientFormattedError: "Ошибка протокола: {clientError:string}"

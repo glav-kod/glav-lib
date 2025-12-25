@@ -1,12 +1,9 @@
-﻿using Dapper;
-using Destructurama.Attributed;
+﻿using Destructurama.Attributed;
 using GlavLib.Basics.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using Serilog;
-using Serilog.Core;
 
 var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")

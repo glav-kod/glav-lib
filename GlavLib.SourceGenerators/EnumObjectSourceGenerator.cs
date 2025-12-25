@@ -21,18 +21,22 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
     private const string IEnumObject = "GlavLib.Abstractions.DataTypes.IEnumObject";
 
     private static readonly DiagnosticDescriptor UnhandledException =
-        new("XX0001",
-            "Unhandled exception occurred",
-            "The EnumObjectSourceGenerator caused an exception {0}: {1} {2}",
-            "Error",
-            DiagnosticSeverity.Error,
-            true);
+        new(
+                "XX0001",
+                "Unhandled exception occurred",
+                "The EnumObjectSourceGenerator caused an exception {0}: {1} {2}",
+                "Error",
+                DiagnosticSeverity.Error,
+                true
+            );
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider
-                              .CreateSyntaxProvider(predicate: (s, _) => IsTransformCandidate(s),
-                                                    transform: (ctx, _) => GetEnumRegistration(ctx))
+                              .CreateSyntaxProvider(
+                                      predicate: (s, _) => IsTransformCandidate(s),
+                                      transform: (ctx, _) => GetEnumRegistration(ctx)
+                                  )
                               .Where(t => t is not null)
                               .Select((t, _) => (EnumRegistration)t!);
 
@@ -128,9 +132,13 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
             var valueArg       = attributeData.ConstructorArguments[1];
             var displayNameArg = attributeData.ConstructorArguments[2];
 
-            enumItems.Add(new EnumItem(FieldName: fieldNameArg.Value!.ToString(),
-                                       Value: valueArg.Value!.ToString(),
-                                       DisplayName: displayNameArg.Value!.ToString()));
+            enumItems.Add(
+                    new EnumItem(
+                            FieldName: fieldNameArg.Value!.ToString(),
+                            Value: valueArg.Value!.ToString(),
+                            DisplayName: displayNameArg.Value!.ToString()
+                        )
+                );
         }
 
         string? ns = null;
@@ -138,9 +146,11 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         if (!classSymbol.ContainingNamespace.IsGlobalNamespace)
             ns = classSymbol.ContainingNamespace.ToDisplayString();
 
-        return new EnumRegistration(classNamespace: ns,
-                                    className: classSymbol.Name,
-                                    items: enumItems);
+        return new EnumRegistration(
+                classNamespace: ns,
+                className: classSymbol.Name,
+                items: enumItems
+            );
     }
 
     private static void GenerateCode(
@@ -181,11 +191,13 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            var diagnostic = Diagnostic.Create(UnhandledException,
-                                               null,
-                                               ex.GetType(),
-                                               ex.Message,
-                                               ex.StackTrace);
+            var diagnostic = Diagnostic.Create(
+                    UnhandledException,
+                    null,
+                    ex.GetType(),
+                    ex.Message,
+                    ex.StackTrace
+                );
 
             context.ReportDiagnostic(diagnostic);
         }
@@ -203,82 +215,92 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
         foreach (var enumItem in enumRegistration.Items)
         {
             keys.Add(ParseMemberDeclaration($"""public const string {enumItem.FieldName}Key = "{enumItem.Value}";""")!);
-            fields.Add(ParseMemberDeclaration(
-                           $"public static readonly {className} {enumItem.FieldName} = new ({enumItem.FieldName}Key, \"{enumItem.DisplayName}\");")!);
+            fields.Add(ParseMemberDeclaration($"public static readonly {className} {enumItem.FieldName} = new ({enumItem.FieldName}Key, \"{enumItem.DisplayName}\");")!);
 
             switchBuilder.AppendLine($"{enumItem.FieldName}Key => {enumItem.FieldName},");
         }
 
         var itemNames = string.Join(", ", enumRegistration.Items.Select(x => x.FieldName));
-        fields.Add(ParseMemberDeclaration(
-                       $"public static readonly global::System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
+        fields.Add(ParseMemberDeclaration($"public static readonly global::System.Collections.Generic.IReadOnlyList<{className}> Items = [{itemNames}];")!);
 
-        var constructorMember = ParseMemberDeclaration($$"""
-                                                       private {{className}}(string key, string displayName) : base(key, displayName)
-                                                       {
-                                                       }
-                                                       """);
+        var constructorMember = ParseMemberDeclaration(
+                $$"""
+                  private {{className}}(string key, string displayName) : base(key, displayName)
+                  {
+                  }
+                  """
+            );
 
-        var equalsMember = ParseMemberDeclaration($$"""
-                                                  public override bool Equals(object? obj)
-                                                  {
-                                                      if (ReferenceEquals(null, obj))
-                                                          return false;
-                                                  
-                                                      if (ReferenceEquals(this, obj))
-                                                          return true;
-                                                  
-                                                      if (obj.GetType() != typeof({{className}}))
-                                                          return false;
-                                                  
-                                                      var other = ({{className}})obj;
-                                                      return Key == other.Key;
-                                                  }
-                                                  """);
+        var equalsMember = ParseMemberDeclaration(
+                $$"""
+                  public override bool Equals(object? obj)
+                  {
+                      if (ReferenceEquals(null, obj))
+                          return false;
 
-        var getHashCodeMember = ParseMemberDeclaration("""
-                                                       public override int GetHashCode()
-                                                       {
-                                                           return Key.GetHashCode();
-                                                       }
-                                                       """);
+                      if (ReferenceEquals(this, obj))
+                          return true;
 
-        var createMethod = ParseMemberDeclaration($$"""
-                                                  public static {{className}} Create(string key)
-                                                  {
-                                                      return key switch
-                                                      {
-                                                        {{switchBuilder}}
-                                                        _ => throw new global::System.InvalidOperationException($"Неожиданный ключ '{key}'")
-                                                      };
-                                                  }
-                                                  """);
+                      if (obj.GetType() != typeof({{className}}))
+                          return false;
 
-        var equalityOperator = ParseMemberDeclaration($$"""
-                                                      public static bool operator ==({{className}}? left, {{className}}? right)
-                                                      {
-                                                          if (left is null && right is null)
-                                                              return true;
-                                                      
-                                                          if (left is null || right is null)
-                                                              return false;
-                                                      
-                                                          return left.Key == right.Key;
-                                                      }
-                                                      """);
+                      var other = ({{className}})obj;
+                      return Key == other.Key;
+                  }
+                  """
+            );
 
-        var inequalityOperator = ParseMemberDeclaration($$"""
-                                                        public static bool operator !=({{className}}? left, {{className}}? right)
-                                                        {
-                                                            if (left is null && right is null)
-                                                                return false;
-                                                        
-                                                            if (left is null || right is null)
-                                                                return true;
-                                                        
-                                                            return left.Key != right.Key;
-                                                        }
-                                                        """);
+        var getHashCodeMember = ParseMemberDeclaration(
+                """
+                public override int GetHashCode()
+                {
+                    return Key.GetHashCode();
+                }
+                """
+            );
+
+        var createMethod = ParseMemberDeclaration(
+                $$"""
+                  public static {{className}} Create(string key)
+                  {
+                      return key switch
+                      {
+                        {{switchBuilder}}
+                        _ => throw new global::System.InvalidOperationException($"Неожиданный ключ '{key}'")
+                      };
+                  }
+                  """
+            );
+
+        var equalityOperator = ParseMemberDeclaration(
+                $$"""
+                  public static bool operator ==({{className}}? left, {{className}}? right)
+                  {
+                      if (left is null && right is null)
+                          return true;
+
+                      if (left is null || right is null)
+                          return false;
+
+                      return left.Key == right.Key;
+                  }
+                  """
+            );
+
+        var inequalityOperator = ParseMemberDeclaration(
+                $$"""
+                  public static bool operator !=({{className}}? left, {{className}}? right)
+                  {
+                      if (left is null && right is null)
+                          return false;
+
+                      if (left is null || right is null)
+                          return true;
+
+                      return left.Key != right.Key;
+                  }
+                  """
+            );
         var fullClassName = enumRegistration.GetFullClassName();
         var iEnumObject   = ParseTypeName($"{IEnumObject}<{fullClassName}>");
 
@@ -334,22 +356,14 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
 
             unchecked
             {
-                var hashCode = ClassNamespace != null ? ClassNamespace.GetHashCode() : 0;
+                var hashCode = ClassNamespace != null
+                    ? ClassNamespace.GetHashCode()
+                    : 0;
                 hashCode = (hashCode * 397) ^ ClassName.GetHashCode();
                 hashCode = (hashCode * 397) ^ sb.ToString().GetHashCode();
                 return hashCode;
             }
         }
-    }
-
-    private static void ReportExceptionDiagnostic(
-            SourceProductionContext context,
-            Exception exception,
-            Func<Exception, Diagnostic> diagnosticFactory
-        )
-    {
-        var diagnostic = diagnosticFactory(exception);
-        context.ReportDiagnostic(diagnostic);
     }
 
     private readonly record struct EnumItem(

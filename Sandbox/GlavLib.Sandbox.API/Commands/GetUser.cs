@@ -1,10 +1,10 @@
-﻿using Dapper;
-using FluentValidation;
+﻿using FluentValidation;
 using GlavLib.App.Commands;
 using GlavLib.App.Http;
 using GlavLib.Basics.Extensions;
 using GlavLib.Db;
 using GlavLib.Errors;
+using GlavLib.Sandbox.API.Model;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GlavLib.Sandbox.API.Commands;
@@ -31,28 +31,25 @@ public sealed class UserDTO
 
 public class GetUser
 {
-    public static async Task<CommandResult<Ok<UserDTO>>> ExecuteAsync(FromJsonQuery<GetUserRequest> request,
-                                                                      CancellationToken             cancellationToken)
+    public static async Task<CommandResult<Ok<UserDTO>>> ExecuteAsync(
+            FromJsonQuery<GetUserRequest> request,
+            CancellationToken cancellationToken
+        )
     {
-        var connection = StatefulDbSession.CurrentConnection;
+        var dbSession = StatefulDbSession.Current;
+        var nhSession = dbSession.NhSession;
 
-        const string sql = """
-                           select t.id,
-                                  t.name
-                             from public.users t
-                            where t.id = :id
-                           """;
-
-        var parameters = new
-        {
-            id = request.Value.UserId
-        };
-
-        var user = await connection.QuerySingleOrDefaultAsync<UserDTO>(sql, parameters);
+        var user = await nhSession.GetAsync<User>(request.Value.UserId, cancellationToken);
 
         if (user is null)
             return (ApiErrors.UserIsNotFound(request.Value.UserId), xDebug: $"User#{request.Value.UserId} is not found");
 
-        return Ok(user);
+        var result = new UserDTO
+        {
+            Id   = user.Id,
+            Name = user.Name
+        };
+
+        return Ok(result);
     }
 }

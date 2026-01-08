@@ -9,3 +9,8 @@ create table public.users
     constraint pk_users primary key (id)
 );
 --rollback drop table public.users;
+
+--changeset uamangeldiev:20
+alter table public.users
+    add column birth_date date;
+--rollback ;

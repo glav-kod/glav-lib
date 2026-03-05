@@ -144,12 +144,32 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
             TimeZoneInfo timeZone
         )
     {
-        var dateTime = DateTime.Parse(
+        return TryParse(value, timeZone, out var result)
+            ? result
+            : throw new InvalidOperationException($"Wrong value format: {value}");
+    }
+
+    [PublicAPI]
+    public static bool TryParse(
+            string value,
+            TimeZoneInfo timeZone,
+            [NotNullWhen(returnValue: true)] out UtcDateTime? utcDateTime
+        )
+    {
+        var isParsed = DateTime.TryParse(
                 s: value,
-                provider: CultureInfo.InvariantCulture
+                provider: CultureInfo.InvariantCulture,
+                result: out var dateTime
             );
 
-        return FromDateTime(dateTime, timeZone);
+        if (!isParsed)
+        {
+            utcDateTime = null;
+            return false;
+        }
+
+        utcDateTime = FromDateTime(dateTime, timeZone);
+        return true;
     }
 
     [PublicAPI]

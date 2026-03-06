@@ -98,53 +98,56 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
     }
 
     [PublicAPI]
-    public static UtcDateTime FromDateTime(DateTime dateTime)
+    public static UtcDateTime FromDateTime(
+            DateTime dateTime,
+            TimeZoneInfo? sourceTimeZone = null
+        )
     {
+        if (dateTime.Kind == DateTimeKind.Utc)
+            return new UtcDateTime(dateTime);
+
         if (dateTime.Kind == DateTimeKind.Unspecified)
         {
-            throw new InvalidOperationException(
-                    $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
-                    "DateTime.Kind is not specified"
-                );
+            if (sourceTimeZone is null)
+            {
+                throw new InvalidOperationException(
+                        $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
+                        $"DateTime.Kind is {dateTime.Kind} and {nameof(sourceTimeZone)} not specified"
+                    );
+            }
+
+            var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(dateTime, sourceTimeZone);
+            return new UtcDateTime(utcDateTime);
         }
 
-        var utcDateTime = dateTime.ToUniversalTime();
-
-        return new UtcDateTime(utcDateTime);
-    }
-
-    [PublicAPI]
-    public static UtcDateTime FromDateTime(DateTime dateTime, TimeZoneInfo timeZone)
-    {
-        var utcDateTime = dateTime.Kind switch
+        if (dateTime.Kind == DateTimeKind.Local)
         {
-            DateTimeKind.Utc => dateTime,
-            DateTimeKind.Local => TimeZoneInfo.ConvertTimeToUtc(dateTime, TimeZoneInfo.Local),
-            DateTimeKind.Unspecified => TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZone),
-            _ => throw new InvalidOperationException(
-                    $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
-                    $"not supported DateTime.Kind: {dateTime.Kind}"
-                )
-        };
+            var utcDateTime = dateTime.ToUniversalTime();
 
-        return new UtcDateTime(utcDateTime);
+            return new UtcDateTime(utcDateTime);
+        }
+
+        throw new InvalidOperationException(
+                $"Cannot convert DateTime {dateTime:yyyy.MM.dd HH:mm:ss fffffff} to UtcDateTime, " +
+                $"not supported DateTime.Kind: {dateTime.Kind}"
+            );
     }
 
     [PublicAPI]
-    public static UtcDateTime FromString(string value)
+    public static UtcDateTime ParseExact(string value)
     {
-        return TryParse(value, out var result)
+        return TryParseExact(value, out var result)
             ? result
             : throw new InvalidOperationException($"Wrong value format: {value}");
     }
 
     [PublicAPI]
-    public static UtcDateTime FromString(
+    public static UtcDateTime Parse(
             string value,
-            TimeZoneInfo timeZone
+            TimeZoneInfo? sourceTimeZone
         )
     {
-        return TryParse(value, timeZone, out var result)
+        return TryParse(value, sourceTimeZone, out var result)
             ? result
             : throw new InvalidOperationException($"Wrong value format: {value}");
     }
@@ -152,7 +155,7 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
     [PublicAPI]
     public static bool TryParse(
             string value,
-            TimeZoneInfo timeZone,
+            TimeZoneInfo? sourceTimeZone,
             [NotNullWhen(returnValue: true)] out UtcDateTime? utcDateTime
         )
     {
@@ -168,18 +171,21 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
             return false;
         }
 
-        utcDateTime = FromDateTime(dateTime, timeZone);
+        utcDateTime = FromDateTime(dateTime, sourceTimeZone);
         return true;
     }
 
     [PublicAPI]
-    public static bool TryParse(string value, [MaybeNullWhen(false)] out UtcDateTime result)
+    public static bool TryParseExact(
+            string value,
+            [MaybeNullWhen(false)] out UtcDateTime result
+        )
     {
         if (!DateTime.TryParseExact(
                     s: value,
-                    format: "yyyy-MM-ddTHH:mm:ssZ",
+                    format: Format,
                     provider: CultureInfo.InvariantCulture,
-                    style: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
+                    style: DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
                     result: out var dateTime
                 ))
         {
@@ -194,7 +200,7 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
     [PublicAPI]
     public static Result<UtcDateTime, Error> Create(string value)
     {
-        if (!TryParse(value, out var result))
+        if (!TryParseExact(value, out var result))
             return BasicErrors.WrongFormat;
 
         return result;

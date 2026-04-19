@@ -17,7 +17,7 @@ public sealed class NpgsqlDataSourceProvider(
         NpgsqlDataSourceProviderOptions? npgsqlOptions = null
     ) : IDisposable
 {
-    private readonly object _syncObject = new();
+    private readonly Lock _syncObject = new();
 
     private readonly Dictionary<string, NpgsqlDataSource> _dataSources = new();
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace GlavLib.App.Commands;
 
-internal readonly struct LocalizedError(string? code, string message)
+public readonly struct LocalizedError(string? code, string message)
 {
     public string? Code { get; } = code;
 

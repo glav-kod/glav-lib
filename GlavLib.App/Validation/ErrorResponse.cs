@@ -12,7 +12,7 @@ public sealed class ErrorResponse
 
     public Dictionary<string, string>? ParameterMessages { get; set; }
 
-    internal static ErrorResponse Create(
+    public static ErrorResponse Create(
             LocalizedError error,
             Dictionary<string, LocalizedError>? parameterErrors
         )

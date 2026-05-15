@@ -1,0 +1,12 @@
+### Get User
+GET http://localhost:8080/api/users/get?request={"userId": 2}
+Accept: application/json
+
+### Create User
+POST http://localhost:8080/api/users/create
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "{{$random.address.lastName}} {{$random.address.firstName}}"
+}

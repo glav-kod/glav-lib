@@ -4,11 +4,9 @@ using GlavLib.App.Http;
 using GlavLib.App.Validation;
 using GlavLib.Basics.DomainEvents;
 using GlavLib.Basics.MultiLang;
-using GlavLib.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace GlavLib.App.Commands;
 
@@ -17,11 +15,12 @@ public static class CommandsFilterExtensions
     public static TBuilder UseCommands<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder
     {
-        return builder.AddEndpointFilterFactory(CommandsFilter.Factory);
+        return builder.UseDomainEvents()
+                      .AddEndpointFilterFactory(CommandsFilter.Factory);
     }
 }
 
-public sealed class CommandsFilter
+public static class CommandsFilter
 {
     public static Func<EndpointFilterFactoryContext, EndpointFilterDelegate, EndpointFilterDelegate> Factory => (_, next) => Create(next);
 
@@ -29,12 +28,7 @@ public sealed class CommandsFilter
     {
         return async context =>
         {
-            var serviceProvider = context.HttpContext.RequestServices;
-
-            var logger              = serviceProvider.GetRequiredService<ILogger<CommandsFilter>>();
-            var domainEventsHandler = serviceProvider.GetRequiredService<DomainEventsHandler>();
-
-            using var domainEventsSession = DomainEventsSession.Bind();
+            var domainEventsSession = DomainEventsSession.Current;
 
             var result = await next(context);
 
@@ -55,6 +49,8 @@ public sealed class CommandsFilter
                     return TypedResults.Json(errorResponse);
                 }
 
+                domainEventsSession.Commit();
+                
                 httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
                 result = commandResult.Value;
@@ -74,21 +70,12 @@ public sealed class CommandsFilter
                     httpContext.Response.Headers.SetXStatus(XStatus.Error);
                     return TypedResults.Json(errorResponse);
                 }
+                
+                domainEventsSession.Commit();
 
                 httpContext.Response.Headers.SetXStatus(XStatus.OK);
 
                 result = Results.Ok();
-            }
-
-            if (domainEventsSession.Events.Count > 0)
-            {
-                using var dbTransaction = new DbTransaction();
-
-                await domainEventsHandler.HandleAsync(domainEventsSession, context.HttpContext.RequestAborted);
-
-                logger.LogInformation("Обработка ДоменныхСобытий завершилась успешно");
-
-                dbTransaction.Commit();
             }
 
             return result;

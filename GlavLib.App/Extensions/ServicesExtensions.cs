@@ -6,16 +6,6 @@ namespace GlavLib.App.Extensions;
 
 public static class ServicesExtensions
 {
-    /// <summary>
-    /// Adds
-    /// <list>
-    /// <item><c>RequestTimeouts</c></item>
-    /// <item><c>AddEndpointsApiExplorer</c></item>
-    /// <item><c>AddSwaggerGen</c></item>
-    /// <item><c>HealthChecks</c></item>
-    /// </list>
-    /// </summary>
-    /// <returns></returns>
     public static IServiceCollection AddDefaults(this IServiceCollection services)
     {
         services.AddRequestTimeouts()
@@ -27,14 +17,6 @@ public static class ServicesExtensions
         return services;
     }
 
-    /// <summary>
-    /// Adds
-    /// <list>
-    /// <item><c>Metrics</c></item>
-    /// <item><c>MetricsEndpoints</c></item>
-    /// </list>
-    /// </summary>
-    /// <returns></returns>
     public static IServiceCollection AddAppMetrics(this IServiceCollection services, string defaultContextLabel)
     {
         var metrics = AppMetrics.CreateDefaultBuilder()

@@ -111,6 +111,7 @@ public class Date : SingleValueObject<DateTime>, IComparable<Date?>
             : throw new InvalidOperationException($"Wrong value format: {value}");
     }
     
+    //Не трогать сигнатуру метода: это метод нужен для Asp.Net Core
     [PublicAPI]
     public static bool TryParse(string value, [MaybeNullWhen(false)] out Date result)
     {

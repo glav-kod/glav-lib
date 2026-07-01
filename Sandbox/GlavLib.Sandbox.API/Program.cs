@@ -57,12 +57,6 @@ appBuilder.Services
 
 var app = appBuilder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseMetricsEndpoint(new MetricsPrometheusTextOutputFormatter());
 
 app.MapHealthChecks("/healthz")

@@ -9,8 +9,7 @@ public static class ServicesExtensions
     public static IServiceCollection AddDefaults(this IServiceCollection services)
     {
         services.AddRequestTimeouts()
-                .AddEndpointsApiExplorer()
-                .AddSwaggerGen();
+                .AddEndpointsApiExplorer();
 
         services.AddHealthChecks();
 

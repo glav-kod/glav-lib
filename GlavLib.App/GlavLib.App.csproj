@@ -7,11 +7,9 @@
     <PackageReference Include="App.Metrics.AspNetCore"/>
     <PackageReference Include="App.Metrics.Prometheus"/>
     <PackageReference Include="FluentValidation.AspNetCore"/>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
     <PackageReference Include="Microsoft.Extensions.Configuration"/>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream"/>
     <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Endpoints"/>
-    <PackageReference Include="Swashbuckle.AspNetCore"/>
     <PackageReference Include="Serilog.AspNetCore"/>
   </ItemGroup>
 

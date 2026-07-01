@@ -152,6 +152,27 @@ public class UtcDateTime : SingleValueObject<DateTime>, IComparable<UtcDateTime?
             : throw new InvalidOperationException($"Wrong value format: {value}");
     }
 
+    //Не трогать сигнатуру метода: это метод нужен для Asp.Net Core
+    [PublicAPI]
+    public static bool TryParse(string value, [MaybeNullWhen(false)] out UtcDateTime result)
+    {
+        if (!DateTime.TryParseExact(
+                    s: value,
+                    format: Format,
+                    provider: CultureInfo.InvariantCulture,
+                    style: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeLocal,
+                    result: out var dateTime
+                ))
+        {
+            result = null;
+            return false;
+        }
+
+        result = new UtcDateTime(dateTime);
+        return true;
+    }
+
+    
     [PublicAPI]
     public static bool TryParse(
             string value,

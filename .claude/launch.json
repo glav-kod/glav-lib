@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sandbox-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "Sandbox/GlavLib.Sandbox.API", "--launch-profile", "http"],
+      "port": 8080,
+      "url": "http://localhost:8080"
+    }
+  ]
+}

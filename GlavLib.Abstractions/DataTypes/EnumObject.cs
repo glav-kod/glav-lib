@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace GlavLib.Abstractions.DataTypes;
 
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature, ImplicitUseTargetFlags.WithInheritors)]
 public abstract class EnumObject(
         string key,
         string displayName

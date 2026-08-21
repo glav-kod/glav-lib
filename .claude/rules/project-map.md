@@ -30,9 +30,18 @@ build/                     Nuke-сборка: Build.cs, цели DotNetPack и P
 ```
 
 Решение — `GlavLib.sln`. Общие настройки сборки — `Directory.Build.props` (`net10.0`,
-`Nullable`, `TreatWarningsAsErrors`), `Directory.Build.targets` (подключение `NullGuard.Fody`
-и автоматическое включение `_errors/*` в `AdditionalFiles`), версии пакетов —
-`Directory.Packages.props` (центральное управление версиями, в `csproj` версии не пишутся).
+`Nullable`, `TreatWarningsAsErrors`, константа компиляции `JETBRAINS_ANNOTATIONS`),
+`Directory.Build.targets` (подключение `NullGuard.Fody` и автоматическое включение `_errors/*`
+в `AdditionalFiles`), версии пакетов — `Directory.Packages.props` (центральное управление
+версиями, в `csproj` версии не пишутся).
+
+Константа `JETBRAINS_ANNOTATIONS` определена на всё решение и снимать её нельзя. Атрибуты
+пакета `JetBrains.Annotations` помечены `[Conditional("JETBRAINS_ANNOTATIONS")]`, поэтому без
+этой константы компилятор выбрасывает их применение из выходной сборки: в метаданных пакетов
+не остаётся ни `[PublicAPI]`, ни `[UsedImplicitly]`, и у потребителей библиотеки подсказки
+IDE не работают — например, Rider сообщает «Class is never instantiated» на наследниках
+`EnumObject`. Задаётся она с сохранением `$(DefineConstants)`, чтобы не затереть `DEBUG`
+и `TRACE`, которые SDK добавляет позже.
 
 ## Зависимости сборок
 

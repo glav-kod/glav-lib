@@ -1,6 +1,9 @@
-﻿namespace GlavLib.Abstractions.DataTypes;
+﻿using JetBrains.Annotations;
+
+namespace GlavLib.Abstractions.DataTypes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
 public class EnumObjectItemAttribute : Attribute
 {
     public string FieldName { get; set; }

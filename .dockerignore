@@ -1,0 +1,17 @@
+# В контекст сборки попадают только исходники. Результаты сборки с хоста исключены осознанно:
+# `obj/` содержит файлы, привязанные к версии SDK хоста, и внутри образа с другим SDK они
+# ломают восстановление пакетов.
+.git
+.gitignore
+.idea
+.vs
+.claude
+**/bin
+**/obj
+artifacts
+.nuke/temp
+Dockerfile
+.dockerignore
+docker-compose.yml
+*.user
+*.DotSettings

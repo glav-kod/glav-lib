@@ -27,6 +27,8 @@ migrations/                Liquibase: db.changelog.xml + public/
 init-database/             init.sql для контейнера Postgres (пользователь sys, база glavdb)
 build/                     Nuke-сборка: Build.cs, цели DotNetPack и PushPackages
 .nuke/                     Параметры Nuke
+Dockerfile                 Сборка и упаковка пакетов на фиксированной версии .NET SDK
+.dockerignore              Что не попадает в контекст сборки образа
 ```
 
 Решение — `GlavLib.sln`. Общие настройки сборки — `Directory.Build.props` (`net10.0`,
@@ -203,6 +205,25 @@ Errors:
 `DotNetRestore`, `DotNetCompile`, `DotNetPack`, `PushPackages`. Номер версии считается
 из ветки и номера сборки TeamCity (`BuildVersion`), поэтому версии пакетов в репозитории
 руками не проставляются.
+
+Цель `DotNetPack` компилирует и упаковывает решение не на агенте, а в контейнере по корневому
+`Dockerfile`: она вызывает `docker build` и выгружает готовые `.nupkg` в `artifacts/`
+(стадия `artifacts` в `Dockerfile` существует ровно ради этой выгрузки). Версия пакетов
+и конфигурация передаются в контейнер аргументами сборки, поэтому расчёт версии остаётся
+на агенте, где доступен контекст TeamCity.
+
+Причина такого устройства — версия компилятора. `GlavLib.SourceGenerators` компилируется против
+Roslyn той версии, что указана для `Microsoft.CodeAnalysis.CSharp` в `Directory.Packages.props`,
+а компилятор более старой версии отказывается загружать такой анализатор с ошибкой CS9057.
+Образ SDK задан явно параметром `DotNetSdkImage` (по умолчанию `mcr.microsoft.com/dotnet/sdk:10.0.400`,
+он несёт Roslyn 5.9), и версия SDK на агенте на упаковку больше не влияет. Поднимая версию
+`Microsoft.CodeAnalysis.CSharp`, поднимай и образ.
+
+От агента при этом требуется Docker с BuildKit (версия 23 и новее): цель использует экспорт
+артефактов через `--output`, а `Dockerfile` — кеш-mount для пакетов NuGet.
+
+Цели `DotNetClean`, `DotNetRestore` и `DotNetCompile` остались сборкой на самом агенте и в цепочку
+упаковки больше не входят: их место — локальная проверка компиляции, а не выпуск пакетов.
 
 GitHub Actions в репозитории нет: автоматических проверок на pull request не запускается,
 и единственная проверка изменения — та, которую агент или разработчик прогнал сам.

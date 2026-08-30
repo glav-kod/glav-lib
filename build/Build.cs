@@ -7,6 +7,7 @@ using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
+using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Serilog;
 
@@ -26,6 +27,13 @@ class Build : NukeBuild
     [Parameter] readonly string NugetApiKey;
     
     [Parameter] readonly string NugetSource = "https://api.nuget.org/v3/index.json";
+
+    /// <summary>
+    /// Образ .NET SDK, в котором собираются и упаковываются пакеты. Версия задана явно, потому что
+    /// source-генератор компилируется против Roslyn из <c>Microsoft.CodeAnalysis.CSharp</c>
+    /// и не загружается компилятором более старой версии (CS9057).
+    /// </summary>
+    [Parameter] readonly string DotNetSdkImage = "mcr.microsoft.com/dotnet/sdk:10.0.400";
 
     readonly TeamCity TeamCity = TeamCity.Instance;
 
@@ -101,10 +109,14 @@ class Build : NukeBuild
                });
     };
 
+    /// <summary>
+    /// Собирает и упаковывает решение внутри контейнера, а готовые <c>.nupkg</c> выгружает
+    /// в <see cref="ArtifactsDirectory" />. Компиляция вынесена из агента в контейнер, чтобы
+    /// версия .NET SDK была задана явно и не зависела от того, что установлено на агенте.
+    /// </summary>
     Target DotNetPack => x =>
     {
         return x
-               .DependsOn(DotNetCompile)
                .Executes(() =>
                {
                    TeamCity?.StartProgress(nameof(DotNetPack));
@@ -112,14 +124,21 @@ class Build : NukeBuild
                    Log.Information("Cleaning artifacts directory");
                    ArtifactsDirectory.CreateOrCleanDirectory();
 
-                   DotNetTasks.DotNetPack(x => x.SetConfiguration(Configuration)
-                                                .SetNoBuild(true)
-                                                .SetNoRestore(true)
-                                                .SetProject(Solution.Path)
-                                                .SetVersion(BuildVersion.NuGetVersion)
-                                                .SetAuthors("GlavKod")
-                                                .SetOutputDirectory(ArtifactsDirectory)
-                                         );
+                   Log.Information("Packing in {DotNetSdkImage}", DotNetSdkImage);
+
+                   // BuildKit нужен для `--output` и кеш-mount в Dockerfile. В Docker 23 и новее он
+                   // включён по умолчанию, переменная страхует от более старого демона на агенте.
+                   DockerTasks.DockerBuild(x => x.SetProcessEnvironmentVariable("DOCKER_BUILDKIT", "1")
+                                                 .SetPath(RootDirectory)
+                                                 .SetFile(RootDirectory / "Dockerfile")
+                                                 .SetTarget("artifacts")
+                                                 .SetOutput($"type=local,dest={ArtifactsDirectory}")
+                                                 .SetProgress(DockerProgressType.plain)
+                                                 .AddBuildArg($"DOTNET_SDK_IMAGE={DotNetSdkImage}")
+                                                 .AddBuildArg($"CONFIGURATION={Configuration}")
+                                                 .AddBuildArg($"PACKAGE_VERSION={BuildVersion.NuGetVersion}")
+                                                 .AddBuildArg("PACKAGE_AUTHORS=GlavKod")
+                                          );
 
                    TeamCity?.FinishProgress(nameof(DotNetPack));
                });

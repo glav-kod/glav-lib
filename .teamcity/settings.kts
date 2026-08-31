@@ -27,13 +27,6 @@ project {
                            "версии Microsoft.CodeAnalysis.CSharp из Directory.Packages.props, " +
                            "иначе source-генератор не загрузится (ошибка CS9057)",
              allowEmpty = false)
-
-        text("version.timezone",
-             "",
-             label = "Таймзона для даты в версии",
-             description = "Идентификатор вида Europe/Moscow. Пустое значение означает " +
-                           "таймзону агента",
-             allowEmpty = true)
     }
 
     buildType(Pack)
@@ -50,6 +43,9 @@ object Pack : BuildType({
         root(DslContext.settingsRoot)
     }
 
+    // Таймзона, в которой берётся дата для версии, приходит из параметра окружения проекта
+    // TeamCity (`env.TimeZone`) — здесь он не объявлен намеренно: объявление перекрыло бы
+    // значение, заданное на проекте. Если параметр пуст, `ci/version.sh` берёт таймзону агента.
     params {
         // Версия считается из счётчика сборок, а не из её номера: номер сборки скрипт сам
         // заменяет на вычисленную версию, и брать его на вход означало бы считать версию
@@ -58,7 +54,6 @@ object Pack : BuildType({
         param("env.BUILD_BRANCH", "%teamcity.build.branch%")
         param("env.CONFIGURATION", "Release")
         param("env.DOTNET_SDK_IMAGE", "%dotnet.sdk.image%")
-        param("env.VERSION_TIMEZONE", "%version.timezone%")
     }
 
     steps {

@@ -77,6 +77,11 @@ object Publish : BuildType({
     name = "Publish"
     description = "Публикует пакеты, собранные конфигурацией Pack"
 
+    // Номер сборки берётся у `Pack`, а тот выставляет номером вычисленную версию пакетов.
+    // Без этого `Publish` показывал бы собственный счётчик, по которому нельзя понять,
+    // какая версия уехала в хранилище.
+    buildNumberPattern = "%dep.${Pack.id}.build.number%"
+
     vcs {
         root(DslContext.settingsRoot)
     }

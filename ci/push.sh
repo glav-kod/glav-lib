@@ -46,12 +46,12 @@ for package in "${packages[@]}"; do
 done
 
 # В TeamCity опубликованная версия проставляется тегом и выносится в текст статуса сборки:
-# по списку сборок сразу видно, что и куда уехало, а по тегу сборку можно найти поиском.
+# по списку сборок сразу видно, что уехало, а по тегу сборку можно найти поиском.
 if [[ -n "${TEAMCITY_VERSION:-}" ]]; then
   if [[ -n "$version" ]]; then
     echo "##teamcity[addBuildTag '$version']"
-    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, версия $version, хранилище $nuget_source']"
+    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, версия $version']"
   else
-    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, хранилище $nuget_source']"
+    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}']"
   fi
 fi

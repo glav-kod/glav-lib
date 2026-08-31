@@ -11,7 +11,8 @@
 # Обновляя `Microsoft.CodeAnalysis.CSharp`, обновляй и образ здесь.
 #
 # Нужен BuildKit (Docker 23 и новее): используются кеш-mount и экспорт артефактов через
-# `--output`. Ручной запуск:
+# `--output`. Обычно этот файл вызывается не напрямую, а скриптом `ci/pack.sh` — он же
+# считает версию и складывает результат в `artifacts/`. Ручной запуск:
 #
 #   docker build --build-arg PACKAGE_VERSION=1.2.3 --target artifacts --output artifacts .
 

@@ -6,10 +6,10 @@
 .idea
 .vs
 .claude
+.teamcity
 **/bin
 **/obj
 artifacts
-.nuke/temp
 Dockerfile
 .dockerignore
 docker-compose.yml

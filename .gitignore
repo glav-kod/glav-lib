@@ -662,3 +662,6 @@ src/tools/
 test-results/
 
 .tye/
+
+# Собранные пакеты NuGet: их выкладывает ci/pack.sh
+/artifacts/

@@ -10,9 +10,17 @@
 #   NUGET_API_KEY  ключ доступа, обязателен;
 #   NUGET_SOURCE   адрес хранилища, по умолчанию `https://api.nuget.org/v3/index.json`.
 #
-# В GitHub Actions ключ не хранится в секретах репозитория: его выдаёт на один час
-# шаг `NuGet/login` по OIDC-токену задания (trusted publishing на nuget.org). Локально
+# В GitHub Actions ключ nuget.org не хранится в секретах репозитория: его выдаёт на один
+# час шаг `NuGet/login` по OIDC-токену задания (trusted publishing на nuget.org). Локально
 # в `NUGET_API_KEY` подставляют обычный ключ, выпущенный в личном кабинете nuget.org.
+#
+# Тем же скриптом пакеты уезжают в GitHub Packages: хранилищу этого владельца отвечает
+# адрес `https://nuget.pkg.github.com/<владелец>/index.json`, а ключом доступа служит
+# токен GitHub с правом `packages: write`.
+#
+# Уже опубликованная версия не считается ошибкой: пакеты уходят с `--skip-duplicate`,
+# потому что повторный прогон задания workflow сохраняет прежний номер сборки и, значит,
+# даёт ту же версию пакетов.
 
 set -euo pipefail
 
@@ -36,7 +44,7 @@ fi
 
 for package in "${packages[@]}"; do
   echo "Публикую $(basename "$package") в $nuget_source"
-  dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source "$nuget_source"
+  dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source "$nuget_source" --skip-duplicate
 done
 
 echo "Опубликовано пакетов: ${#packages[@]}"
@@ -44,7 +52,7 @@ echo "Опубликовано пакетов: ${#packages[@]}"
 # Сводка задания в GitHub Actions: по ней видно, что уехало в хранилище, не открывая лог.
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   {
-    echo "### Опубликованные пакеты"
+    echo "### Опубликованные пакеты — $nuget_source"
     echo
     for package in "${packages[@]}"; do
       echo "- \`$(basename "$package")\`"

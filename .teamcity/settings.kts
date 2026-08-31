@@ -14,7 +14,7 @@ import jetbrains.buildServer.configs.kotlin.triggers.vcs
  * Если сервер новее, её стоит поднять, чтобы стали доступны свежие возможности DSL.
  */
 
-version = "2024.03"
+version = "2026.1"
 
 project {
     description = "GlavLib: сборка пакетов NuGet в контейнере и их публикация"
@@ -28,23 +28,12 @@ project {
                            "иначе source-генератор не загрузится (ошибка CS9057)",
              allowEmpty = false)
 
-        text("nuget.source",
-             "https://api.nuget.org/v3/index.json",
-             label = "Адрес NuGet-хранилища",
-             description = "Куда публикуются собранные пакеты",
-             allowEmpty = false)
-
         text("version.timezone",
              "",
              label = "Таймзона для даты в версии",
              description = "Идентификатор вида Europe/Moscow. Пустое значение означает " +
                            "таймзону агента",
              allowEmpty = true)
-
-        password("nuget.api.key",
-                 "",
-                 label = "Ключ доступа к NuGet-хранилищу",
-                 description = "Задаётся в настройках проекта TeamCity, в репозитории не хранится")
     }
 
     buildType(Pack)
@@ -97,11 +86,10 @@ object Publish : BuildType({
         root(DslContext.settingsRoot)
     }
 
-    params {
-        param("env.NUGET_SOURCE", "%nuget.source%")
-        param("env.NUGET_API_KEY", "%nuget.api.key%")
-    }
-
+    // Ключ доступа и адрес хранилища берутся из параметров окружения проекта TeamCity
+    // (`env.NugetApiKey` и `env.NugetSource`) — здесь они не объявлены намеренно: секрет
+    // в репозитории не хранится, а объявление перекрыло бы значение, заданное на проекте.
+    // Если `env.NugetSource` не задан, `ci/push.sh` публикует в nuget.org.
     steps {
         script {
             name = "Опубликовать пакеты"

@@ -5,7 +5,6 @@ using Nuke.Common;
 using Nuke.Common.CI.TeamCity;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
@@ -17,8 +16,6 @@ class Build : NukeBuild
 
     [Parameter]
     public string TimeZone { get; set; } = TimeZoneInfo.Local.Id;
-
-    [Solution(GenerateProjects = true)] readonly Solution Solution = null!;
 
     [GitRepository] readonly GitRepository GitRepository = null!;
 
@@ -64,50 +61,6 @@ class Build : NukeBuild
 
         Log.Information("BuildVersion: {@BuildVersion}", BuildVersion);
     }
-
-
-    Target DotNetClean => x =>
-    {
-        return x
-            .Executes(() =>
-            {
-                TeamCity?.StartProgress(nameof(DotNetClean));
-
-                DotNetTasks.DotNetClean(x => x.SetProject(Solution)
-                                              .SetConfiguration(Configuration));
-
-                TeamCity?.FinishProgress(nameof(DotNetClean));
-            });
-    };
-
-    Target DotNetRestore => x =>
-    {
-        return x
-               .DependsOn(DotNetClean)
-               .Executes(() =>
-               {
-                   TeamCity?.StartProgress(nameof(DotNetRestore));
-
-                   DotNetTasks.DotNetRestore(x => x.SetProjectFile(Solution));
-
-                   TeamCity?.FinishProgress(nameof(DotNetRestore));
-               });
-    };
-
-    Target DotNetCompile => x =>
-    {
-        return x
-               .DependsOn(DotNetRestore)
-               .Executes(() =>
-               {
-                   TeamCity?.StartProgress(nameof(DotNetCompile));
-
-                   DotNetTasks.DotNetBuild(x => x.SetProjectFile(Solution)
-                                                 .SetConfiguration(Configuration));
-
-                   TeamCity?.FinishProgress(nameof(DotNetCompile));
-               });
-    };
 
     /// <summary>
     /// Собирает и упаковывает решение внутри контейнера, а готовые <c>.nupkg</c> выгружает

@@ -1,0 +1,88 @@
+# Выпуск пакетов NuGet.
+#
+# Workflow собирает решение, упаковывает пакеты и публикует их в nuget.org. Вся работа
+# вынесена в скрипты каталога `ci`, поэтому выпуск воспроизводится локально теми же
+# командами, что и на раннере.
+#
+# Публикация идёт через trusted publishing: постоянный ключ доступа в секретах репозитория
+# не хранится, вместо него шаг `NuGet/login` обменивает OIDC-токен задания на ключ, живущий
+# один час. Чтобы обмен состоялся, в личном кабинете nuget.org должна быть заведена политика
+# доверенной публикации, в которой указаны владелец репозитория, сам репозиторий и имя
+# этого файла — `publish.yml`. Переименование файла политику ломает.
+#
+# Секрет `NUGET_USER` — имя учётной записи nuget.org (не адрес почты), от имени которой
+# заведена политика.
+
+name: Публикация пакетов
+
+on:
+  push:
+  workflow_dispatch:
+
+# Одновременные выпуски одной ветки не нужны: они гоняют один и тот же набор пакетов
+# в хранилище. Запущенный выпуск при этом не прерывается — он мог уже начать публикацию.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # Версия SDK задана явно: `GlavLib.SourceGenerators` компилируется против Roslyn той версии,
+  # что указана для `Microsoft.CodeAnalysis.CSharp` в `Directory.Packages.props`, и компилятор
+  # более старой версии отказывается загружать такой анализатор с ошибкой CS9057. Поднимая
+  # `Microsoft.CodeAnalysis.CSharp`, поднимай и версию здесь.
+  DOTNET_VERSION: "10.0.400"
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+
+jobs:
+  release:
+    name: Собрать и опубликовать пакеты
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Разрешение выдаёт заданию OIDC-токен, без которого trusted publishing не работает.
+      id-token: write
+
+    steps:
+      - name: Получить исходники
+        uses: actions/checkout@v7
+
+      - name: Установить .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Упаковать пакеты
+        env:
+          BUILD_COUNTER: ${{ github.run_number }}
+          BUILD_BRANCH: ${{ github.ref_name }}
+          # Раннеры GitHub Actions живут в UTC, поэтому дату для версии считаем в таймзоне
+          # команды: иначе вечерняя сборка получает вчерашнюю дату.
+          TIMEZONE: Asia/Bishkek
+        run: ci/pack.sh
+
+      - name: Сохранить пакеты как артефакт сборки
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+      # Из основной ветки пакеты уезжают в хранилище сами, из рабочей — только ручным
+      # запуском workflow: она даёт предрелизную версию с суффиксом имени ветки.
+      - name: Получить временный ключ nuget.org
+        id: nuget-login
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Опубликовать пакеты
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: ci/push.sh

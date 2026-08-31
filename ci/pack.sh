@@ -2,20 +2,23 @@
 #
 # Собирает решение и упаковывает пакеты NuGet, складывая `.nupkg` в каталог `artifacts`.
 #
-# Компиляция идёт не на агенте, а в контейнере по корневому `Dockerfile`: версия .NET SDK
-# там задана явно, потому что компилятор старее Roslyn из `Microsoft.CodeAnalysis.CSharp`
-# не загружает наш source-генератор (ошибка CS9057).
+# Упаковываются только проекты библиотеки: у тестов и песочницы в `csproj` проставлено
+# `IsPackable=false`, поэтому отдельный список проектов скрипту не нужен.
+#
+# Версия SDK, которым идёт сборка, важна: `GlavLib.SourceGenerators` компилируется против
+# той версии Roslyn, которая указана для `Microsoft.CodeAnalysis.CSharp`
+# в `Directory.Packages.props`, и компилятор более старой версии отказывается загружать
+# такой анализатор с ошибкой CS9057. `Microsoft.CodeAnalysis.CSharp` 5.9.0 требует
+# SDK не старее 10.0.400. В GitHub Actions версия задаётся шагом `actions/setup-dotnet`
+# в `.github/workflows/publish.yml`, при локальном запуске — тем SDK, который стоит
+# на машине.
 #
 # Настраивается переменными окружения:
 #
 #   PACKAGE_VERSION    версия пакетов; если пусто, считается скриптом `version.sh`,
 #                      которому нужен BUILD_COUNTER;
 #   CONFIGURATION      конфигурация сборки, по умолчанию `Release`;
-#   DOTNET_SDK_IMAGE   образ .NET SDK, по умолчанию `mcr.microsoft.com/dotnet/sdk:10.0.400`;
 #   PACKAGE_AUTHORS    значение поля `Authors` в пакетах, по умолчанию `GlavKod`.
-#
-# Требуется Docker с BuildKit (версия 23 и новее): результат забирается из контейнера
-# через `--output`, а сам `Dockerfile` использует кеш-mount для пакетов NuGet.
 
 set -euo pipefail
 
@@ -24,35 +27,23 @@ cd "$root"
 
 version="${PACKAGE_VERSION:-$("$root/ci/version.sh")}"
 configuration="${CONFIGURATION:-Release}"
-sdk_image="${DOTNET_SDK_IMAGE:-mcr.microsoft.com/dotnet/sdk:10.0.400}"
 authors="${PACKAGE_AUTHORS:-GlavKod}"
 artifacts="$root/artifacts"
 
-echo "Версия пакетов: $version"
-echo "Образ .NET SDK: $sdk_image"
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DOTNET_NOLOGO=1
 
-# Номер сборки в TeamCity заменяется на версию пакетов, чтобы по списку сборок было видно,
-# какая версия из какой собрана. На счётчик сборок это не влияет: версия считается из
-# `%build.counter%`, а он живёт отдельно от номера.
-if [[ -n "${TEAMCITY_VERSION:-}" ]]; then
-  echo "##teamcity[buildNumber '$version']"
-fi
+echo "Версия пакетов: $version"
+echo "Версия .NET SDK: $(dotnet --version)"
 
 rm -rf "$artifacts"
 mkdir -p "$artifacts"
 
-export DOCKER_BUILDKIT=1
-
-docker build \
-  --file "$root/Dockerfile" \
-  --target artifacts \
-  --output "type=local,dest=$artifacts" \
-  --progress plain \
-  --build-arg "DOTNET_SDK_IMAGE=$sdk_image" \
-  --build-arg "CONFIGURATION=$configuration" \
-  --build-arg "PACKAGE_VERSION=$version" \
-  --build-arg "PACKAGE_AUTHORS=$authors" \
-  "$root"
+dotnet pack GlavLib.sln \
+  --configuration "$configuration" \
+  -p:Version="$version" \
+  -p:Authors="$authors" \
+  --output "$artifacts"
 
 echo "Готовые пакеты:"
 ls -1 "$artifacts"

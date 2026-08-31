@@ -1,9 +1,8 @@
 # Выпуск пакетов NuGet.
 #
-# Workflow собирает решение, упаковывает пакеты и раскладывает их по трём местам:
-# в nuget.org, в GitHub Packages этого владельца и в релиз GitHub, к которому пакеты
-# прикладываются файлами. Вся работа вынесена в скрипты каталога `ci`, поэтому выпуск
-# воспроизводится локально теми же командами, что и на раннере.
+# Workflow собирает решение, упаковывает пакеты, публикует их в nuget.org и создаёт релиз
+# GitHub, к которому те же пакеты прикладываются файлами. Вся работа вынесена в скрипты
+# каталога `ci`, поэтому выпуск воспроизводится локально теми же командами, что и на раннере.
 #
 # Публикация в nuget.org идёт через trusted publishing: постоянный ключ доступа в секретах
 # репозитория не хранится, вместо него шаг `NuGet/login` обменивает OIDC-токен задания
@@ -14,8 +13,8 @@
 # Секрет `NUGET_USER` — имя учётной записи nuget.org (не адрес почты), от имени которой
 # заведена политика.
 #
-# Для GitHub Packages и релиза внешние секреты не нужны: хватает `GITHUB_TOKEN` задания
-# с правами `packages: write` и `contents: write`.
+# Для релиза внешние секреты не нужны: хватает `GITHUB_TOKEN` задания с правом
+# `contents: write`.
 
 name: Публикация пакетов
 
@@ -47,17 +46,15 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # Создание релиза требует права на запись в репозиторий, публикация в GitHub
-      # Packages — права на запись пакетов.
+      # Создание релиза требует права на запись в репозиторий.
       contents: write
-      packages: write
       # Разрешение выдаёт заданию OIDC-токен, без которого trusted publishing не работает.
       id-token: write
 
     env:
       # Из основной ветки пакеты выкладываются сами, из рабочей — только ручным запуском
       # workflow: она даёт предрелизную версию с суффиксом имени ветки. Признак вычисляется
-      # один раз, чтобы все шаги выкладки включались и выключались вместе.
+      # один раз, чтобы публикация и релиз включались и выключались вместе.
       PUBLISH: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
 
     steps:
@@ -85,8 +82,6 @@ jobs:
           echo "PACKAGE_VERSION=$version" >> "$GITHUB_ENV"
 
       - name: Упаковать пакеты
-        env:
-          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
         run: ci/pack.sh
 
       - name: Сохранить пакеты как артефакт сборки
@@ -103,17 +98,10 @@ jobs:
         with:
           user: ${{ secrets.NUGET_USER }}
 
-      - name: Опубликовать пакеты в nuget.org
+      - name: Опубликовать пакеты
         if: env.PUBLISH == 'true'
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: ci/push.sh
-
-      - name: Опубликовать пакеты в GitHub Packages
-        if: env.PUBLISH == 'true'
-        env:
-          NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-          NUGET_API_KEY: ${{ github.token }}
         run: ci/push.sh
 
       - name: Создать релиз GitHub

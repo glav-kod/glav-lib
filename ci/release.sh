@@ -59,7 +59,7 @@ fi
 
 notes="Пакеты версии \`$version\`, собранные из коммита \`$target\`."
 notes+=$'\n\n'
-notes+="Те же пакеты опубликованы в nuget.org и в GitHub Packages; к релизу они приложены файлами \`.nupkg\`."
+notes+="Те же пакеты опубликованы в nuget.org; к релизу они приложены файлами \`.nupkg\`."
 notes+=$'\n\n'
 notes+=$'### Пакеты\n\n'
 for package in "${packages[@]}"; do

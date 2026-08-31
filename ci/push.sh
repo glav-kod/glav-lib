@@ -13,6 +13,11 @@
 # В GitHub Actions ключ не хранится в секретах репозитория: его выдаёт на один час
 # шаг `NuGet/login` по OIDC-токену задания (trusted publishing на nuget.org). Локально
 # в `NUGET_API_KEY` подставляют обычный ключ, выпущенный в личном кабинете nuget.org.
+#
+# Уже опубликованная версия не считается ошибкой: пакеты уходят с `--skip-duplicate`.
+# Повторный прогон задания workflow сохраняет прежний номер сборки и потому даёт ту же
+# версию пакетов; без флага он падал бы здесь и не доходил до шага, который обновляет
+# релиз GitHub.
 
 set -euo pipefail
 
@@ -36,7 +41,7 @@ fi
 
 for package in "${packages[@]}"; do
   echo "Публикую $(basename "$package") в $nuget_source"
-  dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source "$nuget_source"
+  dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source "$nuget_source" --skip-duplicate
 done
 
 echo "Опубликовано пакетов: ${#packages[@]}"

@@ -3,34 +3,28 @@
 # Публикует пакеты из каталога `artifacts` в NuGet-хранилище.
 #
 # Скрипт ничего не собирает: он рассчитан на то, что `.nupkg` уже лежат в `artifacts` —
-# либо после `pack.sh`, либо как артефакты предыдущей сборки в цепочке TeamCity.
+# либо после `pack.sh`, либо как артефакты предыдущего задания workflow.
 #
-# Настраивается переменными окружения. Имена унаследованы от параметров, которые задавались
-# в проекте TeamCity ещё для сборки на Nuke, поэтому менять настройки сервера не пришлось:
+# Настраивается переменными окружения:
 #
-#   NugetApiKey  ключ доступа, обязателен;
-#   NugetSource  адрес хранилища, по умолчанию `https://api.nuget.org/v3/index.json`.
+#   NUGET_API_KEY  ключ доступа, обязателен;
+#   NUGET_SOURCE   адрес хранилища, по умолчанию `https://api.nuget.org/v3/index.json`.
 #
-# Версия публикуемых пакетов скрипту нужна только для отчёта в TeamCity. Она берётся
-# из `PACKAGE_VERSION`, а если переменная пуста — из номера сборки `BUILD_NUMBER`: номер
-# конфигурации `Publish` повторяет номер `Pack`, а тот равен вычисленной версии пакетов.
-# При локальном запуске обеих переменных нет, и скрипт просто не сообщает версию.
-#
-# На агенте нужен `dotnet` — любой версии: публикация готового пакета от версии SDK
-# не зависит, в отличие от компиляции.
+# В GitHub Actions ключ не хранится в секретах репозитория: его выдаёт на один час
+# шаг `NuGet/login` по OIDC-токену задания (trusted publishing на nuget.org). Локально
+# в `NUGET_API_KEY` подставляют обычный ключ, выпущенный в личном кабинете nuget.org.
 
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 
-if [[ -z "${NugetApiKey:-}" ]]; then
-  echo "Не задан NugetApiKey — публиковать нечем" >&2
+if [[ -z "${NUGET_API_KEY:-}" ]]; then
+  echo "Не задан NUGET_API_KEY — публиковать нечем" >&2
   exit 1
 fi
 
-nuget_source="${NugetSource:-https://api.nuget.org/v3/index.json}"
-version="${PACKAGE_VERSION:-${BUILD_NUMBER:-}}"
+nuget_source="${NUGET_SOURCE:-https://api.nuget.org/v3/index.json}"
 
 shopt -s nullglob
 packages=("$root"/artifacts/*.nupkg)
@@ -42,16 +36,18 @@ fi
 
 for package in "${packages[@]}"; do
   echo "Публикую $(basename "$package") в $nuget_source"
-  dotnet nuget push "$package" --api-key "$NugetApiKey" --source "$nuget_source"
+  dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source "$nuget_source"
 done
 
-# В TeamCity опубликованная версия проставляется тегом и выносится в текст статуса сборки:
-# по списку сборок сразу видно, что уехало, а по тегу сборку можно найти поиском.
-if [[ -n "${TEAMCITY_VERSION:-}" ]]; then
-  if [[ -n "$version" ]]; then
-    echo "##teamcity[addBuildTag '$version']"
-    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, версия $version']"
-  else
-    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}']"
-  fi
+echo "Опубликовано пакетов: ${#packages[@]}"
+
+# Сводка задания в GitHub Actions: по ней видно, что уехало в хранилище, не открывая лог.
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  {
+    echo "### Опубликованные пакеты"
+    echo
+    for package in "${packages[@]}"; do
+      echo "- \`$(basename "$package")\`"
+    done
+  } >> "$GITHUB_STEP_SUMMARY"
 fi

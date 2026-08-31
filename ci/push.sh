@@ -11,6 +11,11 @@
 #   NugetApiKey  ключ доступа, обязателен;
 #   NugetSource  адрес хранилища, по умолчанию `https://api.nuget.org/v3/index.json`.
 #
+# Версия публикуемых пакетов скрипту нужна только для отчёта в TeamCity. Она берётся
+# из `PACKAGE_VERSION`, а если переменная пуста — из номера сборки `BUILD_NUMBER`: номер
+# конфигурации `Publish` повторяет номер `Pack`, а тот равен вычисленной версии пакетов.
+# При локальном запуске обеих переменных нет, и скрипт просто не сообщает версию.
+#
 # На агенте нужен `dotnet` — любой версии: публикация готового пакета от версии SDK
 # не зависит, в отличие от компиляции.
 
@@ -25,6 +30,7 @@ if [[ -z "${NugetApiKey:-}" ]]; then
 fi
 
 nuget_source="${NugetSource:-https://api.nuget.org/v3/index.json}"
+version="${PACKAGE_VERSION:-${BUILD_NUMBER:-}}"
 
 shopt -s nullglob
 packages=("$root"/artifacts/*.nupkg)
@@ -38,3 +44,14 @@ for package in "${packages[@]}"; do
   echo "Публикую $(basename "$package") в $nuget_source"
   dotnet nuget push "$package" --api-key "$NugetApiKey" --source "$nuget_source"
 done
+
+# В TeamCity опубликованная версия проставляется тегом и выносится в текст статуса сборки:
+# по списку сборок сразу видно, что и куда уехало, а по тегу сборку можно найти поиском.
+if [[ -n "${TEAMCITY_VERSION:-}" ]]; then
+  if [[ -n "$version" ]]; then
+    echo "##teamcity[addBuildTag '$version']"
+    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, версия $version, хранилище $nuget_source']"
+  else
+    echo "##teamcity[buildStatus text='Опубликовано пакетов: ${#packages[@]}, хранилище $nuget_source']"
+  fi
+fi

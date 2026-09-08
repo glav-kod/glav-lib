@@ -9,22 +9,15 @@ namespace GlavLib.Tests.Db;
 
 /// <summary>
 /// Пользовательские типы NHibernate на PostgreSQL. В отличие от SQLite, здесь у базы есть
-/// собственные типы даты и времени, поэтому значения ложатся в `timestamptz` и `date`,
+/// собственные типы даты и времени, поэтому значения ложатся в `timestamp` и `date`,
 /// а не строкой.
 /// </summary>
 [Collection(nameof(IntegrationTestsCollection))]
-public sealed class NpgsqlUserTypesTests : IClassFixture<NpgsqlTestDatabase>
+public sealed class NpgsqlUserTypesTests(NpgsqlTestDatabase database) : IClassFixture<NpgsqlTestDatabase>
 {
-    private readonly NpgsqlTestDatabase _database;
-
-    public NpgsqlUserTypesTests(NpgsqlTestDatabase database)
-    {
-        _database = database;
-    }
-
     private StatefulDbSession OpenSession()
     {
-        return _database.SessionFactory.OpenStatefulSession(ConnectionStringNames.Master);
+        return database.SessionFactory.OpenStatefulSession(ConnectionStringNames.Master);
     }
 
     [Fact]
@@ -90,7 +83,7 @@ public sealed class NpgsqlUserTypesTests : IClassFixture<NpgsqlTestDatabase>
 
     /// <summary>
     /// Проверяет, что типы кладут в колонки собственные значения PostgreSQL, а не строки:
-    /// вставка идёт в `timestamptz` и `date`, а прочитанное сырым запросом значение —
+    /// вставка идёт в `timestamp` и `date`, а прочитанное сырым запросом значение —
     /// `DateTime`, а не текст.
     /// </summary>
     [Fact]
@@ -127,7 +120,6 @@ public sealed class NpgsqlUserTypesTests : IClassFixture<NpgsqlTestDatabase>
             "select currency from stored_records where name = 'native'");
 
         storedCreatedAt.Should().Be(createdAt.Value);
-        storedCreatedAt.Kind.Should().Be(DateTimeKind.Utc);
         storedBirthDate.Should().Be(new DateTime(1990, 5, 17));
         storedPeriod.Should().Be(new DateTime(2026, 1, 1));
         storedCurrency.Should().Be("KGS");

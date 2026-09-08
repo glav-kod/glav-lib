@@ -106,7 +106,7 @@ Abstractions ← Basics ← Db ← App
 | `DbTransaction.cs` | Транзакция с явным `Commit()` |
 | `Providers/` | Абстрактная `DbSessionFactory` и её наследники `NpgsqlDbSessionFactory`, `SqliteDbSessionFactory`; `NpgsqlDataSourceProvider` |
 | `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`IdConvention` и `SqliteIdConvention`), коллекции, `enum` |
-| `NhUserTypes/` | `UtcDateTimeUserType`, `DateUserType`, `YearMonthUserType` и их SQLite-двойники `Sqlite*UserType`; `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType`; конвенции `UserTypesConventions` и `SqliteUserTypesConventions` |
+| `NhUserTypes/` | Зависящие от СУБД `Npgsql*UserType` и `Sqlite*UserType` для `UtcDateTime`, `Date`, `YearMonth` плюс конвенции `NpgsqlUserTypesConventions` и `SqliteUserTypesConventions`; общие `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
 | `Dapper/` | `DapperConventions` с `SetupNpgsql()`/`SetupSqlite()`, обработчики типов обеих СУБД и расширения для Dapper |
 | `Extensions/` | `AddNpgsql(...)`, `AddSqlite(...)`, `AddFluentMappings(...)`, `Use<TConvention>()`, `EnumObjectType<T>()` |
 

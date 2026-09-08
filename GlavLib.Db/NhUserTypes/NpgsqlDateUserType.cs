@@ -4,18 +4,18 @@ using NHibernate.Type;
 
 namespace GlavLib.Db.NhUserTypes;
 
-internal sealed class YearMonthUserType : SingleValueObjectType<YearMonth>
+internal sealed class NpgsqlDateUserType : SingleValueObjectType<Date>
 {
     protected override NullableType PrimitiveType => NHibernateUtil.Date;
 
-    protected override YearMonth Create(object value)
+    protected override Date Create(object value)
     {
         var dateTime = (DateTime)value;
 
-        return YearMonth.FromDateTime(dateTime);
+        return Date.FromDateTime(dateTime);
     }
 
-    protected override object GetValue(YearMonth state)
+    protected override object GetValue(Date state)
     {
         return state.Value;
     }

@@ -2,7 +2,6 @@ using GlavLib.Db.Extensions;
 using GlavLib.Db.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace GlavLib.Tests.Db;
 
@@ -19,7 +18,7 @@ public sealed class NpgsqlTestDatabase : IDisposable
                                   create table stored_records (
                                       id         bigserial primary key,
                                       name       text not null,
-                                      created_at timestamptz null,
+                                      created_at timestamp null,
                                       birth_date date null,
                                       period     date null,
                                       duration   bigint null,

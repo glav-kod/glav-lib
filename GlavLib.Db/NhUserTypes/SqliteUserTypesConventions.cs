@@ -5,7 +5,7 @@ using GlavLib.Basics.DataTypes;
 namespace GlavLib.Db.NhUserTypes;
 
 /// <summary>
-/// Двойник <see cref="UserTypesConventions"/> для SQLite: типов даты и времени в SQLite нет,
+/// Двойник <see cref="NpgsqlUserTypesConventions"/> для SQLite: типов даты и времени в SQLite нет,
 /// поэтому собственные типы хранятся текстом в каноническом виде, а не в том, который
 /// выбрал бы за них диалект.
 /// </summary>

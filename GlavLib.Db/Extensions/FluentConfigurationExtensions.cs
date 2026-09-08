@@ -53,7 +53,7 @@ public static class FluentConfigurationExtensions
 
     internal static FluentConfiguration UseNpgsqlDefaults(this FluentConfiguration fluentConfiguration)
     {
-        return fluentConfiguration.UseDefaults(new IdConvention(), new UserTypesConventions());
+        return fluentConfiguration.UseDefaults(new IdConvention(), new NpgsqlUserTypesConventions());
     }
 
     internal static FluentConfiguration UseSqliteDefaults(this FluentConfiguration fluentConfiguration)

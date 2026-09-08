@@ -1,7 +1,6 @@
 using GlavLib.Db.Dapper;
 using GlavLib.Db.Extensions;
 using GlavLib.Db.Providers;
-using GlavLib.Tests.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

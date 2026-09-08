@@ -1,7 +1,7 @@
 # CLAUDE.md — GlavLib
 
 `GlavLib` — внутренняя библиотека GlavKod для .NET-приложений (.NET 10). Она даёт типы-значения
-и сериализацию, многоязычные сообщения, работу с PostgreSQL через NHibernate и Dapper, каркас
+и сериализацию, многоязычные сообщения, работу с PostgreSQL и SQLite через NHibernate и Dapper, каркас
 HTTP-команд на minimal API и source-генераторы, которые выпускают шаблонный код за разработчика.
 Сборки публикуются пакетами NuGet, поэтому публичный API библиотеки — контракт с приложениями,
 которых в этом репозитории нет.
@@ -39,9 +39,11 @@ HTTP-команд на minimal API и source-генераторы, которы�
   базы не требуют, должны быть зелёными целиком (27 тестов).
 - **Тесты библиотеки без базы:**
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'` —
-  27 тестов, из которых два (`MultiLangMessageTests`) падают и на `main`: причина в том, что
+  34 теста, из которых два (`MultiLangMessageTests`) падают и на `main`: причина в том, что
   `MultiLangMessage.Format` подставляет аргументы по шаблону `{arg:type}`, а тесты написаны
   на плейсхолдеры без типа.
+- **Тесты SQLite:** входят в набор выше (`GlavLib.Tests.Sqlite`) и Postgres не требуют —
+  SQLite работает с временным файлом, поэтому они зелены и в облачной среде.
 - **Тесты, которым нужна база:** `GlavLib.Tests.Db.DbSessionFactoryTests` и весь
   `Sandbox/GlavLib.Sandbox.API.Tests` — запускаются только при поднятом Postgres.
 - Тестовые проекты запускай **по отдельности**, а не через `dotnet test GlavLib.sln`: иначе

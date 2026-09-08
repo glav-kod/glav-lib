@@ -1,35 +1,20 @@
-﻿using GlavLib.Abstractions.DI;
-using NHibernate;
+using JetBrains.Annotations;
 
 namespace GlavLib.Db.Providers;
 
-[SingleInstance]
-public sealed class DbSessionFactory(
-        ISessionFactory sessionFactory,
-        NpgsqlDataSourceProvider npgsqlDataSourceProvider
-    )
+/// <summary>
+/// Открывает сессии работы с базой данных. Конкретная СУБД выбирается наследником,
+/// который регистрируется вызовом <c>AddNpgsql</c> либо <c>AddSqlite</c>.
+/// </summary>
+[PublicAPI]
+public abstract class DbSessionFactory
 {
-    public StatefulDbSession OpenStatefulSession(string connectionStringName)
-    {
-        var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
+    public abstract StatefulDbSession OpenStatefulSession(string connectionStringName);
 
-        var dbConnection = npgsqlDataSource.OpenConnection();
+    public abstract StatelessDbSession OpenStatelessSession(string connectionStringName);
 
-        var session = sessionFactory.WithOptions()
-                                    .Connection(dbConnection)
-                                    .OpenSession();
-
-        return new StatefulDbSession(session);
-    }
-
-    public StatelessDbSession OpenStatelessSession(string connectionStringName)
-    {
-        var npgsqlDataSource = npgsqlDataSourceProvider.GetDataSource(connectionStringName);
-
-        var dbConnection = npgsqlDataSource.OpenConnection();
-
-        var session = sessionFactory.OpenStatelessSession(dbConnection);
-
-        return new StatelessDbSession(session);
-    }
+    /// <summary>
+    /// Закрывает все соединения, открытые фабрикой, и опустошает пул.
+    /// </summary>
+    public abstract void CloseAllConnections();
 }

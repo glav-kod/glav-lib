@@ -1,5 +1,4 @@
-﻿using GlavLib.Abstractions.DI;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -10,7 +9,6 @@ public sealed class NpgsqlDataSourceProviderOptions
     public string? ApplicationName { get; set; }
 }
 
-[SingleInstance]
 public sealed class NpgsqlDataSourceProvider(
         ILoggerFactory loggerFactory,
         IConfiguration configuration,
@@ -27,7 +25,7 @@ public sealed class NpgsqlDataSourceProvider(
         {
             if (!_dataSources.TryGetValue(connectionStringName, out var dataSource))
             {
-                var connectionString = configuration.GetConnectionString(connectionStringName);
+                var connectionString = ConnectionStringResolver.Resolve(configuration, connectionStringName);
 
                 var dsBuilder = new NpgsqlDataSourceBuilder(connectionString)
                 {

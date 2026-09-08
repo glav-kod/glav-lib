@@ -6,6 +6,7 @@ using GlavLib.App.Validation;
 using GlavLib.Basics.Logging;
 using GlavLib.Basics.MultiLang;
 using GlavLib.Basics.Serialization;
+using GlavLib.Db.Dapper;
 using GlavLib.Db.Extensions;
 using GlavLib.Sandbox.API;
 using GlavLib.Sandbox.API.Db;
@@ -13,7 +14,7 @@ using GlavLib.Sandbox.API.Routes;
 using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
-DapperConventions.Setup();
+DapperConventions.SetupNpgsql();
 
 var appBuilder = WebApplication.CreateBuilder(args);
 
@@ -42,11 +43,9 @@ appBuilder.Services
               )
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.App"))
           .AddValidatorsFromAssembly(Assembly.Load("GlavLib.Sandbox.API"))
-          .AddNh(config =>
+          .AddNpgsql(nh => //
                   {
-                      config.UsePostgreSQL()
-                            .UseDefaults()
-                            .AddFluentMappings("GlavLib.Sandbox.API");
+                      nh.AddFluentMappings("GlavLib.Sandbox.API");
                   }
               )
           .AddMultiLang(builder => //

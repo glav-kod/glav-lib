@@ -23,8 +23,9 @@
   Тесты генераторов базы не требуют и должны быть зелёными целиком (27 тестов);
 - менялись `GlavLib.Basics/`, `GlavLib.Abstractions/` или `GlavLib.Db/` — прогони
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'`.
-  Фильтр отбрасывает тесты, которым нужен Postgres, и оставляет 27 тестов, работающих
-  без базы;
+  Фильтр отбрасывает тесты, которым нужен Postgres, и оставляет 34 теста, работающих
+  без базы, включая набор `GlavLib.Tests.Sqlite` — SQLite работает с временным файлом
+  и доступна в том числе в облачной среде;
 - менялись `GlavLib.App/` или `Sandbox/` — сборка обязательна, а
   `dotnet test Sandbox/GlavLib.Sandbox.API.Tests/GlavLib.Sandbox.API.Tests.csproj`
   запускай, только если база доступна: единственный тест проекта создаёт пользователя

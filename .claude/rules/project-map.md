@@ -1,7 +1,7 @@
 # Карта проекта GlavLib
 
 `GlavLib` — внутренняя библиотека GlavKod для .NET-приложений: типы-значения, сериализация,
-многоязычные сообщения, работа с PostgreSQL через NHibernate и Dapper, каркас HTTP-команд
+многоязычные сообщения, работа с PostgreSQL и SQLite через NHibernate и Dapper, каркас HTTP-команд
 на minimal API и source-генераторы, которые выпускают шаблонный код за разработчика.
 
 Главное отличие от прикладного репозитория: продукт здесь — **публичный API пакетов NuGet**.
@@ -104,13 +104,57 @@ Abstractions ← Basics ← Db ← App
 |---|---|
 | `DbSession.cs`, `StatefulDbSession.cs`, `StatelessDbSession.cs` | Сессия запроса, доступ через `Current` |
 | `DbTransaction.cs` | Транзакция с явным `Commit()` |
-| `Providers/` | `DbSessionFactory`, `NpgsqlDataSourceProvider` |
-| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id, коллекции, `enum` |
+| `Providers/` | Абстрактная `DbSessionFactory` и её наследники `NpgsqlDbSessionFactory`, `SqliteDbSessionFactory`; `NpgsqlDataSourceProvider` |
+| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`IdConvention` и `SqliteIdConvention`), коллекции, `enum` |
 | `NhUserTypes/` | `UtcDateTimeUserType`, `DateUserType`, `YearMonthUserType`, `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
-| `Dapper/` | Обработчики типов и расширения для Dapper |
-| `Extensions/` | `AddNh(...)`, `Add_GlavLib_Db()`, `UsePostgreSQL()`, `UseDefaults()`, `AddFluentMappings(...)`, `EnumObjectType<T>()` |
+| `Dapper/` | `DapperConventions` с `SetupNpgsql()`/`SetupSqlite()`, обработчики типов обеих СУБД и расширения для Dapper |
+| `Extensions/` | `AddNpgsql(...)`, `AddSqlite(...)`, `AddFluentMappings(...)`, `Use<TConvention>()`, `EnumObjectType<T>()` |
 
 Подробности маппинга и работы с сессиями — в `persistence.md` и `nhibernate-models.md`.
+
+### Выбор СУБД
+
+Приложение работает либо с PostgreSQL, либо с SQLite; одновременная работа с двумя базами
+не поддерживается. СУБД выбирается **одним** вызовом, который ставит и провайдер соединений,
+и диалект NHibernate, и подходящий набор конвенций:
+
+```csharp
+services.AddNpgsql(nh => nh.AddFluentMappings("MyApp"),
+                   options => options.ApplicationName = "my-app");
+
+services.AddSqlite(nh => nh.AddFluentMappings("MyApp"));
+```
+
+Разносить эти три решения по разным вызовам нельзя намеренно: приложение, где провайдер
+соединений взят от одной СУБД, а диалект от другой, собралось бы без ошибок и упало бы
+на первом запросе. По той же причине `UsePostgreSQL()` и `UseDefaults()` — внутренние:
+снаружи их вызывать незачем.
+
+`DbSessionFactory` — абстрактный класс, а не интерфейс: потребители инжектят его по имени,
+и сохранение имени избавляет их доменный код от правок. `Add_GlavLib_Db()` больше нет —
+регистрацию делает `AddNpgsql`/`AddSqlite`.
+
+Обработчики типов Dapper выбираются отдельно, вызовом `DapperConventions.SetupNpgsql()`
+либо `DapperConventions.SetupSqlite()` при старте приложения: настройки Dapper глобальны
+для процесса и к DI-контейнеру отношения не имеют. Наборы не взаимозаменяемы — SQLite
+отдаёт даты текстом, и Postgres-обработчики на них падают приведением типа.
+
+### Что поддержано на SQLite
+
+Провайдер — `Microsoft.Data.Sqlite`, диалект и драйвер ставит `MsSqliteConfiguration`.
+
+Поддержано: маппинги NHibernate и Dapper; `UtcDateTime`, `Date`, `YearMonth` и `TimeSpan`
+(хранятся текстом в ISO-8601 — поведение диалекта по умолчанию); `JsonType<T>`; `EnumObject`
+в колонках; stateful- и stateless-сессии; транзакции; выдача идентификаторов через `identity`
+вместо секвенций (`SqliteIdConvention`). Проверка внешних ключей включается фабрикой
+на каждом открываемом соединении: `PRAGMA foreign_keys` в SQLite задаётся на соединение,
+а не на файл базы.
+
+Не поддержано и не заявляется: база in-memory (она не переживает закрытие соединения,
+а сессия открывает своё соединение на каждый запрос); несколько процессов на один файл;
+режим WAL — его включает миграция приложения одноразово, потому что `journal_mode` хранится
+в файле базы, а строкой подключения `Microsoft.Data.Sqlite` не задаётся; создание схемы —
+как и для PostgreSQL, это забота приложения.
 
 ## GlavLib.App
 

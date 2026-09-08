@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using FluentNHibernate.Conventions;
@@ -31,9 +31,8 @@ public static class FluentConfigurationExtensions
         return fluentConfiguration;
     }
 
-    [PublicAPI]
     // ReSharper disable once InconsistentNaming
-    public static FluentConfiguration UsePostgreSQL(this FluentConfiguration fluentConfiguration)
+    internal static FluentConfiguration UsePostgreSQL(this FluentConfiguration fluentConfiguration)
     {
         var postgreSqlConfiguration = PostgreSQLConfiguration.Standard.Dialect<PostgreSQLDialect>();
         postgreSqlConfiguration.ConnectionString(string.Empty);
@@ -42,12 +41,35 @@ public static class FluentConfigurationExtensions
         return fluentConfiguration;
     }
 
-    [PublicAPI]
-    public static FluentConfiguration UseDefaults(this FluentConfiguration fluentConfiguration)
+    internal static FluentConfiguration UseSqlite(this FluentConfiguration fluentConfiguration)
+    {
+        //MsSqliteConfiguration сама ставит диалект и драйвер Microsoft.Data.Sqlite.
+        var sqliteConfiguration = MsSqliteConfiguration.Standard;
+        sqliteConfiguration.ConnectionString(string.Empty);
+        fluentConfiguration.Database(sqliteConfiguration);
+
+        return fluentConfiguration;
+    }
+
+    internal static FluentConfiguration UseNpgsqlDefaults(this FluentConfiguration fluentConfiguration)
+    {
+        return fluentConfiguration.UseDefaults(new IdConvention());
+    }
+
+    internal static FluentConfiguration UseSqliteDefaults(this FluentConfiguration fluentConfiguration)
+    {
+        return fluentConfiguration.UseDefaults(new SqliteIdConvention());
+    }
+
+    /// <summary>
+    /// Общий набор конвенций. От СУБД зависит только выдача идентификаторов, поэтому
+    /// она и приходит параметром: остальные конвенции лишь режут имена и подставляют типы.
+    /// </summary>
+    private static FluentConfiguration UseDefaults(this FluentConfiguration fluentConfiguration, IIdConvention idConvention)
     {
         return fluentConfiguration.Mappings(m =>
                                   {
-                                      m.FluentMappings.Conventions.Add(new IdConvention(),
+                                      m.FluentMappings.Conventions.Add(idConvention,
                                                                        new PropertyConvention(),
                                                                        new ReferenceConvention(),
                                                                        new ClassConvention(),

@@ -24,7 +24,7 @@ Entity Framework Core в проекте **не** используется. Не 
 | Слой | Технология |
 |------|------------|
 | ORM | **FluentNHibernate** (маппинги co-located в entity-классах) |
-| БД | **PostgreSQL** (`Npgsql`) |
+| БД | **PostgreSQL** (`Npgsql`) либо **SQLite** (`Microsoft.Data.Sqlite`) — одна на приложение |
 | Миграции | **Liquibase** SQL (`migrations/`) |
 | Ad-hoc чтения | **Dapper** через `dbSession.Connection` |
 | Доступ к БД | `DbSessionFactory`, `StatefulDbSession`, `StatelessDbSession`, `DbTransaction` |
@@ -41,13 +41,14 @@ Entity Framework Core в проекте **не** используется. Не 
 | Map class | `NhClassMap` |
 | Схема БД | `public` (единственная; `Schema(...)` в маппингах не указывается) |
 | Миграции | `migrations/public/` |
-| Регистрация NHibernate | `.AddNh(config => config.UsePostgreSQL().UseDefaults().AddFluentMappings("<Assembly>"))` |
-| Регистрация сервисов | `services.Add_GlavLib_Db()` |
+| Регистрация NHibernate | `.AddNpgsql(nh => nh.AddFluentMappings("<Assembly>"))` либо `.AddSqlite(nh => nh.AddFluentMappings("<Assembly>"))` |
+| Регистрация сервисов | делает тот же вызов: `Add_GlavLib_Db()` больше нет |
+| Обработчики Dapper | `DapperConventions.SetupNpgsql()` либо `DapperConventions.SetupSqlite()` при старте |
 
 ## Соглашения по именованию — делает конвенция, а не маппинг
 
-`UseDefaults()` подключает набор конвенций из `GlavLib.Db/NhConventions/`, поэтому имена
-таблиц и колонок в маппинге обычно писать не нужно:
+`AddNpgsql`/`AddSqlite` подключают набор конвенций из `GlavLib.Db/NhConventions/`, поэтому
+имена таблиц и колонок в маппинге обычно писать не нужно:
 
 - `ClassConvention` — имя таблицы: имя класса в `snake_case` и во множественном числе
   (`User` → `users`);
@@ -55,7 +56,8 @@ Entity Framework Core в проекте **не** используется. Не 
 - `ReferenceConvention` — колонка ссылки: имя свойства в `snake_case` плюс `_id`, ленивая
   загрузка через proxy и `Cascade.SaveUpdate()`;
 - `IdConvention` — при незаданном генераторе ставит `Native` с последовательностью
-  `<table>_<column>_seq` и `unsaved-value = 0`;
+  `<table>_<column>_seq` и `unsaved-value = 0`; на SQLite вместо неё работает
+  `SqliteIdConvention`, которая ставит `Identity`, потому что секвенций в SQLite нет;
 - `EnumConvention` — свойства обычных C#-перечислений (`enum`), через `EnumType<T>`;
 - `HasManyConvention`, `HasOneConvention` — коллекции и связи «один к одному»;
 - `UserTypesConventions` — пользовательские типы, но не все: см. раздел ниже.

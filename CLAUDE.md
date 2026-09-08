@@ -23,7 +23,7 @@ HTTP-команд на minimal API и source-генераторы, которы�
 
 ## Сборка, тесты, окружение
 
-Локальное окружение — `docker-compose.yml` (PostgreSQL 16, мастер и потоковая реплика, база
+Локальное окружение — `docker-compose.yml` (PostgreSQL 18, мастер и потоковая реплика, база
 `glavdb`) и PowerShell-скрипты `up.ps1`, `migrate.ps1`, `rollback.ps1`, `stop.ps1`, `down.ps1`.
 На macOS адреса реплик предварительно навешиваются на loopback скриптом `iface-setup.sh`.
 В облачной среде Claude Code нет ни Docker, ни Postgres, поэтому запуск приложения

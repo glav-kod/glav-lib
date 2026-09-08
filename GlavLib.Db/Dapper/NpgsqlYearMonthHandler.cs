@@ -4,7 +4,7 @@ using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.Dapper;
 
-public sealed class YearMonthHandler : SqlMapper.TypeHandler<YearMonth>
+public sealed class NpgsqlYearMonthHandler : SqlMapper.TypeHandler<YearMonth>
 {
     public override void SetValue(
             IDbDataParameter parameter,

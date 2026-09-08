@@ -4,10 +4,12 @@ using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.Dapper;
 
-public sealed class DateHandler : SqlMapper.TypeHandler<Date>
+public sealed class NpgsqlDateHandler : SqlMapper.TypeHandler<Date>
 {
-    public override void SetValue(IDbDataParameter parameter,
-                                  Date?            dateTime)
+    public override void SetValue(
+            IDbDataParameter parameter,
+            Date? dateTime
+        )
     {
         parameter.Value = dateTime?.Value;
     }

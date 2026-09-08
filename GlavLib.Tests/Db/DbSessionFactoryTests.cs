@@ -1,5 +1,4 @@
-﻿using GlavLib.Db;
-using GlavLib.Db.Extensions;
+﻿using GlavLib.Db.Extensions;
 using GlavLib.Db.Providers;
 using GlavLib.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -30,12 +29,7 @@ public sealed class DbSessionFactoryTests : IDisposable
         _serviceProvider = new ServiceCollection()
                            .AddLogging(config => config.AddSerilog(logger))
                            .AddSingleton<IConfiguration>(configuration)
-                           .Add_GlavLib_Db()
-                           .AddNh(config =>
-                           {
-                               config.UsePostgreSQL()
-                                     .UseDefaults();
-                           })
+                           .AddNpgsql(_ => { })
                            .BuildServiceProvider();
 
         _dbSessionFactory = _serviceProvider.GetRequiredService<DbSessionFactory>();

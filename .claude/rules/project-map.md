@@ -1,7 +1,7 @@
 # Карта проекта GlavLib
 
 `GlavLib` — внутренняя библиотека GlavKod для .NET-приложений: типы-значения, сериализация,
-многоязычные сообщения, работа с PostgreSQL через NHibernate и Dapper, каркас HTTP-команд
+многоязычные сообщения, работа с PostgreSQL и SQLite через NHibernate и Dapper, каркас HTTP-команд
 на minimal API и source-генераторы, которые выпускают шаблонный код за разработчика.
 
 Главное отличие от прикладного репозитория: продукт здесь — **публичный API пакетов NuGet**.
@@ -104,13 +104,94 @@ Abstractions ← Basics ← Db ← App
 |---|---|
 | `DbSession.cs`, `StatefulDbSession.cs`, `StatelessDbSession.cs` | Сессия запроса, доступ через `Current` |
 | `DbTransaction.cs` | Транзакция с явным `Commit()` |
-| `Providers/` | `DbSessionFactory`, `NpgsqlDataSourceProvider` |
-| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id, коллекции, `enum` |
-| `NhUserTypes/` | `UtcDateTimeUserType`, `DateUserType`, `YearMonthUserType`, `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
-| `Dapper/` | Обработчики типов и расширения для Dapper |
-| `Extensions/` | `AddNh(...)`, `Add_GlavLib_Db()`, `UsePostgreSQL()`, `UseDefaults()`, `AddFluentMappings(...)`, `EnumObjectType<T>()` |
+| `Providers/` | Абстрактная `DbSessionFactory` и её наследники `NpgsqlDbSessionFactory`, `SqliteDbSessionFactory`; `NpgsqlDataSourceProvider` |
+| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`NpgsqlIdConvention` и `SqliteIdConvention`), коллекции, `enum` |
+| `NhUserTypes/` | Зависящие от СУБД `Npgsql*UserType` и `Sqlite*UserType` для `UtcDateTime`, `Date`, `YearMonth` плюс конвенции `NpgsqlUserTypesConventions` и `SqliteUserTypesConventions`; общие `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
+| `Dapper/` | `DapperConventions` с `SetupNpgsql()`/`SetupSqlite()`, обработчики типов обеих СУБД и расширения для Dapper |
+| `Extensions/` | `AddNpgsql(...)`, `AddSqlite(...)`, `AddFluentMappings(...)`, `Use<TConvention>()`, `EnumObjectType<T>()` |
 
 Подробности маппинга и работы с сессиями — в `persistence.md` и `nhibernate-models.md`.
+
+### Выбор СУБД
+
+Приложение работает либо с PostgreSQL, либо с SQLite; одновременная работа с двумя базами
+не поддерживается. СУБД выбирается **одним** вызовом, который ставит и провайдер соединений,
+и диалект NHibernate, и подходящий набор конвенций:
+
+```csharp
+services.AddNpgsql(nh => nh.AddFluentMappings("MyApp"),
+                   options => options.ApplicationName = "my-app");
+
+services.AddSqlite(nh => nh.AddFluentMappings("MyApp"));
+```
+
+Разносить эти три решения по разным вызовам нельзя намеренно: приложение, где провайдер
+соединений взят от одной СУБД, а диалект от другой, собралось бы без ошибок и упало бы
+на первом запросе. По той же причине `UsePostgreSQL()` и `UseDefaults()` — внутренние:
+снаружи их вызывать незачем.
+
+`DbSessionFactory` — абстрактный класс, а не интерфейс: потребители инжектят его по имени,
+и сохранение имени избавляет их доменный код от правок. `Add_GlavLib_Db()` больше нет —
+регистрацию делает `AddNpgsql`/`AddSqlite`.
+
+Имена типов подчиняются правилу: префикс `Npgsql`/`Sqlite` означает зависимость от СУБД,
+а его отсутствие — что тип работает на обеих. Поэтому `NpgsqlDateUserType` и `SqliteDateUserType`
+названы оба, а `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType`, `ClassConvention`,
+`PropertyConvention`, `ReferenceConvention`, `HasManyConvention`, `HasOneConvention`
+и `EnumConvention` остаются без префикса. Добавляя третью СУБД, разноси по префиксам только
+то, что от неё действительно зависит: префикс на общем типе перестаёт что-либо сообщать.
+
+Обработчики типов Dapper выбираются отдельно, вызовом `DapperConventions.SetupNpgsql()`
+либо `DapperConventions.SetupSqlite()` при старте приложения: настройки Dapper глобальны
+для процесса и к DI-контейнеру отношения не имеют. Наборы не взаимозаменяемы — SQLite
+отдаёт даты текстом, и Postgres-обработчики на них падают приведением типа.
+
+### Что поддержано на SQLite
+
+Провайдер — `Microsoft.Data.Sqlite`, диалект и драйвер ставит `MsSqliteConfiguration`.
+
+Поддержано: маппинги NHibernate и Dapper; `UtcDateTime`, `Date`, `YearMonth`; `JsonType<T>`;
+`EnumObject` в колонках; stateful- и stateless-сессии; транзакции; выдача идентификаторов
+через `identity` вместо секвенций (`SqliteIdConvention`). Проверка внешних ключей включается
+фабрикой на каждом открываемом соединении: `PRAGMA foreign_keys` в SQLite задаётся
+на соединение, а не на файл базы.
+
+**Форму хранения задаёт сам тип, а не диалект.** Типов даты и времени в SQLite нет, и если
+отдать выбор диалекту NHibernate, то `Date` уедет в колонку как `1990-05-17 00:00:00`,
+`YearMonth` — как `2026-01-01 00:00:00` с выдуманным днём, а `TimeSpan` — числом тиков.
+Прочитать такую колонку в обход NHibernate нельзя, а сравнить её в SQL с человеческой датой
+тем более. Поэтому `Sqlite*UserType` хранят значение строкой в каноническом виде самого типа —
+том, что даёт его `ToString()`:
+
+| Тип | В колонке | Формат |
+|---|---|---|
+| `UtcDateTime` | `2026-09-08T14:35:12Z` | `yyyy-MM-ddTHH:mm:ssZ` |
+| `Date` | `1990-05-17` | `yyyy-MM-dd` |
+| `YearMonth` | `2026-01` | `yyyy-MM` |
+
+Все три сортируются лексикографически так же, как хронологически, принимаются встроенными
+функциями SQLite `date()`/`datetime()` и сравниваются в SQL напрямую: `where birth_date =
+'1990-05-17'` работает. Обработчики Dapper пользуются теми же `ToString()`/`Parse`, поэтому
+NHibernate и Dapper согласованы по построению, а не по совпадению.
+
+Следствие, о котором нужно знать: канонический вид `UtcDateTime` — с точностью до секунды,
+поэтому на SQLite доли секунды не сохраняются, тогда как на PostgreSQL колонка `timestamp`
+их хранит.
+
+Для PostgreSQL колонки объявляются собственными типами базы: `UtcDateTime` — `timestamp`
+(NHibernate выставляет параметру `DbType.DateTime`, и Npgsql отображает его именно так),
+`Date` и `YearMonth` — `date`. Зону хранить не нужно: `UtcDateTime` по построению держит
+только UTC, а при чтении NHibernate проставляет `DateTimeKind.Utc` сам.
+
+`TimeSpan` в этот список не входит. Конвенция подставляет `TimeAsTimeSpan` только для
+свойств типа `TimeSpan`; свойство `TimeSpan?` до неё не доходит и хранится тиками —
+на обеих СУБД одинаково.
+
+Не поддержано и не заявляется: база in-memory (она не переживает закрытие соединения,
+а сессия открывает своё соединение на каждый запрос); несколько процессов на один файл;
+режим WAL — его включает миграция приложения одноразово, потому что `journal_mode` хранится
+в файле базы, а строкой подключения `Microsoft.Data.Sqlite` не задаётся; создание схемы —
+как и для PostgreSQL, это забота приложения.
 
 ## GlavLib.App
 

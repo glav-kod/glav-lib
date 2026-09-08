@@ -23,8 +23,9 @@
   Тесты генераторов базы не требуют и должны быть зелёными целиком (27 тестов);
 - менялись `GlavLib.Basics/`, `GlavLib.Abstractions/` или `GlavLib.Db/` — прогони
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'`.
-  Фильтр отбрасывает тесты, которым нужен Postgres, и оставляет 27 тестов, работающих
-  без базы;
+  Фильтр отбрасывает тесты, которым нужен Postgres, и оставляет 36 тестов, работающих
+  без базы, включая набор `GlavLib.Tests.Sqlite` — SQLite работает с временным файлом
+  и доступна в том числе в облачной среде;
 - менялись `GlavLib.App/` или `Sandbox/` — сборка обязательна, а
   `dotnet test Sandbox/GlavLib.Sandbox.API.Tests/GlavLib.Sandbox.API.Tests.csproj`
   запускай, только если база доступна: единственный тест проекта создаёт пользователя
@@ -52,7 +53,8 @@
 
 В облачной среде Claude Code нет Docker и Postgres, а `docker-compose.yml` поднимает пару
 «мастер — реплика», поэтому недоступны ни `up.ps1`, ни `migrate.ps1`, ни тесты, работающие
-с базой. Это `GlavLib.Tests.Db.DbSessionFactoryTests` и весь `GlavLib.Sandbox.API.Tests`.
+с базой. Это `GlavLib.Tests.Db.DbSessionFactoryTests`, `GlavLib.Tests.Db.NpgsqlUserTypesTests`
+и весь `GlavLib.Sandbox.API.Tests`.
 Проверку, которая требует базы, за пройденную не выдавай — прямо скажи, что осталось
 непроверенным.
 

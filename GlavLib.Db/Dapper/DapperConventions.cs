@@ -20,9 +20,9 @@ public static class DapperConventions
     {
         SetupCommon();
 
-        SqlMapper.AddTypeHandler(typeof(Date), new DateHandler());
-        SqlMapper.AddTypeHandler(typeof(UtcDateTime), new UtcDateTimeHandler());
-        SqlMapper.AddTypeHandler(typeof(YearMonth), new YearMonthHandler());
+        SqlMapper.AddTypeHandler(typeof(Date), new NpgsqlDateHandler());
+        SqlMapper.AddTypeHandler(typeof(UtcDateTime), new NpgsqlUtcDateTimeHandler());
+        SqlMapper.AddTypeHandler(typeof(YearMonth), new NpgsqlYearMonthHandler());
     }
 
     public static void SetupSqlite()

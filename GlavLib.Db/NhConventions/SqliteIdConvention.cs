@@ -5,7 +5,7 @@ using Humanizer;
 namespace GlavLib.Db.NhConventions;
 
 /// <summary>
-/// Идентификаторы для SQLite. Отличается от <see cref="IdConvention"/> генератором:
+/// Идентификаторы для SQLite. Отличается от <see cref="NpgsqlIdConvention"/> генератором:
 /// секвенций в SQLite нет, идентификатор выдаёт сама база при вставке.
 /// </summary>
 public sealed class SqliteIdConvention : IIdConvention

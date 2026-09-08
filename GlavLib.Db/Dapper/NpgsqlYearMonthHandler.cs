@@ -1,23 +1,23 @@
-﻿using System.Data;
+using System.Data;
 using Dapper;
 using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.Dapper;
 
-public sealed class DateHandler : SqlMapper.TypeHandler<Date>
+public sealed class NpgsqlYearMonthHandler : SqlMapper.TypeHandler<YearMonth>
 {
     public override void SetValue(
             IDbDataParameter parameter,
-            Date? dateTime
+            YearMonth? dateTime
         )
     {
         parameter.Value = dateTime?.Value;
     }
 
-    public override Date Parse(object value)
+    public override YearMonth Parse(object value)
     {
         var dateTime = (DateTime)value;
 
-        return Date.FromDateTime(dateTime);
+        return YearMonth.FromDateTime(dateTime);
     }
 }

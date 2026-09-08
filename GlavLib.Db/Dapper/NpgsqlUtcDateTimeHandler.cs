@@ -4,7 +4,7 @@ using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.Dapper;
 
-public sealed class UtcDateTimeHandler : SqlMapper.TypeHandler<UtcDateTime>
+public sealed class NpgsqlUtcDateTimeHandler : SqlMapper.TypeHandler<UtcDateTime>
 {
     public override void SetValue(
             IDbDataParameter parameter,

@@ -105,7 +105,7 @@ Abstractions ← Basics ← Db ← App
 | `DbSession.cs`, `StatefulDbSession.cs`, `StatelessDbSession.cs` | Сессия запроса, доступ через `Current` |
 | `DbTransaction.cs` | Транзакция с явным `Commit()` |
 | `Providers/` | Абстрактная `DbSessionFactory` и её наследники `NpgsqlDbSessionFactory`, `SqliteDbSessionFactory`; `NpgsqlDataSourceProvider` |
-| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`IdConvention` и `SqliteIdConvention`), коллекции, `enum` |
+| `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`NpgsqlIdConvention` и `SqliteIdConvention`), коллекции, `enum` |
 | `NhUserTypes/` | Зависящие от СУБД `Npgsql*UserType` и `Sqlite*UserType` для `UtcDateTime`, `Date`, `YearMonth` плюс конвенции `NpgsqlUserTypesConventions` и `SqliteUserTypesConventions`; общие `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
 | `Dapper/` | `DapperConventions` с `SetupNpgsql()`/`SetupSqlite()`, обработчики типов обеих СУБД и расширения для Dapper |
 | `Extensions/` | `AddNpgsql(...)`, `AddSqlite(...)`, `AddFluentMappings(...)`, `Use<TConvention>()`, `EnumObjectType<T>()` |
@@ -133,6 +133,13 @@ services.AddSqlite(nh => nh.AddFluentMappings("MyApp"));
 `DbSessionFactory` — абстрактный класс, а не интерфейс: потребители инжектят его по имени,
 и сохранение имени избавляет их доменный код от правок. `Add_GlavLib_Db()` больше нет —
 регистрацию делает `AddNpgsql`/`AddSqlite`.
+
+Имена типов подчиняются правилу: префикс `Npgsql`/`Sqlite` означает зависимость от СУБД,
+а его отсутствие — что тип работает на обеих. Поэтому `NpgsqlDateUserType` и `SqliteDateUserType`
+названы оба, а `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType`, `ClassConvention`,
+`PropertyConvention`, `ReferenceConvention`, `HasManyConvention`, `HasOneConvention`
+и `EnumConvention` остаются без префикса. Добавляя третью СУБД, разноси по префиксам только
+то, что от неё действительно зависит: префикс на общем типе перестаёт что-либо сообщать.
 
 Обработчики типов Dapper выбираются отдельно, вызовом `DapperConventions.SetupNpgsql()`
 либо `DapperConventions.SetupSqlite()` при старте приложения: настройки Dapper глобальны

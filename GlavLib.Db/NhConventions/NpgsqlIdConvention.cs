@@ -4,7 +4,7 @@ using Humanizer;
 
 namespace GlavLib.Db.NhConventions;
 
-public sealed class IdConvention : IIdConvention
+public sealed class NpgsqlIdConvention : IIdConvention
 {
     public void Apply(IIdentityInstance instance)
     {

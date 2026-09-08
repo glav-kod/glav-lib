@@ -55,7 +55,7 @@ Entity Framework Core в проекте **не** используется. Не 
 - `PropertyConvention` — имя колонки: имя свойства в `snake_case` (`BirthDate` → `birth_date`);
 - `ReferenceConvention` — колонка ссылки: имя свойства в `snake_case` плюс `_id`, ленивая
   загрузка через proxy и `Cascade.SaveUpdate()`;
-- `IdConvention` — при незаданном генераторе ставит `Native` с последовательностью
+- `NpgsqlIdConvention` — при незаданном генераторе ставит `Native` с последовательностью
   `<table>_<column>_seq` и `unsaved-value = 0`; на SQLite вместо неё работает
   `SqliteIdConvention`, которая ставит `Identity`, потому что секвенций в SQLite нет;
 - `UserTypesConventions` — подставляет пользовательские типы для `UtcDateTime`, `Date`

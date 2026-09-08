@@ -15,6 +15,7 @@ public struct ErrorArgument
 
 public sealed class ErrorMessageTemplate
 {
+    //Ту же грамматику разбирает MultiLangMessage в GlavLib.Basics: расходиться они не должны
     private static readonly Regex ReplaceRegex = new(@"{(?<name>\w+):(?<type>[\w?]+)(:(?<format>\w+))?}", RegexOptions.Compiled);
 
     public string InterpolatedMessage { get; private set; } = null!;

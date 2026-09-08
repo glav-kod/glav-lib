@@ -38,7 +38,7 @@ public sealed class MultiLangMessageTests
     {
         var multiLangMessage = new MultiLangMessage(new Dictionary<string, string>
         {
-            ["ru"] = "Ошибка: {message}"
+            ["ru"] = "Ошибка: {message:string}"
         });
 
         var result = multiLangMessage.Format(new[] { "ru" }, args: new Dictionary<string, string>
@@ -48,13 +48,61 @@ public sealed class MultiLangMessageTests
 
         result.Should().Be("Ошибка: Все идет по плану (c)");
     }
-    
+
+    [Fact]
+    public void It_should_format_optional_argument()
+    {
+        var multiLangMessage = new MultiLangMessage(new Dictionary<string, string>
+        {
+            ["ru"] = "Пользователь#{userId:long?} не найден"
+        });
+
+        var result = multiLangMessage.Format(new[] { "ru" }, args: new Dictionary<string, string>
+        {
+            ["userId"] = "42"
+        });
+
+        result.Should().Be("Пользователь#42 не найден");
+    }
+
+    [Fact]
+    public void It_should_format_argument_with_format_string()
+    {
+        var multiLangMessage = new MultiLangMessage(new Dictionary<string, string>
+        {
+            ["ru"] = "Сумма: {amount:decimal:F2}"
+        });
+
+        var result = multiLangMessage.Format(new[] { "ru" }, args: new Dictionary<string, string>
+        {
+            ["amount"] = "10.5"
+        });
+
+        result.Should().Be("Сумма: 10.5");
+    }
+
+    [Fact]
+    public void It_should_keep_placeholder_without_type_as_is()
+    {
+        var multiLangMessage = new MultiLangMessage(new Dictionary<string, string>
+        {
+            ["ru"] = "Ошибка: {message}"
+        });
+
+        var result = multiLangMessage.Format(new[] { "ru" }, args: new Dictionary<string, string>
+        {
+            ["message"] = "Все идет по плану (c)"
+        });
+
+        result.Should().Be("Ошибка: {message}");
+    }
+
     [Fact]
     public void It_should_ignore_argument_if_it_is_absent()
     {
         var multiLangMessage = new MultiLangMessage(new Dictionary<string, string>
         {
-            ["ru"] = "Ошибка: {message}"
+            ["ru"] = "Ошибка: {message:string}"
         });
 
         var result = multiLangMessage.Format(new[] { "ru" }, args: new Dictionary<string, string>());

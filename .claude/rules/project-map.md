@@ -168,8 +168,13 @@ services.AddSqlite(nh => nh.AddFluentMappings("MyApp"));
 NHibernate и Dapper согласованы по построению, а не по совпадению.
 
 Следствие, о котором нужно знать: канонический вид `UtcDateTime` — с точностью до секунды,
-поэтому на SQLite доли секунды не сохраняются, тогда как на PostgreSQL `timestamptz` их
-хранит.
+поэтому на SQLite доли секунды не сохраняются, тогда как на PostgreSQL колонка `timestamp`
+их хранит.
+
+Для PostgreSQL колонки объявляются собственными типами базы: `UtcDateTime` — `timestamp`
+(NHibernate выставляет параметру `DbType.DateTime`, и Npgsql отображает его именно так),
+`Date` и `YearMonth` — `date`. Зону хранить не нужно: `UtcDateTime` по построению держит
+только UTC, а при чтении NHibernate проставляет `DateTimeKind.Utc` сам.
 
 `TimeSpan` в этот список не входит. Конвенция подставляет `TimeAsTimeSpan` только для
 свойств типа `TimeSpan`; свойство `TimeSpan?` до неё не доходит и хранится тиками —

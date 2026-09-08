@@ -53,7 +53,8 @@
 
 В облачной среде Claude Code нет Docker и Postgres, а `docker-compose.yml` поднимает пару
 «мастер — реплика», поэтому недоступны ни `up.ps1`, ни `migrate.ps1`, ни тесты, работающие
-с базой. Это `GlavLib.Tests.Db.DbSessionFactoryTests` и весь `GlavLib.Sandbox.API.Tests`.
+с базой. Это `GlavLib.Tests.Db.DbSessionFactoryTests`, `GlavLib.Tests.Db.NpgsqlUserTypesTests`
+и весь `GlavLib.Sandbox.API.Tests`.
 Проверку, которая требует базы, за пройденную не выдавай — прямо скажи, что осталось
 непроверенным.
 

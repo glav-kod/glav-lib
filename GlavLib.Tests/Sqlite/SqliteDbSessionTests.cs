@@ -2,6 +2,7 @@ using Dapper;
 using FluentAssertions;
 using GlavLib.Basics.DataTypes;
 using GlavLib.Db;
+using GlavLib.Tests.Model;
 using Microsoft.Data.Sqlite;
 
 namespace GlavLib.Tests.Sqlite;

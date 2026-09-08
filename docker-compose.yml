@@ -1,7 +1,6 @@
-version: "3"
 x-postgres-common:
   &postgres-common
-  image: postgres:16
+  image: postgres:18
   user: postgres
   restart: always
   healthcheck:

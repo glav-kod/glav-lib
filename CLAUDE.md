@@ -44,7 +44,8 @@ HTTP-команд на minimal API и source-генераторы, которы�
   на плейсхолдеры без типа.
 - **Тесты SQLite:** входят в набор выше (`GlavLib.Tests.Sqlite`) и Postgres не требуют —
   SQLite работает с временным файлом, поэтому они зелены и в облачной среде.
-- **Тесты, которым нужна база:** `GlavLib.Tests.Db.DbSessionFactoryTests` и весь
+- **Тесты, которым нужна база:** `GlavLib.Tests.Db.DbSessionFactoryTests`,
+  `GlavLib.Tests.Db.NpgsqlUserTypesTests` и весь
   `Sandbox/GlavLib.Sandbox.API.Tests` — запускаются только при поднятом Postgres.
 - Тестовые проекты запускай **по отдельности**, а не через `dotnet test GlavLib.sln`: иначе
   в один прогон попадают тесты, требующие базы, и собственные падения теряются среди чужих.

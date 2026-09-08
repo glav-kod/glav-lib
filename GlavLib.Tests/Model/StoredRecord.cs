@@ -6,7 +6,7 @@ using GlavLib.Db.Extensions;
 using GlavLib.Db.NhUserTypes;
 using JetBrains.Annotations;
 
-namespace GlavLib.Tests.Sqlite;
+namespace GlavLib.Tests.Model;
 
 [EnumObjectItem("Som", "KGS", "Сом")]
 [EnumObjectItem("Tenge", "KZT", "Тенге")]
@@ -20,8 +20,9 @@ public sealed class TestPayload
 }
 
 /// <summary>
-/// Сущность, собирающая в одной таблице всё, что библиотека обещает поддерживать на SQLite:
-/// собственные типы дат, JSON-колонку и <see cref="EnumObject"/>.
+/// Сущность, собирающая в одной таблице всё, что библиотека обещает поддерживать:
+/// собственные типы дат, JSON-колонку и <see cref="EnumObject"/>. Маппинг один на обе СУБД —
+/// именно это и проверяют наборы тестов PostgreSQL и SQLite.
 /// </summary>
 public class StoredRecord : Entity
 {

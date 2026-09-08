@@ -53,19 +53,24 @@ public static class FluentConfigurationExtensions
 
     internal static FluentConfiguration UseNpgsqlDefaults(this FluentConfiguration fluentConfiguration)
     {
-        return fluentConfiguration.UseDefaults(new IdConvention());
+        return fluentConfiguration.UseDefaults(new IdConvention(), new UserTypesConventions());
     }
 
     internal static FluentConfiguration UseSqliteDefaults(this FluentConfiguration fluentConfiguration)
     {
-        return fluentConfiguration.UseDefaults(new SqliteIdConvention());
+        return fluentConfiguration.UseDefaults(new SqliteIdConvention(), new SqliteUserTypesConventions());
     }
 
     /// <summary>
-    /// Общий набор конвенций. От СУБД зависит только выдача идентификаторов, поэтому
-    /// она и приходит параметром: остальные конвенции лишь режут имена и подставляют типы.
+    /// Общий набор конвенций. От СУБД зависят выдача идентификаторов и хранение собственных
+    /// типов, поэтому они приходят параметрами: остальные конвенции лишь режут имена
+    /// и подставляют <c>EnumType</c>.
     /// </summary>
-    private static FluentConfiguration UseDefaults(this FluentConfiguration fluentConfiguration, IIdConvention idConvention)
+    private static FluentConfiguration UseDefaults(
+            this FluentConfiguration fluentConfiguration,
+            IIdConvention idConvention,
+            IPropertyConvention userTypesConvention
+        )
     {
         return fluentConfiguration.Mappings(m =>
                                   {
@@ -77,7 +82,7 @@ public static class FluentConfigurationExtensions
                                                                        new HasManyConvention(),
                                                                        new HasOneConvention(),
                                                                        DefaultAccess.Property(),
-                                                                       new UserTypesConventions()
+                                                                       userTypesConvention
                                       );
                                   })
                                   .ExposeConfiguration(cfg => cfg.SetProperty(Environment.Hbm2ddlKeyWords, "none"));

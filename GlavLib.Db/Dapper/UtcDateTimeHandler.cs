@@ -6,8 +6,10 @@ namespace GlavLib.Db.Dapper;
 
 public sealed class UtcDateTimeHandler : SqlMapper.TypeHandler<UtcDateTime>
 {
-    public override void SetValue(IDbDataParameter parameter,
-                                  UtcDateTime?     dateTime)
+    public override void SetValue(
+            IDbDataParameter parameter,
+            UtcDateTime? dateTime
+        )
     {
         parameter.Value = dateTime?.Value;
     }
@@ -16,14 +18,16 @@ public sealed class UtcDateTimeHandler : SqlMapper.TypeHandler<UtcDateTime>
     {
         var dateTime = (DateTime)value;
 
-        var utcDateTime = new DateTime(dateTime.Year,
-                                       dateTime.Month,
-                                       dateTime.Day,
-                                       dateTime.Hour,
-                                       dateTime.Minute,
-                                       dateTime.Second,
-                                       dateTime.Millisecond,
-                                       DateTimeKind.Utc);
+        var utcDateTime = new DateTime(
+                dateTime.Year,
+                dateTime.Month,
+                dateTime.Day,
+                dateTime.Hour,
+                dateTime.Minute,
+                dateTime.Second,
+                dateTime.Millisecond,
+                DateTimeKind.Utc
+            );
 
         return UtcDateTime.FromDateTime(utcDateTime);
     }

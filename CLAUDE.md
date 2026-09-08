@@ -39,7 +39,7 @@ HTTP-команд на minimal API и source-генераторы, которы�
   базы не требуют, должны быть зелёными целиком (27 тестов).
 - **Тесты библиотеки без базы:**
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'` —
-  34 теста, из которых два (`MultiLangMessageTests`) падают и на `main`: причина в том, что
+  36 тестов, из которых два (`MultiLangMessageTests`) падают и на `main`: причина в том, что
   `MultiLangMessage.Format` подставляет аргументы по шаблону `{arg:type}`, а тесты написаны
   на плейсхолдеры без типа.
 - **Тесты SQLite:** входят в набор выше (`GlavLib.Tests.Sqlite`) и Postgres не требуют —

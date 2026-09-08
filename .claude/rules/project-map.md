@@ -106,7 +106,7 @@ Abstractions ← Basics ← Db ← App
 | `DbTransaction.cs` | Транзакция с явным `Commit()` |
 | `Providers/` | Абстрактная `DbSessionFactory` и её наследники `NpgsqlDbSessionFactory`, `SqliteDbSessionFactory`; `NpgsqlDataSourceProvider` |
 | `NhConventions/` | Конвенции имён: таблица, колонка, ссылка, Id (`IdConvention` и `SqliteIdConvention`), коллекции, `enum` |
-| `NhUserTypes/` | `UtcDateTimeUserType`, `DateUserType`, `YearMonthUserType`, `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType` |
+| `NhUserTypes/` | `UtcDateTimeUserType`, `DateUserType`, `YearMonthUserType` и их SQLite-двойники `Sqlite*UserType`; `EnumObjectUserType`, `JsonType<T>`, `SingleValueObjectType`; конвенции `UserTypesConventions` и `SqliteUserTypesConventions` |
 | `Dapper/` | `DapperConventions` с `SetupNpgsql()`/`SetupSqlite()`, обработчики типов обеих СУБД и расширения для Dapper |
 | `Extensions/` | `AddNpgsql(...)`, `AddSqlite(...)`, `AddFluentMappings(...)`, `Use<TConvention>()`, `EnumObjectType<T>()` |
 
@@ -143,12 +143,37 @@ services.AddSqlite(nh => nh.AddFluentMappings("MyApp"));
 
 Провайдер — `Microsoft.Data.Sqlite`, диалект и драйвер ставит `MsSqliteConfiguration`.
 
-Поддержано: маппинги NHibernate и Dapper; `UtcDateTime`, `Date`, `YearMonth` и `TimeSpan`
-(хранятся текстом в ISO-8601 — поведение диалекта по умолчанию); `JsonType<T>`; `EnumObject`
-в колонках; stateful- и stateless-сессии; транзакции; выдача идентификаторов через `identity`
-вместо секвенций (`SqliteIdConvention`). Проверка внешних ключей включается фабрикой
-на каждом открываемом соединении: `PRAGMA foreign_keys` в SQLite задаётся на соединение,
-а не на файл базы.
+Поддержано: маппинги NHibernate и Dapper; `UtcDateTime`, `Date`, `YearMonth`; `JsonType<T>`;
+`EnumObject` в колонках; stateful- и stateless-сессии; транзакции; выдача идентификаторов
+через `identity` вместо секвенций (`SqliteIdConvention`). Проверка внешних ключей включается
+фабрикой на каждом открываемом соединении: `PRAGMA foreign_keys` в SQLite задаётся
+на соединение, а не на файл базы.
+
+**Форму хранения задаёт сам тип, а не диалект.** Типов даты и времени в SQLite нет, и если
+отдать выбор диалекту NHibernate, то `Date` уедет в колонку как `1990-05-17 00:00:00`,
+`YearMonth` — как `2026-01-01 00:00:00` с выдуманным днём, а `TimeSpan` — числом тиков.
+Прочитать такую колонку в обход NHibernate нельзя, а сравнить её в SQL с человеческой датой
+тем более. Поэтому `Sqlite*UserType` хранят значение строкой в каноническом виде самого типа —
+том, что даёт его `ToString()`:
+
+| Тип | В колонке | Формат |
+|---|---|---|
+| `UtcDateTime` | `2026-09-08T14:35:12Z` | `yyyy-MM-ddTHH:mm:ssZ` |
+| `Date` | `1990-05-17` | `yyyy-MM-dd` |
+| `YearMonth` | `2026-01` | `yyyy-MM` |
+
+Все три сортируются лексикографически так же, как хронологически, принимаются встроенными
+функциями SQLite `date()`/`datetime()` и сравниваются в SQL напрямую: `where birth_date =
+'1990-05-17'` работает. Обработчики Dapper пользуются теми же `ToString()`/`Parse`, поэтому
+NHibernate и Dapper согласованы по построению, а не по совпадению.
+
+Следствие, о котором нужно знать: канонический вид `UtcDateTime` — с точностью до секунды,
+поэтому на SQLite доли секунды не сохраняются, тогда как на PostgreSQL `timestamptz` их
+хранит.
+
+`TimeSpan` в этот список не входит. Конвенция подставляет `TimeAsTimeSpan` только для
+свойств типа `TimeSpan`; свойство `TimeSpan?` до неё не доходит и хранится тиками —
+на обеих СУБД одинаково.
 
 Не поддержано и не заявляется: база in-memory (она не переживает закрытие соединения,
 а сессия открывает своё соединение на каждый запрос); несколько процессов на один файл;

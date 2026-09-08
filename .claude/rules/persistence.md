@@ -58,6 +58,11 @@ Entity Framework Core в проекте **не** используется. Не 
 - `IdConvention` — при незаданном генераторе ставит `Native` с последовательностью
   `<table>_<column>_seq` и `unsaved-value = 0`; на SQLite вместо неё работает
   `SqliteIdConvention`, которая ставит `Identity`, потому что секвенций в SQLite нет;
+- `UserTypesConventions` — подставляет пользовательские типы для `UtcDateTime`, `Date`
+  и `YearMonth`; на SQLite вместо неё работает `SqliteUserTypesConventions`, которая хранит
+  эти типы строкой в каноническом виде самого типа (`1990-05-17`, `2026-01`,
+  `2026-09-08T14:35:12Z`), потому что типов даты и времени в SQLite нет — подробности
+  в `project-map.md`;
 - `EnumConvention` — свойства обычных C#-перечислений (`enum`), через `EnumType<T>`;
 - `HasManyConvention`, `HasOneConvention` — коллекции и связи «один к одному»;
 - `UserTypesConventions` — пользовательские типы, но не все: см. раздел ниже.

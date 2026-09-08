@@ -1,35 +1,26 @@
 using System.Data;
-using System.Globalization;
 using Dapper;
 using GlavLib.Basics.DataTypes;
 
 namespace GlavLib.Db.Dapper;
 
 /// <summary>
-/// SQLite хранит момент времени текстом в ISO-8601, и Dapper получает из такой колонки
-/// строку, а не <see cref="DateTime"/>, поэтому значение разбирается, а не приводится.
+/// На SQLite собственные типы дат хранятся текстом в каноническом виде самого типа,
+/// поэтому Dapper читает и пишет их тем же <c>ToString</c>/<c>Parse</c>, что и
+/// пользовательские типы NHibernate: формат задаёт тип, а не диалект.
 /// </summary>
 public sealed class SqliteUtcDateTimeHandler : SqlMapper.TypeHandler<UtcDateTime>
 {
-    public override void SetValue(IDbDataParameter parameter,
-                                  UtcDateTime?     dateTime)
+    public override void SetValue(
+            IDbDataParameter parameter,
+            UtcDateTime? dateTime
+        )
     {
-        parameter.Value = dateTime?.Value;
+        parameter.Value = dateTime?.ToString();
     }
 
     public override UtcDateTime Parse(object value)
     {
-        var dateTime = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
-
-        var utcDateTime = new DateTime(dateTime.Year,
-                                       dateTime.Month,
-                                       dateTime.Day,
-                                       dateTime.Hour,
-                                       dateTime.Minute,
-                                       dateTime.Second,
-                                       dateTime.Millisecond,
-                                       DateTimeKind.Utc);
-
-        return UtcDateTime.FromDateTime(utcDateTime);
+        return UtcDateTime.ParseExact((string)value);
     }
 }

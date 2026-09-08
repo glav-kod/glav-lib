@@ -176,6 +176,67 @@ public sealed class SqliteDbSessionTests : IClassFixture<SqliteTestDatabase>
         dbSession.Commit();
     }
 
+    [Fact]
+    public void It_should_store_values_in_canonical_text_form()
+    {
+        using var dbSession = OpenSession();
+
+        using (var transaction = new DbTransaction(dbSession))
+        {
+            dbSession.NhSession.Save(new StoredRecord
+            {
+                Name      = "canonical",
+                CreatedAt = new UtcDateTime(2026, 9, 8, 14, 35, 12),
+                BirthDate = new Date(1990, 5, 17),
+                Period    = new YearMonth(2026, 1),
+                Currency  = TestCurrency.Som
+            });
+
+            transaction.Commit();
+        }
+
+        var stored = dbSession.Connection.QuerySingle<StoredText>(
+            "select created_at, birth_date, period, currency from stored_records where name = 'canonical'");
+
+        stored.CreatedAt.Should().Be("2026-09-08T14:35:12Z");
+        stored.BirthDate.Should().Be("1990-05-17");
+        stored.Period.Should().Be("2026-01");
+        stored.Currency.Should().Be("KGS");
+    }
+
+    [Fact]
+    public void It_should_allow_comparing_dates_in_plain_sql()
+    {
+        using var dbSession = OpenSession();
+
+        using (var transaction = new DbTransaction(dbSession))
+        {
+            dbSession.NhSession.Save(new StoredRecord
+            {
+                Name      = "plain sql",
+                BirthDate = new Date(1977, 3, 4)
+            });
+
+            transaction.Commit();
+        }
+
+        var count = dbSession.Connection.ExecuteScalar<long>(
+            "select count(*) from stored_records where birth_date = '1977-03-04'");
+
+        count.Should().Be(1);
+    }
+
+    private sealed class StoredText
+    {
+        public string CreatedAt { get; set; } = null!;
+
+        public string BirthDate { get; set; } = null!;
+
+        public string Period { get; set; } = null!;
+
+        public string Currency { get; set; } = null!;
+    }
+
     private sealed class StoredRecordRow
     {
         public string Name { get; set; } = null!;

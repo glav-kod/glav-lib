@@ -10,7 +10,7 @@ internal sealed class UtcDateTimeUserType : SingleValueObjectType<UtcDateTime>
 
     protected override UtcDateTime Create(object value)
     {
-        var dateTime = Convert.ToDateTime(value);
+        var dateTime = (DateTime)value;
         return UtcDateTime.FromDateTime(dateTime);
     }
 

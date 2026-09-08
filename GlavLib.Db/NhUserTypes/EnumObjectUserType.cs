@@ -11,7 +11,7 @@ public sealed class EnumObjectUserType<TValue> : SingleValueObjectType<TValue>
 
     protected override TValue Create(object value)
     {
-        var key = Convert.ToString(value)!;
+        var key = (string)value;
 
         return TValue.Create(key);
     }

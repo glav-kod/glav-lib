@@ -11,7 +11,7 @@ internal sealed class SqliteYearMonthUserType : SingleValueObjectType<YearMonth>
 
     protected override YearMonth Create(object value)
     {
-        var str = Convert.ToString(value)!;
+        var str = (string)value;
 
         var result = YearMonth.FromString(str);
         if (result.IsFailure)

@@ -10,7 +10,7 @@ internal sealed class YearMonthUserType : SingleValueObjectType<YearMonth>
 
     protected override YearMonth Create(object value)
     {
-        var dateTime = Convert.ToDateTime(value);
+        var dateTime = (DateTime)value;
 
         return YearMonth.FromDateTime(dateTime);
     }

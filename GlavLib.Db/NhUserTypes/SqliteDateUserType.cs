@@ -17,7 +17,7 @@ internal sealed class SqliteDateUserType : SingleValueObjectType<Date>
 
     protected override Date Create(object value)
     {
-        return Date.FromString(Convert.ToString(value)!);
+        return Date.FromString((string)value);
     }
 
     protected override object GetValue(Date state)

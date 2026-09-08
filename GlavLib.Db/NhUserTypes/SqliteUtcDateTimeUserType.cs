@@ -15,7 +15,7 @@ internal sealed class SqliteUtcDateTimeUserType : SingleValueObjectType<UtcDateT
 
     protected override UtcDateTime Create(object value)
     {
-        return UtcDateTime.ParseExact(Convert.ToString(value)!);
+        return UtcDateTime.ParseExact((string)value);
     }
 
     protected override object GetValue(UtcDateTime state)

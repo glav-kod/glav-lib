@@ -53,6 +53,14 @@ create table public.orders
 );
 ```
 
+При добавлении через `alter table` — отдельным changeset'ом:
+
+```sql
+alter table public.orders
+    add constraint "fk_orders#user" foreign key (user_id)
+        references public.users (id);
+```
+
 ## NULL / NOT NULL — всегда явно
 
 Для каждого столбца всегда явно указывайте `null` или `not null`:
@@ -100,14 +108,6 @@ create table public.orders
     version    bigint       not null,
     is_deleted boolean      not null
 );
-```
-
-При добавлении через `alter table` — отдельным changeset'ом:
-
-```sql
-alter table public.orders
-    add constraint "fk_orders#user" foreign key (user_id)
-        references public.users (id);
 ```
 
 ## Именование constraints

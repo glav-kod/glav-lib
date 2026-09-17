@@ -30,20 +30,30 @@ echo '{"async": true, "asyncTimeout": 600000}'
 
 DOTNET_INSTALL_DIR="/root/.dotnet"
 
-# Версия берётся из TargetFramework в Directory.Build.props: канал должен совпадать
-# с тем, на что нацелены проекты, иначе восстановление пакетов упадёт.
-DOTNET_CHANNEL="10.0"
+project_dir="${CLAUDE_PROJECT_DIR:-.}"
+props_file="$project_dir/Directory.Build.props"
+
+# Канал SDK вычисляется из TargetFramework проектов (`net10.0` → `10.0`), а не задаётся
+# константой: иначе при следующем обновлении фреймворка хук молча разъедется с решением
+# и восстановление пакетов упадёт.
+dotnet_channel="$(sed -n 's:.*<TargetFramework>net\([0-9.]*\)</TargetFramework>.*:\1:p' "$props_file" | head -1)"
+
+if [ -z "$dotnet_channel" ]; then
+  echo "Не удалось прочитать TargetFramework из $props_file" >&2
+  exit 1
+fi
 
 if [ ! -x "$DOTNET_INSTALL_DIR/dotnet" ]; then
-  echo "Устанавливаю .NET SDK $DOTNET_CHANNEL в $DOTNET_INSTALL_DIR"
+  echo "Устанавливаю .NET SDK $dotnet_channel в $DOTNET_INSTALL_DIR"
 
   install_script="$(mktemp)"
+  trap 'rm -f "$install_script"' EXIT
 
-  curl -sSL --max-time 120 https://dot.net/v1/dotnet-install.sh -o "$install_script"
+  # `--fail` обязателен: без него curl складывает в файл тело ошибки HTTP и выходит с нулевым
+  # кодом, после чего bash исполняет страницу ошибки вместо установщика.
+  curl -fsSL --max-time 120 https://dot.net/v1/dotnet-install.sh -o "$install_script"
 
-  bash "$install_script" --channel "$DOTNET_CHANNEL" --install-dir "$DOTNET_INSTALL_DIR"
-
-  rm -f "$install_script"
+  bash "$install_script" --channel "$dotnet_channel" --install-dir "$DOTNET_INSTALL_DIR"
 else
   echo ".NET SDK уже установлен в $DOTNET_INSTALL_DIR"
 fi
@@ -52,7 +62,8 @@ export DOTNET_ROOT="$DOTNET_INSTALL_DIR"
 export PATH="$DOTNET_INSTALL_DIR:$PATH"
 
 # Переменные нужны каждой команде сессии, а не только этому скрипту: без записи в CLAUDE_ENV_FILE
-# агент не найдёт `dotnet` в PATH.
+# агент не найдёт `dotnet` в PATH. При ручном запуске эта переменная не задана — тогда
+# записывать некуда, и `dotnet` вызывается по полному пути.
 if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
   {
     echo "export DOTNET_ROOT=\"$DOTNET_INSTALL_DIR\""
@@ -64,10 +75,10 @@ fi
 
 # Пакеты восстанавливаем заранее: они складываются в кеш контейнера, и первая же сборка
 # в сессии обходится без обращения к сети.
-if [ -f "${CLAUDE_PROJECT_DIR:-.}/GlavLib.sln" ]; then
+if [ -f "$project_dir/GlavLib.sln" ]; then
   echo "Восстанавливаю пакеты решения GlavLib.sln"
 
-  "$DOTNET_INSTALL_DIR/dotnet" restore "${CLAUDE_PROJECT_DIR:-.}/GlavLib.sln"
+  "$DOTNET_INSTALL_DIR/dotnet" restore "$project_dir/GlavLib.sln"
 fi
 
 echo "Окружение .NET готово: $("$DOTNET_INSTALL_DIR/dotnet" --version)"

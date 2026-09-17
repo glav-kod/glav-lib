@@ -196,6 +196,64 @@ public class Order
 }
 ```
 
+## Primary constructor
+
+Зависимости класса объявляются primary constructor'ом — параметрами прямо в объявлении класса.
+Отдельный конструктор, переписывающий зависимости в приватные поля, не пишется: параметр primary
+constructor виден во всём теле класса, а поле-копия лишь повторяет его другим именем.
+
+```csharp
+// ❌ BAD
+public sealed class OrderService
+{
+    private readonly ILogger<OrderService> _logger;
+    private readonly OrderRepository _repository;
+
+    public OrderService(
+            ILogger<OrderService> logger,
+            OrderRepository repository
+        )
+    {
+        _logger     = logger;
+        _repository = repository;
+    }
+
+    public async Task ProcessAsync(long orderId, CancellationToken cancellationToken)
+    {
+        var order = await _repository.GetAsync(orderId, cancellationToken);
+
+        _logger.LogInformation("Заказ обработан, Заказ#{OrderId}", order.Id);
+    }
+}
+
+// ✅ GOOD
+public sealed class OrderService(
+        ILogger<OrderService> logger,
+        OrderRepository repository
+    )
+{
+    public async Task ProcessAsync(long orderId, CancellationToken cancellationToken)
+    {
+        var order = await repository.GetAsync(orderId, cancellationToken);
+
+        logger.LogInformation("Заказ обработан, Заказ#{OrderId}", order.Id);
+    }
+}
+```
+
+Копировать параметр в поле (`private readonly ILogger _logger = logger;`) тоже не нужно — это
+тот же дубликат, записанный короче.
+
+Primary constructor — часть объявления класса, поэтому пункт «Конструктор(ы)» из порядка элементов
+к нему не относится: его параметры стоят в заголовке класса, а не среди членов.
+
+Обычный конструктор остаётся там, где primary constructor не подходит:
+
+- в конструкторе есть логика — проверка аргументов, вычисления, подписка на события;
+- классу нужно несколько конструкторов;
+- класс мапится NHibernate: сущности нужен конструктор без параметров (`protected Order()`),
+  а состояние ей задаёт ORM либо статический фабричный метод `Create`.
+
 ## Методы в классах
 
 Методы всегда объявляются в блочном виде с фигурными скобками. Лямбда-методы (`=>`) запрещены.

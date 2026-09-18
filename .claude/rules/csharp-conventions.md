@@ -419,7 +419,7 @@ select t.id
 var sql = @$"
 select t.id
   from public.users t
- where t.status = {UserStatus.ActiveKey}
+ where t.status = '{UserStatus.ActiveKey}'
 ";
 ```
 

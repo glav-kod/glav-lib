@@ -102,3 +102,11 @@ _logger.LogInformation("Заказ " + orderId + " создан");
 // ✅ GOOD
 _logger.LogInformation("Заказ создан, Заказ#{OrderId}, СистемныйПользователь#{UserId}", orderId, userId);
 ```
+
+Объекты целиком (результаты, DTO, ответы внешних систем) логируются через destructuring-префикс
+`@` — Serilog разложит их на поля вместо `ToString()`:
+
+```csharp
+_logger.LogWarning("Создание заказа отклонено: {@Error}", error);
+_logger.LogInformation("Получен ответ внешней системы: {@Response}", response);
+```

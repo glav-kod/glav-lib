@@ -193,7 +193,9 @@ Join("wallet_notifications", t =>
 
 ## Сохранение агрегатов
 
-Всегда явно вызывать `SaveAsync` или `SaveAndFlushAsync` для агрегатов — и при создании, и после изменения. Не полагаться на автоматический dirty-checking NHibernate или flush по окончании UoW.
+Всегда явно вызывать `SaveAsync` или `SaveAndFlushAsync` для агрегатов — и при создании, и после изменения. Не полагаться на каскадное сохранение, автоматический dirty-checking NHibernate или flush по окончании UoW.
+
+Вызываются они у NHibernate-сессии, а не у `DbSession`: у самой `DbSession` этих методов нет, она отдаёт сессию свойством `NhSession` (`var nhSession = dbSession.NhSession;`, статически — `StatefulDbSession.CurrentNhSession`). `SaveAndFlushAsync` — расширение из `GlavLib.Db.Extensions`, а не метод `ISession`, поэтому не забудь про `using`; `cancellationToken` у него обязателен.
 
 ```csharp
 // ❌ плохо — агрегат создан, но не сохранён явно
@@ -204,15 +206,19 @@ order.UpdateStatus(newStatus, userId);
 
 // ✅ хорошо — создание
 var order = Order.Create(number, clientId);
-await dbSession.SaveAsync(order);
+await nhSession.SaveAsync(order, cancellationToken);
 
 // ✅ хорошо — изменение
 order.UpdateStatus(newStatus, userId);
-await dbSession.SaveAsync(order);
+await nhSession.SaveAsync(order, cancellationToken);
 
-// ✅ хорошо — когда нужен немедленный flush (например, для получения Id до конца транзакции)
-await dbSession.SaveAndFlushAsync(order);
+// ✅ хорошо — когда нужен немедленный flush
+await nhSession.SaveAndFlushAsync(order, cancellationToken);
 ```
+
+`SaveAndFlushAsync` нужен там, где изменения должны попасть в базу до конца транзакции: перед вызовом внешней системы или когда требуется сгенерированный `Id`.
+
+Явный вызов обязателен даже при `FlushMode.Auto` — он делает намерение очевидным и устойчивым к изменению конфигурации сессии.
 
 ## Read-model (DTO без Entity)
 

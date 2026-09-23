@@ -381,7 +381,7 @@ public virtual Date        BirthDate      { get; protected set; }
 
 ## Именование параметров с датой и временем
 
-Параметры методов **нельзя** называть `now` или `today`. Используй `dateTime` или `date`.
+Параметры методов **нельзя** называть `now` или `today`. Допустимые имена — `dateTime` (для `UtcDateTime`) и `date` (для `Date`).
 
 Имена `now` и `today` допустимы **только** как локальные переменные, получаемые внутри метода из `dateTimeProvider`.
 

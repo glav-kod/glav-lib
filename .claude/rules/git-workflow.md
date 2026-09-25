@@ -102,7 +102,9 @@ PR создавай и обновляй на **русском языке** — �
   **обнови** заголовок и описание под текущий diff ветки, а не под первоначальный замысел.
 - Операции с pull request выполняй через CLI `gh` (`gh pr create`, `gh pr view`,
   `gh pr edit`, `gh pr comment`, `gh pr merge --squash`). Команды по каждой операции —
-  в `docs/agents/issue-tracker.md`.
+  в `docs/agents/issue-tracker.md`. Инструменты GitHub MCP (`mcp__github__*`) допустимы как
+  дополнение, но по умолчанию бери `gh`: он уже авторизован в окружении и не требует
+  отдельного OAuth-входа.
 
 ### Базовая ветка pull request'а
 

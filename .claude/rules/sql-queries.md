@@ -36,6 +36,7 @@ create table public.clients ( ... );
 create table public.orders
 (
     id          bigserial    not null,
+    number      varchar(50)  not null,
     user_id     bigint       not null,
     merchant_id bigint       not null,
 
@@ -148,6 +149,17 @@ select t.id,
 - продолжение `on` (`and`) — выровнено под первое условие `on`
 - `where ` — 5 символов + 1 пробел → ровно под `select`
 - `order by` — аналогично `where`
+
+При использовании псевдонимов столбцов (`as`) — выравниваются по длиннейшему имени:
+
+```sql
+select t.id                 as id,
+       t.create_date_time   as create_date_time,
+       t.amount             as amount,
+       u.name               as user_name
+  from public.orders t
+  left join public.users u on u.id = t.user_id
+```
 
 ## UPDATE — форматирование и отступы
 

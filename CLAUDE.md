@@ -133,11 +133,12 @@ worktree и сводит результат в одну ветку с одним
 ### Issue tracker
 
 Задачи ведутся в GitHub Issues репозитория `glav-kod/glav-lib`, все операции — через CLI
-`gh`. См. `docs/agents/issue-tracker.md`.
+`gh`; через него же идут операции с pull request'ами. См. `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Пять канонических меток триажа без переименования. См. `docs/agents/triage-labels.md`.
+Канонический набор меток триажа без переименований: `needs-triage`, `needs-info`,
+`ready-for-agent`, `ready-for-human`, `wontfix`. См. `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

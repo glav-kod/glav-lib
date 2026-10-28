@@ -98,10 +98,10 @@ worktree и сводит результат в одну ветку с одним
   компилятор по полному пути — `/root/.dotnet/dotnet` — либо добавь этот каталог
   в `PATH` сам.
 - **Тесты генераторов:** `dotnet test GlavLib.SourceGenerators.Tests/GlavLib.SourceGenerators.Tests.csproj` —
-  базы не требуют, должны быть зелёными целиком (27 тестов).
+  базы не требуют, должны быть зелёными целиком.
 - **Тесты библиотеки без базы:**
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'` —
-  39 тестов, должны быть зелёными целиком.
+  должны быть зелёными целиком.
 - **Тесты SQLite:** входят в набор выше (`GlavLib.Tests.Sqlite`) и Postgres не требуют —
   SQLite работает с временным файлом, поэтому они зелены и в облачной среде.
 - **Тесты, которым нужна база:** `GlavLib.Tests.Db.DbSessionFactoryTests`,

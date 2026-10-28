@@ -98,10 +98,10 @@ worktree и сводит результат в одну ветку с одним
   компилятор по полному пути — `/root/.dotnet/dotnet` — либо добавь этот каталог
   в `PATH` сам.
 - **Тесты генераторов:** `dotnet test GlavLib.SourceGenerators.Tests/GlavLib.SourceGenerators.Tests.csproj` —
-  базы не требуют, должны быть зелёными целиком (27 тестов).
+  базы не требуют, должны быть зелёными целиком.
 - **Тесты библиотеки без базы:**
   `dotnet test GlavLib.Tests/GlavLib.Tests.csproj --filter 'FullyQualifiedName!~GlavLib.Tests.Db'` —
-  39 тестов, должны быть зелёными целиком.
+  должны быть зелёными целиком.
 - **Тесты SQLite:** входят в набор выше (`GlavLib.Tests.Sqlite`) и Postgres не требуют —
   SQLite работает с временным файлом, поэтому они зелены и в облачной среде.
 - **Тесты, которым нужна база:** `GlavLib.Tests.Db.DbSessionFactoryTests`,
@@ -133,12 +133,14 @@ worktree и сводит результат в одну ветку с одним
 ### Issue tracker
 
 Задачи ведутся в GitHub Issues репозитория `glav-kod/glav-lib`, все операции — через CLI
-`gh`. См. `docs/agents/issue-tracker.md`.
+`gh`; через него же идут операции с pull request'ами. См. `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Пять канонических меток триажа без переименования. См. `docs/agents/triage-labels.md`.
+Канонический набор меток триажа без переименований: `needs-triage`, `needs-info`,
+`ready-for-agent`, `ready-for-human`, `wontfix`. См. `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Один контекст: `CONTEXT.md` в корне и `docs/adr/`. См. `docs/agents/domain.md`.
+Один контекст: `CONTEXT.md` в корне и `docs/adr/`; оба заводятся лениво, когда понадобятся,
+поэтому их отсутствие — норма, а не пробел. См. `docs/agents/domain.md`.

@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.CodeAnalysis;
 
 namespace GlavLib.SourceGenerators.Tests;
@@ -90,5 +91,105 @@ public class EnumObjectSourceGeneratorTests : SourceGeneratorTestsBase
 
         //assert
         Assert.Equal(expected, result, ignoreLineEndingDifferences: true);
+    }
+
+    [Theory]
+    [InlineData("""[EnumObjectItem("Draft", "drf")]""")]
+    [InlineData("""[EnumObjectItem("Draft", null, "Черновик")]""")]
+    [InlineData("""[EnumObjectItem()]""")]
+    [InlineData("""[EnumObjectItem("Draft", """)]
+    public void It_should_generate_other_enum_objects_when_attribute_is_incomplete(string incompleteAttribute)
+    {
+        //language=CSharp
+        var source = $$"""
+                       using GlavLib.Abstractions.DataTypes;
+
+                       namespace TestNamespace;
+
+                       [EnumObjectItem("Som", "KGS", "Сом")]
+                       public sealed partial class Currency : EnumObject
+                       {
+                       }
+
+                       {{incompleteAttribute}}
+                       public sealed partial class Status : EnumObject
+                       {
+                       }
+                       """;
+
+        var runResult = RunSourceGenerator(sourceGenerator: new EnumObjectSourceGenerator().AsSourceGenerator(),
+                                           sourceCode: source);
+
+        //assert
+        var generatorResult = runResult.Results.Single();
+        generatorResult.Exception.Should().BeNull();
+
+        var currency = generatorResult.GeneratedSources.Single(s => s.HintName == "Currency.g.cs");
+        currency.SourceText.ToString().Should().Contain("public const string SomKey = \"KGS\";");
+    }
+
+    [Fact]
+    public void It_should_skip_only_incomplete_item_of_enum_object()
+    {
+        //language=CSharp
+        const string source = """
+                              using GlavLib.Abstractions.DataTypes;
+
+                              namespace TestNamespace;
+
+                              [EnumObjectItem("Som", "KGS", "Сом")]
+                              [EnumObjectItem("Tenge", "KZT")]
+                              public sealed partial class Currency : EnumObject
+                              {
+                              }
+                              """;
+
+        var result = RunSourceGenerator(sourceGenerator: new EnumObjectSourceGenerator().AsSourceGenerator(),
+                                        sourceCode: source,
+                                        resultFile: "Currency.g.cs");
+
+        //assert
+        result.Should().Contain("Items = [Som];");
+        result.Should().NotContain("Tenge");
+    }
+
+    [Fact]
+    public void It_should_generate_other_enum_objects_when_generation_of_one_fails()
+    {
+        //language=CSharp
+        const string source = """
+                              using GlavLib.Abstractions.DataTypes;
+
+                              namespace First
+                              {
+                                  [EnumObjectItem("Som", "KGS", "Сом")]
+                                  public sealed partial class Currency : EnumObject
+                                  {
+                                  }
+                              }
+
+                              namespace Second
+                              {
+                                  [EnumObjectItem("Tenge", "KZT", "Тенге")]
+                                  public sealed partial class Currency : EnumObject
+                                  {
+                                  }
+
+                                  [EnumObjectItem("Draft", "drf", "Черновик")]
+                                  public sealed partial class Status : EnumObject
+                                  {
+                                  }
+                              }
+                              """;
+
+        var runResult = RunSourceGenerator(sourceGenerator: new EnumObjectSourceGenerator().AsSourceGenerator(),
+                                           sourceCode: source);
+
+        //assert
+        var generatorResult = runResult.Results.Single();
+        generatorResult.Diagnostics.Should().Contain(d => d.Id == "XX0001");
+
+        var hintNames = generatorResult.GeneratedSources.Select(s => s.HintName);
+        hintNames.Should().BeEquivalentTo("Currency.g.cs", "Status.g.cs");
     }
 }

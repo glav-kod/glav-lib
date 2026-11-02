@@ -128,17 +128,11 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
             if (attributeName != EnumObjectItemAttribute)
                 continue;
 
-            var fieldNameArg   = attributeData.ConstructorArguments[0];
-            var valueArg       = attributeData.ConstructorArguments[1];
-            var displayNameArg = attributeData.ConstructorArguments[2];
+            var enumItem = CreateEnumItem(attributeData);
+            if (enumItem is null)
+                continue;
 
-            enumItems.Add(
-                    new EnumItem(
-                            FieldName: fieldNameArg.Value!.ToString(),
-                            Value: valueArg.Value!.ToString(),
-                            DisplayName: displayNameArg.Value!.ToString()
-                        )
-                );
+            enumItems.Add(enumItem.Value);
         }
 
         string? ns = null;
@@ -153,14 +147,37 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
             );
     }
 
+    /// <remarks>
+    /// Пока атрибут недописан или не разрешился, аргументов конструктора у него меньше трёх
+    /// либо часть из них равна <c>null</c>. Такой элемент пропускается: ошибку на нём покажет
+    /// компилятор, а исключение здесь сняло бы сгенерированный код со всех EnumObject сборки.
+    /// </remarks>
+    private static EnumItem? CreateEnumItem(AttributeData attributeData)
+    {
+        var arguments = attributeData.ConstructorArguments;
+        if (arguments.Length != 3)
+            return null;
+
+        if (arguments[0].Value is not string fieldName
+            || arguments[1].Value is not string value
+            || arguments[2].Value is not string displayName)
+            return null;
+
+        return new EnumItem(
+                FieldName: fieldName,
+                Value: value,
+                DisplayName: displayName
+            );
+    }
+
     private static void GenerateCode(
             SourceProductionContext context,
             ImmutableArray<EnumRegistration> enumRegistrations
         )
     {
-        try
+        foreach (var enumRegistration in enumRegistrations)
         {
-            foreach (var enumRegistration in enumRegistrations)
+            try
             {
                 var enumObjectClass = GenerateClass(enumRegistration);
 
@@ -188,18 +205,18 @@ public class EnumObjectSourceGenerator : IIncrementalGenerator
 
                 context.AddSource($"{className}.g.cs", SourceText.From(code, Encoding.UTF8));
             }
-        }
-        catch (Exception ex)
-        {
-            var diagnostic = Diagnostic.Create(
-                    UnhandledException,
-                    null,
-                    ex.GetType(),
-                    ex.Message,
-                    ex.StackTrace
-                );
+            catch (Exception ex)
+            {
+                var diagnostic = Diagnostic.Create(
+                        UnhandledException,
+                        null,
+                        ex.GetType(),
+                        ex.Message,
+                        ex.StackTrace
+                    );
 
-            context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(diagnostic);
+            }
         }
     }
 

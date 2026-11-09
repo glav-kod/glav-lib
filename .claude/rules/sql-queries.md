@@ -137,7 +137,7 @@ select t.id,
        t.create_date_time
   from public.some_table t
   left join public.other_table ot on ot.id = t.other_table_id
-                                      and ot.value > 10
+                                 and ot.value > 10
  where t.create_date_time > :dateTime
  order by t.create_date_time desc
 ```

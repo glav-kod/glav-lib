@@ -405,17 +405,17 @@ public async Task RunAsync()
 
 ## Ключи EnumObject в SQL-строках
 
-В SQL-строках используй ключи из `EnumObject` через строковую интерполяцию, а не строковые литералы.
+В SQL, встроенных в C# через интерполяцию, для фильтрации по enum-полю используй ключ из `EnumObject` — константу `<Значение>Key`, а не строковый литерал.
 
 ```csharp
-// ❌ BAD
+// ❌ BAD — строковый литерал, хрупко и не рефакторируется
 const string sql = @"
 select t.id
   from public.users t
  where t.status = 'active'
 ";
 
-// ✅ GOOD
+// ✅ GOOD — ключ берётся из EnumObject через интерполяцию
 var sql = @$"
 select t.id
   from public.users t

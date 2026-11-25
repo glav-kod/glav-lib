@@ -25,7 +25,9 @@
 ## Pull request'ы
 
 Pull request'ы этого репозитория тоже ведутся через `gh`: `gh pr create`, `gh pr view`,
-`gh pr edit`, `gh pr comment`, `gh pr merge --squash`. Требования к заголовку, описанию,
+`gh pr edit`, `gh pr comment`, `gh pr merge --squash`. Описание занимает несколько строк,
+а `--body` принимает его одной, поэтому передавай его через heredoc или `--body-file`,
+как и описание задачи. Требования к заголовку, описанию,
 выбору базовой ветки и стратегии merge остаются прежними и описаны
 в `.claude/rules/git-workflow.md`.
 
